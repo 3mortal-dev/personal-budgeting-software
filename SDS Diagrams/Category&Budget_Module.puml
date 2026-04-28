@@ -1,149 +1,117 @@
-@startuml Transaction Module
+@startuml Category & Budget Module
 
-package "Transaction Module" {
+package "Category & Budget Module" {
 
-    enum TransactionType {
-        INCOME
-        EXPENSE
-    }
-
-    class Transaction {
+    class CategoryEntity {
         - int id
         - int userID
-        - double amount
-        - TransactionType type
-        - int categoryID
-        - String source
-        - String description
+        - CategoryType type
+        - String name
     }
 
-    class TransactionRepository {
-        + save(Transaction t)
-        + findAll()
-        + findById(int id)
-        + findByUserId(int userID)
-        + findByType(TransactionType type)
-        + findByUserIdAndType(int userID, TransactionType type)
+    enum CategoryType {
+        BUILTIN
+        CUSTOM
     }
 
-    class TransactionService {
-        - TransactionRepository repo
-        - AccountRepository accountRepo
-        - CategoryRepository categoryRepo
-        - BudgetRepository budgetRepo
+    class CategoryController {
+        - CategoryService categoryService
 
-        + addTransaction(CreateTransactionRequest request)
-
-        + getAllTransactions(int userID)
-        + getIncomeTransactions(int userID)
-        + getExpenseTransactions(int userID)
-
-        + filterHistory(TransactionFilterRequest request)
+        + addCustomCategory(int userID, CreateCategoryRequest request)
+        + editCustomCategory(int userID, String categoryName)
+        + deleteCustomCategory(int userID, int categoryID)
     }
 
-    class TransactionController {
-        - TransactionService service
+    class CategoryService {
+        - CategoryRepository categoryRepository
 
-        + addTransaction(CreateTransactionRequest request)
-
-        + getAllTransactions(int userID)
-        + getIncomeTransactions(int userID)
-        + getExpenseTransactions(int userID)
-
-        + filterTransactions(TransactionFilterRequest request)
+        + addCustomCategory(int userID, CreateCategoryRequest request)
+        + editCustomCategory(int userID, String categoryName)
+        + deleteCustomCategory(int userID, int categoryID)
     }
 
-    class CreateTransactionRequest {
-        + double amount
-        + TransactionType type
-        + int userID
-        + int categoryID
-        + String source
-        + String description
-    }
-
-    class TransactionFilterRequest {
-        + int userID
-        + LocalDateTime startDate
-        + LocalDateTime endDate
-        + int categoryID
-    }
-
-    Transaction --> TransactionType
-
-    TransactionService --> TransactionRepository : uses
-    TransactionService --> AccountRepository
-    TransactionService --> CategoryRepository
-    TransactionService --> BudgetRepository
-
-    TransactionController --> TransactionService
-    TransactionController --> CreateTransactionRequest
-    TransactionController --> TransactionFilterRequest
-
-    TransactionRepository --> Transaction
-}
-
-' =========================
-' GOAL MODULE
-' =========================
-
-package "Goal Module" {
-
-    class GoalEntity {
-        - int id
-        - int userID
-        - String goalName
-        - double target
-        - LocalDateTime deadline
-        - double currentAmount
-        - Status status
-    }
-
-    class GoalService {
-        - GoalRepository repo
-
-        + addGoal(int id, int userId)
-        + editGoal(int id)
-        + updateProgress(int id)
-        + deleteGoal(int id)
-    }
-
-    class GoalController {
-        - GoalService service
-
-        + addGoal(int id, int userId)
-        + editGoal(int id)
-        + updateProgress(int id)
-        + deleteGoal(int id)
-    }
-
-    class GoalRepository {
-        + save(GoalEntity g)
+    class CategoryRepository {
+        + save(CategoryEntity c)
         + findById(int id)
         + findByUserId(int userID)
         + deleteById(int id)
     }
 
-    enum Status {
+    class CreateCategoryRequest {
+        - int userID
+        - CategoryType type
+        - String name
+    }
+
+    class CreateBudgetRequest {
+        - int userID
+        - int categoryID
+        - LocalDateTime startDate
+        - LocalDateTime endDate
+        - BudgetStatus status
+    }
+
+    class BudgetEntity {
+        - int id
+        - int userID
+        - int categoryID
+        - double spentAmount
+        - LocalDateTime startDate
+        - LocalDateTime endDate
+        - BudgetStatus status
+    }
+
+    class BudgetController {
+        - BudgetService budgetService
+
+        + addBudget(int userID, CreateBudgetRequest request)
+        + editBudget(int userID, int categoryID)
+        + deleteBudget(int userID, int budgetID)
+    }
+
+    class BudgetService {
+        - BudgetRepository budgetRepo
+
+        + addBudget(int userID, CreateBudgetRequest request)
+        + editBudget(int userID, int categoryID)
+        + deleteBudget(int userID, int budgetID)
+    }
+
+    enum BudgetStatus {
         ON_TRACK
         NEAR_LIMIT
         EXCEEDED
     }
 
-    GoalService --> GoalRepository
-    GoalService --> GoalEntity : manages
+    class BudgetRepository {
+        + save(BudgetEntity b)
+        + findById(int id)
+        + findByUserId(int userID)
+        + findByCategoryId(int categoryID)
+        + deleteById(int id)
+    }
 
-    GoalController --> GoalService
+    ' Relationships
+    CategoryController --> CategoryService
+    CategoryController --> CreateCategoryRequest
 
-    GoalRepository --> GoalEntity
+    CategoryService --> CategoryRepository
+    CategoryService --> CategoryEntity
 
-    GoalEntity --> Status
+    BudgetController --> BudgetService
+    BudgetController --> CreateBudgetRequest
+
+    BudgetService --> BudgetRepository
+    BudgetService --> BudgetEntity
+
+    BudgetEntity --> BudgetStatus
+
+    CategoryEntity --> CategoryType
+    CategoryEntity "1" o-- "0..1" BudgetEntity
 }
 
 ' =========================
 ' CROSS-MODULE RELATIONS
 ' =========================
-
-Transaction --> BudgetEntity : affects spending
 
 @enduml

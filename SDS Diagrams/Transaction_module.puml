@@ -1,11 +1,149 @@
-@startuml transactionservice
+@startuml Transaction Module
 
-enum status {
-    Income
-    Expense
+package "Transaction Module" {
+
+    enum TransactionType {
+        INCOME
+        EXPENSE
+    }
+
+    class Transaction {
+        - int id
+        - int userID
+        - double amount
+        - TransactionType type
+        - int categoryID
+        - String source
+        - String description
+    }
+
+    class TransactionRepository {
+        + save(Transaction t)
+        + findAll()
+        + findById(int id)
+        + findByUserId(int userID)
+        + findByType(TransactionType type)
+        + findByUserIdAndType(int userID, TransactionType type)
+    }
+
+    class TransactionService {
+        - TransactionRepository repo
+        - AccountRepository accountRepo
+        - CategoryRepository categoryRepo
+        - BudgetRepository budgetRepo
+
+        + addTransaction(CreateTransactionRequest request)
+
+        + getAllTransactions(int userID)
+        + getIncomeTransactions(int userID)
+        + getExpenseTransactions(int userID)
+
+        + filterHistory(TransactionFilterRequest request)
+    }
+
+    class TransactionController {
+        - TransactionService service
+
+        + addTransaction(CreateTransactionRequest request)
+
+        + getAllTransactions(int userID)
+        + getIncomeTransactions(int userID)
+        + getExpenseTransactions(int userID)
+
+        + filterTransactions(TransactionFilterRequest request)
+    }
+
+    class CreateTransactionRequest {
+        + double amount
+        + TransactionType type
+        + int userID
+        + int categoryID
+        + String source
+        + String description
+    }
+
+    class TransactionFilterRequest {
+        + int userID
+        + LocalDateTime startDate
+        + LocalDateTime endDate
+        + int categoryID
+    }
+
+    Transaction --> TransactionType
+
+    TransactionService --> TransactionRepository : uses
+    TransactionService --> AccountRepository
+    TransactionService --> CategoryRepository
+    TransactionService --> BudgetRepository
+
+    TransactionController --> TransactionService
+    TransactionController --> CreateTransactionRequest
+    TransactionController --> TransactionFilterRequest
+
+    TransactionRepository --> Transaction
 }
 
-class transactionservice {
-    + save() : void
+' =========================
+' GOAL MODULE
+' =========================
+
+package "Goal Module" {
+
+    class GoalEntity {
+        - int id
+        - int userID
+        - String goalName
+        - double target
+        - LocalDateTime deadline
+        - double currentAmount
+        - Status status
+    }
+
+    class GoalService {
+        - GoalRepository repo
+
+        + addGoal(int id, int userId)
+        + editGoal(int id)
+        + updateProgress(int id)
+        + deleteGoal(int id)
+    }
+
+    class GoalController {
+        - GoalService service
+
+        + addGoal(int id, int userId)
+        + editGoal(int id)
+        + updateProgress(int id)
+        + deleteGoal(int id)
+    }
+
+    class GoalRepository {
+        + save(GoalEntity g)
+        + findById(int id)
+        + findByUserId(int userID)
+        + deleteById(int id)
+    }
+
+    enum Status {
+        ON_TRACK
+        NEAR_LIMIT
+        EXCEEDED
+    }
+
+    GoalService --> GoalRepository
+    GoalService --> GoalEntity : manages
+
+    GoalController --> GoalService
+
+    GoalRepository --> GoalEntity
+
+    GoalEntity --> Status
 }
+
+' =========================
+' CROSS-MODULE RELATIONS
+' =========================
+
+Transaction --> BudgetEntity : affects spending
+
 @enduml
