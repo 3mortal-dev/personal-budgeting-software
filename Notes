@@ -1,0 +1,14 @@
+Explain for the directory
+
+- Most of coding will be in src/main folder. inside src/main/java/com... we have the architecture folders for our project
+
+- config folder : 
+- controller folder : contain the REST API endpoints of our backend service
+- dto folder : contain all data object transfer
+- repository : contain classes that will query database for specefic data
+- service : contain all business logic functionalities for each service
+
+
+Flow:
+
+1- controller recieve request and mapped the request to the proper method, which most of times call specefic service to handle needed action, it wrapp the json data in http message in a dto object, which send as a parameter to service

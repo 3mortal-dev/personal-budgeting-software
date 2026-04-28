@@ -1,0 +1,11 @@
+@startuml transactionservice
+
+enum status {
+    Income
+    Expense
+}
+
+class transactionservice {
+    + save() : void
+}
+@enduml
