@@ -1,0 +1,36 @@
+
+--------- Designing --------
+
+- State Diagram (Youssef)
+- Notification module (Abdelhamid)
+- Dashboard module (Ammar)
+- Profile module (Mostafa)
+- Bank integeration (fake API) 
+
+----- Implementation -----
+
+// No code written without the module is fully designed and approved by all of us
+
+// standard meeting time 11am
+
+# Approved = Ready for implementation
+
+- User Module (Abdelhamid) (Approved)
+- Report Module (Abdelhamid)
+
+- Category&Budget Module (Youssef)
+- Goal Module (Youssef)
+
+- Transaction Module (Ammar)
+- Notification module (Ammar)
+
+- Dashboard module (Mostafa)
+- Profile module (Mostafa)
+
+
+- Bank integeration (fake API) (All os us)
+
+
+- Database (jdbc or jpa) ? chat with AI
+
+
