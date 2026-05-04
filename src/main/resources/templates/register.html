@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BudgetWise - Create Account</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Link to External CSS -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Lucide Icons Library -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Left Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <div class="logo-box">
+                    <i data-lucide="wallet"></i>
+                </div>
+                <span>BudgetWise</span>
+            </div>
+
+            <div class="hero-text">
+                <h1>Join thousands of smart savers</h1>
+                <p>Start your journey to financial freedom today. Track, save, and grow your wealth with our intuitive tools.</p>
+            </div>
+
+            <div class="security-badge">
+                <i data-lucide="shield-check" class="shield-icon"></i>
+                <span>Bank-grade security for your data</span>
+            </div>
+        </aside>
+
+        <!-- Right Form Section -->
+        <main class="form-section">
+            <header class="form-header">
+                <h2>Create Account</h2>
+                <p>Enter your details to get started with BudgetWise</p>
+            </header>
+
+            <form id="registrationForm">
+                <div class="input-group">
+                    <label>Full Name</label>
+                    <div class="input-wrapper">
+                        <i data-lucide="user"></i>
+                        <input type="text" placeholder="Ahmed Salem" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Email Address</label>
+                    <div class="input-wrapper">
+                        <i data-lucide="mail"></i>
+                        <input type="email" placeholder="ahmed@example.com" required>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Create Password</label>
+                    <div class="input-wrapper">
+                        <i data-lucide="lock"></i>
+                        <input type="password" id="password" placeholder="••••••••" required>
+                        <i data-lucide="eye" class="toggle-password" id="togglePassword"></i>
+                    </div>
+                </div>
+
+                <div class="terms-row">
+                    <input type="checkbox" id="terms">
+                    <label for="terms">
+                        I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    Create Account <i data-lucide="arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="login-footer">
+                Already have an account? <a href="#">Log In</a>
+            </div>
+        </main>
+    </div>
+
+    <!-- Link to External JS -->
+    <script src="script.js"></script>
+</body>
+</html>

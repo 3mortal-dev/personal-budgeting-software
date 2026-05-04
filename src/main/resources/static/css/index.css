@@ -429,6 +429,7 @@ a { text-decoration: none; }
   }
 }
 
+
 @media (max-width: 500px) {
   .hero__content { padding: 48px 24px 32px; }
   .hero__actions { flex-direction: column; }
