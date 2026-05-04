@@ -1,0 +1,436 @@
+/* ============================================================
+   BudgetWise — style.css
+   ============================================================ */
+
+/* ── Variables ── */
+:root {
+  --green-primary:  #1fad6b;
+  --green-dark:     #159955;
+  --green-light:    #e6f7ef;
+  --navy:           #0d1b2a;
+  --navy-mid:       #1a2e42;
+  --white:          #ffffff;
+  --gray-soft:      #f4f6f9;
+  --gray-text:      #5a6a7a;
+  --radius-lg:      20px;
+  --radius-xl:      32px;
+  --shadow-card:    0 24px 60px rgba(13,27,42,.15);
+  --transition:     .4s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── Reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--gray-soft);
+  color: var(--navy);
+  overflow-x: hidden;
+}
+a { text-decoration: none; }
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: 0;
+  overflow: hidden;
+  background: var(--white);
+}
+
+/* ── Left: Content ── */
+.hero__content {
+  padding: 80px 60px 80px 72px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  position: relative;
+  z-index: 2;
+}
+
+.hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--green-light);
+  color: var(--green-dark);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 18px;
+  border-radius: 100px;
+  width: fit-content;
+  letter-spacing: .3px;
+  animation: fadeDown .6s ease both;
+}
+
+.hero__title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(42px, 5vw, 72px);
+  font-weight: 900;
+  line-height: 1.05;
+  color: var(--navy);
+  animation: fadeDown .7s .1s ease both;
+}
+
+.hero__title--accent {
+  color: var(--green-primary);
+  display: block;
+}
+
+.hero__subtitle {
+  font-size: clamp(15px, 1.6vw, 17px);
+  line-height: 1.75;
+  color: var(--gray-text);
+  max-width: 440px;
+  font-weight: 400;
+  animation: fadeDown .7s .2s ease both;
+}
+
+/* ── CTA Buttons (left side) ── */
+.hero__actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  animation: fadeDown .7s .3s ease both;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 32px;
+  border-radius: var(--radius-lg);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.btn--primary {
+  background: var(--green-primary);
+  color: var(--white);
+  box-shadow: 0 8px 28px rgba(31,173,107,.35);
+}
+.btn--primary:hover {
+  background: var(--green-dark);
+  transform: translateY(-3px);
+  box-shadow: 0 14px 36px rgba(31,173,107,.45);
+}
+
+.btn--outline {
+  border: 2px solid var(--navy);
+  color: var(--navy);
+  background: transparent;
+}
+.btn--outline:hover {
+  background: var(--navy);
+  color: var(--white);
+  transform: translateY(-3px);
+}
+
+/* ============================================================
+   RIGHT: IMAGE PANEL
+   ============================================================ */
+.hero__image-wrap {
+  position: relative;
+  height: 100vh;
+}
+
+.hero__image {
+  width: 100%;
+  height: 100%;
+  /* Replace with your actual photo path */
+  background: url('https://images.unsplash.com/photo-1554224154-26032ffc0d07?w=900&q=80')
+              center/cover no-repeat;
+  position: relative;
+  overflow: hidden;
+  border-radius: 0 0 0 var(--radius-xl);
+  animation: fadeIn .9s .1s ease both;
+}
+
+/* Subtle dark overlay so buttons pop */
+.hero__image::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    160deg,
+    rgba(13,27,42,.25) 0%,
+    rgba(13,27,42,.55) 100%
+  );
+  z-index: 1;
+}
+
+/* ── Buttons ON the image ── */
+.image__overlay-buttons {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 240px;
+  z-index: 3;
+  animation: fadeUp .8s .4s ease both;
+}
+
+.img-btn {
+  display: block;
+  text-align: center;
+  padding: 15px 28px;
+  border-radius: var(--radius-lg);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  letter-spacing: .2px;
+}
+
+.img-btn--primary {
+  background: var(--green-primary);
+  color: var(--white);
+  box-shadow: 0 8px 28px rgba(31,173,107,.45);
+}
+.img-btn--primary:hover {
+  background: var(--green-dark);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 14px 40px rgba(31,173,107,.55);
+}
+
+.img-btn--ghost {
+  background: rgba(255,255,255,.18);
+  color: var(--white);
+  border: 2px solid rgba(255,255,255,.55);
+  backdrop-filter: blur(10px);
+}
+.img-btn--ghost:hover {
+  background: rgba(255,255,255,.32);
+  transform: translateY(-3px);
+}
+
+/* ============================================================
+   SCROLL-REVEAL MESSAGE CARD
+   ============================================================ */
+.scroll-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -40%);
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-xl);
+  padding: 36px 32px;
+  width: min(340px, 90%);
+  z-index: 4;
+  box-shadow: 0 32px 80px rgba(13,27,42,.28);
+  text-align: center;
+
+  /* Hidden by default */
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity .55s cubic-bezier(.4,0,.2,1),
+    transform .55s cubic-bezier(.4,0,.2,1);
+}
+
+/* Visible state (JS adds this class) */
+.scroll-message.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+}
+
+.scroll-message__icon {
+  font-size: 40px;
+  line-height: 1;
+  margin-bottom: 14px;
+  display: block;
+  animation: bounce 2s infinite ease-in-out;
+}
+
+.scroll-message__title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 10px;
+  line-height: 1.25;
+}
+
+.scroll-message__text {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--gray-text);
+  margin-bottom: 22px;
+}
+
+.scroll-message__cta {
+  display: inline-block;
+  background: var(--green-primary);
+  color: var(--white);
+  padding: 12px 28px;
+  border-radius: var(--radius-lg);
+  font-size: 14px;
+  font-weight: 600;
+  transition: var(--transition);
+}
+.scroll-message__cta:hover {
+  background: var(--green-dark);
+  transform: translateY(-2px);
+}
+
+/* ── Dismiss button ── */
+.scroll-message::after {
+  content: '✕';
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  font-size: 14px;
+  color: var(--gray-text);
+  cursor: pointer;
+}
+
+/* ============================================================
+   DECORATIVE ELEMENTS
+   ============================================================ */
+.deco {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.deco--circle {
+  width: 180px;
+  height: 180px;
+  background: var(--green-primary);
+  opacity: .08;
+  top: -50px;
+  right: -50px;
+}
+
+.deco--ring {
+  width: 260px;
+  height: 260px;
+  border: 3px solid var(--green-primary);
+  opacity: .12;
+  bottom: 80px;
+  left: -80px;
+}
+
+/* ============================================================
+   FEATURES STRIP
+   ============================================================ */
+.features-strip {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0;
+  background: var(--navy);
+  padding: 28px 40px;
+  border-top: 3px solid var(--green-primary);
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255,255,255,.78);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 32px;
+  position: relative;
+  transition: color .3s;
+}
+
+.feature-item:hover { color: var(--white); }
+
+.feature-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 20%;
+  height: 60%;
+  width: 1px;
+  background: rgba(255,255,255,.15);
+}
+
+.feature-item__icon {
+  font-size: 20px;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translate(-50%, 22px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-7px); }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+
+  .hero__content {
+    padding: 60px 32px 40px;
+    order: 1;
+  }
+
+  .hero__image-wrap {
+    height: 70vw;
+    order: 2;
+  }
+
+  .hero__image {
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+
+  .image__overlay-buttons {
+    bottom: 30px;
+    width: 200px;
+  }
+
+  .features-strip {
+    gap: 0;
+    padding: 20px 16px;
+  }
+
+  .feature-item {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 500px) {
+  .hero__content { padding: 48px 24px 32px; }
+  .hero__actions { flex-direction: column; }
+  .btn { justify-content: center; }
+}
