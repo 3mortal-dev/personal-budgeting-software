@@ -5,17 +5,20 @@ import com.example.personal_budget.enums.TransactionType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.math.BigInteger;
 import java.time.LocalDate;
 import java.util.List;
 
-public interface TransactionRepository extends JpaRepository<Transaction, BigInteger> {
+public interface TransactionRepository extends JpaRepository<Transaction, Long> {
     List<Transaction> findByUserID(Long userID);
 
     List<Transaction> findByUserIDAndType(Long userID, TransactionType type);
 
     List<Transaction> findByUserIDAndDateBetweenAndCategoryID(
             Long userID, LocalDate start, LocalDate end, Long categoryID
+    );
+      
+    List<Transaction> findByUserIDAndDateBetween(
+            Long userID, LocalDate start, LocalDate end
     );
 
     @Query("""

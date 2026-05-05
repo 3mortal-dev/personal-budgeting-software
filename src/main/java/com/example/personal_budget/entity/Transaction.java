@@ -4,7 +4,6 @@ import com.example.personal_budget.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 

@@ -2,7 +2,6 @@ package com.example.personal_budget.dto;
 
 import lombok.Data;
 
-import java.math.BigInteger;
 import java.time.LocalDate;
 
 @Data
