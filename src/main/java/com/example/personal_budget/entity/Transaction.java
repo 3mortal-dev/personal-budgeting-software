@@ -4,9 +4,7 @@ import com.example.personal_budget.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigInteger;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -18,11 +16,11 @@ public class Transaction {
 
     @Id
     @GeneratedValue
-    BigInteger id;
+    Long id;
 
     //@ManyToOne
     //@JoinColumn(name = "user_id")
-    BigInteger userID;
+    Long userID;
     double amount;
 
     @Enumerated(EnumType.STRING)
@@ -30,8 +28,9 @@ public class Transaction {
 
     // @ManyToOne
     // @JoinColumn(name = "category_id")
-    BigInteger categoryID;
+    Long categoryID;
     LocalDate date;
     String source;
     String description;
+    
 }

@@ -11,7 +11,7 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigInteger;
+import java.time.LocalDate;
 import java.time.Month;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,9 +24,8 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepo;
     private final BudgetService budgetService;
-    private final DashboardService dashboardService;
 
-    public Transaction getById(BigInteger id) {
+    public Transaction getById(Long id) {
         return transactionRepo.findById(id)
                 .orElseThrow(() -> new TransactionNotFoundException(id));
     }
@@ -50,11 +49,11 @@ public class TransactionService {
         return transactionRepo.save(transaction);
     }
 
-    public List<Transaction> getAllTransactions(BigInteger userID) {
+    public List<Transaction> getAllTransactions(Long userID) {
         return transactionRepo.findByUserID(userID);
     }
 
-    public Transaction updateTransaction(BigInteger id, @NonNull CreateTransactionRequest req) {
+    public Transaction updateTransaction(Long id, @NonNull CreateTransactionRequest req) {
         Transaction t = getById(id);
         t.setAmount(req.getAmount());
         t.setType(req.getType());
@@ -65,24 +64,24 @@ public class TransactionService {
         return transactionRepo.save(t);
     }
 
-    public void deleteTransaction(BigInteger id) {
+    public void deleteTransaction(Long id) {
         getById(id);
         transactionRepo.deleteById(id);
     }
 
-    public List<Transaction> getIncomeTransactions(BigInteger userID) {
+    public List<Transaction> getIncomeTransactions(Long userID) {
         return transactionRepo.findByUserIDAndType(userID, TransactionType.INCOME);
     }
 
-    public List<Transaction> getExpenseTransactions(BigInteger userID) {
+    public List<Transaction> getExpenseTransactions(Long userID) {
         return transactionRepo.findByUserIDAndType(userID, TransactionType.EXPENSE);
     }
 
-    public Double getTotalIncome(BigInteger userID) {
+    public Double getTotalIncome(Long userID) {
         return transactionRepo.sumByUserIDAndType(userID, TransactionType.INCOME);
     }
 
-    public Double getTotalExpense(BigInteger userID) {
+    public Double getTotalExpense(Long userID) {
         return transactionRepo.sumByUserIDAndType(userID, TransactionType.EXPENSE);
     }
 
@@ -106,7 +105,7 @@ public class TransactionService {
                 ));
     }
 
-    public Map<String, Double> getCategoryMap(BigInteger userID, TransactionType type) {
+    public Map<String, Double> getCategoryMap(Long userID, TransactionType type) {
         return transactionRepo.getCategoryAmount(userID, type)
                 .stream()
                 .collect(Collectors.toMap(
@@ -117,8 +116,16 @@ public class TransactionService {
                 ));
     }
 
-    public Map<String, Double> getCategoryMap(BigInteger userID) {
+    public Map<String, Double> getCategoryMap(Long userID) {
         return getCategoryMap(userID, TransactionType.EXPENSE);
+    }
+
+    public List<Transaction> getTransactionsByDateRange(Long userID, LocalDate startDate, LocalDate end) {
+        return transactionRepo.findByUserIDAndDateBetween(userID, startDate, end);
+    }
+
+    public List<Transaction> getRecentTransactions(Long userID) {
+        return transactionRepo.findTop5ByUserIDOrderByDateDescTransactionIDDesc(userID);
     }
 }
 
