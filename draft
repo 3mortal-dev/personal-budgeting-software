@@ -1,0 +1,64 @@
+- Notification center: The system includes a notification center where users can view all their alerts and notifications related to their budgets and expenses.
+
+
+1 - Given I am a logged-in user, 
+When I navigate to the Notifications screen, 
+Then the system displays a list of all my notifications, clearly 
+marking which are unread.
+
+
+2 - Given I have a budget for a category, 
+When I add an expense that causes my spending in that 
+category to reach 100% or more of my budget, 
+Then the system immediately shows me a visual alert (e.g., a red 
+progress bar) and/or a notification.
+
+
+3 - Multiple settings to turn on/off different 
+types of notifications (e.g., budget 
+alerts, goal reminders)
+
+
+- Notification Data Dictionary:
+  - Notification ID  Integer  Unique identifier for the notification. 
+  - User ID  Integer  The ID of the user the notification  belongs to. 
+  - Type Enum Text < 50 Characters  The category of notification (e.g., "BUDGET_ALERT", "GOAL_COMPLETE"). 
+  - Message  Text < 255 Characters  The content of the notification. 
+  - Is Read  Boolean  A flag indicating whether the user has viewed the notification. 
+  - Timestamp  DateTime  The date and time the notification was generated. 
+
+
+Some scenarios for budget alerts:
+
+1-Actor Action  System Response 
+1- User adds a new expense transaction for a category with an active budget (e.g., adds a $50 expense to a $200 budget, where $180 wasalready spent). 
+2- System calculates the new total spent ($230) and finds it has exceeded the budget by $30. 
+3- System immediately updates the budget's progress bar to 115% and turns it red. 
+4- System creates a prominent notification: "Budget Exceeded — Groceries! You've exceeded your $200 budget by $30." 
+5- This alert also appears on the main dashboard for immediate visibility
+
+
+- Notification Controller -> Notification Service -> Notification Repository
+
+- Notification Controller: This component handles incoming requests related to notifications, such as fetching the list of notifications for a user, marking notifications as read, and managing notification settings. It interacts with the Notification Service to perform these operations.
+- Notification Service: This component contains the business logic for managing notifications. It processes requests from the Notification Controller, interacts with the Notification Repository to retrieve or update notification data, and handles the logic for generating new notifications based on user actions (e.g., adding an expense that exceeds a budget).
+- Notification Repository: This component is responsible for interacting with the database to store and retrieve notification data
+
+- Notification Controller:
+  - getNotifications(userId): Fetches the list of notifications for a specific user.
+  - markAsRead(notificationId): Marks a specific notification as read.
+  - updateNotificationSettings(userId, settings): Updates the notification preferences for a user.
+- Notification Service:
+  - generateBudgetAlert(userId, category, amountOver): Generates a budget alert notification when a user exceeds their budget for a category.
+  - generateGoalReminder(userId, goalId): Generates a reminder notification for an upcoming goal deadline.
+  - getUserNotifications(userId): Retrieves all notifications for a user, including unread and read notifications.
+- Notification Repository:
+  - saveNotification(notification): Saves a new notification to the database.
+  - getNotificationsByUserId(userId): Retrieves all notifications for a specific user from the database.
+  - updateNotificationStatus(notificationId, isRead): Updates the read status of a specific notification in the database.
+
+
+
+- The Notfication service will get alerts from the transaction service when a new transaction is added. It will check if the transaction causes any budget to be exceeded and generate a notification if necessary. The Notification Controller will then handle the display of this notification to the user.
+- The Notification service will also interact with the user settings to determine if the user has enabled notifications for budget alerts and will only generate notifications if the user has opted in for that type of alert.
+- The Notification service will check due dates for financial goals and generate reminder notifications as the deadlines approach, based on user preferences for receiving such reminders.
