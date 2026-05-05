@@ -1,4 +1,4 @@
-package com.example.personal_budget.service;
+package com.example.personal_budget.jwt;
 
 import com.example.personal_budget.dto.request.AuthenticationRequest;
 import com.example.personal_budget.dto.request.RegisterRequest;
@@ -9,7 +9,7 @@ import com.example.personal_budget.enums.Role;
 import com.example.personal_budget.enums.TokenType;
 import com.example.personal_budget.repository.TokenRepository;
 import com.example.personal_budget.repository.UserRepository;
-import com.example.personal_budget.config.JwtService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
