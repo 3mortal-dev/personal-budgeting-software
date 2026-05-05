@@ -2,6 +2,7 @@ package com.example.personal_budget.service;
 
 import com.example.personal_budget.dto.CreateTransactionRequest;
 import com.example.personal_budget.dto.TransactionFilterRequest;
+import com.example.personal_budget.dto.request.MonthlyReportRequest;
 import com.example.personal_budget.entity.Transaction;
 import com.example.personal_budget.enums.TransactionType;
 import com.example.personal_budget.exception.TransactionNotFoundException;
@@ -96,7 +97,7 @@ public class TransactionService {
     }
 
     public Map<Month, Double> getMonthlyTotal(@NonNull MonthlyReportRequest request, TransactionType type) {
-        return transactionRepo.getMonthlyTotal(request.getUserID(), type, request.getStartDate(), request.getEndDate())
+        return transactionRepo.getMonthlyTotal(request.getUserId(), type, request.getStartDate(), request.getEndDate())
                 .stream()
                 .collect(Collectors.toMap(
                         row -> Month.of((Integer) row[0]),
@@ -106,7 +107,7 @@ public class TransactionService {
                 ));
     }
 
-    public Map<String, Double> getCategoryMap(BigInteger userID, TransactionType type) {
+    public Map<String, Double> getCategoryMap(Long userID, TransactionType type) {
         return transactionRepo.getCategoryAmount(userID, type)
                 .stream()
                 .collect(Collectors.toMap(
@@ -117,7 +118,7 @@ public class TransactionService {
                 ));
     }
 
-    public Map<String, Double> getCategoryMap(BigInteger userID) {
+    public Map<String, Double> getCategoryMap(Long userID) {
         return getCategoryMap(userID, TransactionType.EXPENSE);
     }
 }

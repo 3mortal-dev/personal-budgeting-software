@@ -35,7 +35,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, BigInt
                 GROUP BY MONTH(t.date)
                 ORDER BY MONTH(t.date)
             """)
-    List<Object[]> getMonthlyTotal(BigInteger userID, TransactionType type, LocalDate startDate, LocalDate endDate);
+    List<Object[]> getMonthlyTotal(Long userID, TransactionType type, LocalDate startDate, LocalDate endDate);
 
     @Query("""
                 SELECT c.name,
@@ -46,5 +46,5 @@ public interface TransactionRepository extends JpaRepository<Transaction, BigInt
                   AND t.type = :type
                 GROUP BY c.name
             """)
-    List<Object[]> getCategoryAmount(BigInteger userID, TransactionType type);
+    List<Object[]> getCategoryAmount(Long userID, TransactionType type);
 }
