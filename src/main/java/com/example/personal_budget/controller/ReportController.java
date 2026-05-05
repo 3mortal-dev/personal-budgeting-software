@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/reports")
@@ -23,9 +22,9 @@ public class ReportController {
     private ReportService reportService;
 
     @PostMapping("/monthly")
-    public ResponseEntity<List<MonthlyReportResponse>> getMonthlyReport(@RequestBody MonthlyReportRequest request) {
-        List<MonthlyReportResponse> reports = reportService.getMonthlyReport(request);
-        return ResponseEntity.ok(reports);
+    public ResponseEntity<MonthlyReportResponse> getMonthlyReport(@RequestBody MonthlyReportRequest request) {
+        MonthlyReportResponse response = reportService.generateMonthlyReport(request);
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/download")
