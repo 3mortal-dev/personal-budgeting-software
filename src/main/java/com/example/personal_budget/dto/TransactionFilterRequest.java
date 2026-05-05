@@ -7,8 +7,8 @@ import java.time.LocalDate;
 
 @Data
 public class TransactionFilterRequest {
-  private BigInteger userID;
+  private Long userID;
   private LocalDate startDate;
   private LocalDate endDate;
-  private BigInteger categoryID;
+  private Long categoryID;
 }

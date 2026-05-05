@@ -7,15 +7,10 @@ import com.example.personal_budget.entity.User;
 import com.example.personal_budget.repository.UserRepository;
 
 @Service
-public class userService {
+public class UserService {
 
     @Autowired
     private UserRepository userRepository;
-
-    
-    public userService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     public Long getUserIdByEmail(String email) {
         return userRepository.findIdByEmail(email)
@@ -28,6 +23,10 @@ public class userService {
 
     public Iterable<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    public void deleteUserById(Long id) {
+        userRepository.deleteById(id);
     }
 
     

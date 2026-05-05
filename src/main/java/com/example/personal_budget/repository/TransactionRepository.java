@@ -10,12 +10,12 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, BigInteger> {
-    List<Transaction> findByUserID(BigInteger userID);
+    List<Transaction> findByUserID(Long userID);
 
-    List<Transaction> findByUserIDAndType(BigInteger userID, TransactionType type);
+    List<Transaction> findByUserIDAndType(Long userID, TransactionType type);
 
     List<Transaction> findByUserIDAndDateBetweenAndCategoryID(
-            BigInteger userID, LocalDate start, LocalDate end, BigInteger categoryID
+            Long userID, LocalDate start, LocalDate end, Long categoryID
     );
 
     @Query("""
@@ -23,7 +23,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, BigInt
                 FROM Transaction t
                 WHERE t.userID = :userID AND t.type = :type
             """)
-    Double sumByUserIDAndType(BigInteger userID, TransactionType transactionType);
+    Double sumByUserIDAndType(Long userID, TransactionType transactionType);
 
     @Query("""
                 SELECT MONTH(t.date) as month,
