@@ -1,0 +1,32 @@
+@startuml
+
+class DashboardResponse {
+  - userId: Long
+  - totalBalance: BigDecimal
+  - monthlyIncome: BigDecimal
+  - monthlyExpense: BigDecimal
+  - recentTransactions: List<Transaction>
+  - goals: List<Goal>
+  - budgets: List<Budget>
+}
+
+
+class DashboardService {
+    -TransactionRepository transactionRepository;
+    -GoalRepository goalRepository;
+    -BudgetRepository budgetRepository;
+  + getDashboard(userId: Long): DashboardResponse
+}
+
+class DashboardController {
+  - dashboardService: DashboardService
+  + getDashboard(userId: BigDecimal): ResponseEntity<DashboardResponse>
+}
+
+DashboardController --> DashboardService
+DashboardService --> DashboardResponse
+DashboardResponse --> Transaction
+DashboardResponse --> Goal
+DashboardResponse --> Budget
+
+@enduml
