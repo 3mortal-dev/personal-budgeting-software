@@ -28,24 +28,23 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             """)
     Double sumByUserIDAndType(Long userID, TransactionType transactionType);
 
-    @Query("""
-                SELECT MONTH(t.date) as month,
-                COALESCE(SUM(t.amount), 0) as totalAmount
-                FROM Transaction t
-                WHERE t.userID = :userID
+    @Query(nativeQuery = true, value = """
+                SELECT EXTRACT(MONTH FROM t.date) as month,
+                COALESCE(SUM(t.amount), 0) as total_amount
+                FROM transactions t
+                WHERE t.user_id = :userID
                   AND t.type = :type
                   AND t.date BETWEEN :startDate AND :endDate
-                GROUP BY MONTH(t.date)
-                ORDER BY MONTH(t.date)
+                GROUP BY EXTRACT(MONTH FROM t.date)
+                ORDER BY EXTRACT(MONTH FROM t.date)
             """)
     List<Object[]> getMonthlyTotal(Long userID, TransactionType type, LocalDate startDate, LocalDate endDate);
 
-    @Query("""
-                SELECT c.name,
-                COALESCE(SUM(t.amount), 0)
-                FROM Transaction t
-                JOIN Category c ON t.categoryID = c.categoryID
-                WHERE t.userID = :userID
+    @Query(nativeQuery = true, value = """
+                SELECT c.name, COALESCE(SUM(t.amount), 0)
+                FROM transactions t
+                JOIN categories c ON t.category_id = c.category_id
+                WHERE t.user_id = :userID
                   AND t.type = :type
                 GROUP BY c.name
             """)
