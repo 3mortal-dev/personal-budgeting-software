@@ -1,4 +1,4 @@
-package com.example.personal_budget.service;
+package com.example.personal_budget.jwt;
 
 import com.example.personal_budget.repository.TokenRepository;
 

@@ -50,14 +50,9 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(STATELESS)
             )
             .authorizeHttpRequests(auth -> auth
-                // 🔓 public endpoints
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/", "/home", "/index", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
-
-                // 🔒 admin only
                 .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-
-                // 🔐 everything else requires login
                 .anyRequest().authenticated()
             )
             .authenticationProvider(authenticationProvider)

@@ -1,4 +1,4 @@
-package com.example.personal_budget.config;
+package com.example.personal_budget.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
