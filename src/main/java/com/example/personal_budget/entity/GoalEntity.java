@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import com.example.personal_budget.enums.GoalStatus;
 
 @Entity
 @Setter
@@ -23,8 +24,8 @@ public class GoalEntity {
     private Long userId;
     private String goalName;
     private double targetAmount;
-    private LocalDate targetDate;
+    private LocalDate deadline;
     private Double currentAmount;
     @Enumerated(EnumType.STRING) 
-    private Status status;
+    private GoalStatus status;
 }

@@ -6,9 +6,9 @@ import com.example.personal_budget.entity.User;
 import com.example.personal_budget.repository.UserRepository;
 
 @Service
-public class userService {
+public class UserService {
     private final UserRepository userRepository;
-    public userService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
