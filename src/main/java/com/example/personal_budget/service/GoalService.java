@@ -1,7 +1,7 @@
 package com.example.personal_budget.service;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.example.personal_budget.dto.request.GoalRequest;
@@ -82,4 +82,8 @@ public class GoalService {
 
         goalRepository.delete(goal);
     }
+    
+    public List<GoalEntity> getGoalsByUserId(long userId) {
+    return goalRepository.findByUserId(userId);
+}
 }

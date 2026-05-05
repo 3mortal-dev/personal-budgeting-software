@@ -24,16 +24,5 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/api/goals")
 public class GoalController {
 
-    private final GoalService goalService;
-    private final UserService userService;
-
- @PostMapping
-public GoalEntity addGoal(
-        @RequestBody GoalRequest request,
-        @AuthenticationPrincipal UserDetails userDetails) {
-
-    String username = userDetails.getUsername();
-
-    return goalService.addGoal(request, username);
-}
+    
 }
