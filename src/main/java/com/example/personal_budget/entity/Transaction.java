@@ -1,17 +1,36 @@
 package com.example.personal_budget.entity;
 
+import com.example.personal_budget.enums.TransactionType;
 import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@Builder
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 public class Transaction {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long transactionId;
+    @GeneratedValue
+    Long id;
 
-    private double amount;
+    //@ManyToOne
+    //@JoinColumn(name = "user_id")
+    Long userID;
+    double amount;
 
+    @Enumerated(EnumType.STRING)
+    TransactionType type;
 
-    // getters & setters
+    // @ManyToOne
+    // @JoinColumn(name = "category_id")
+    Long categoryID;
+    LocalDate date;
+    String source;
+    String description;
 }
