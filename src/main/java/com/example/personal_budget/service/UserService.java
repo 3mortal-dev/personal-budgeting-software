@@ -1,5 +1,6 @@
 package com.example.personal_budget.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.personal_budget.entity.User;
@@ -7,7 +8,11 @@ import com.example.personal_budget.repository.UserRepository;
 
 @Service
 public class userService {
-    private final UserRepository userRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    
     public userService(UserRepository userRepository) {
         this.userRepository = userRepository;
     }

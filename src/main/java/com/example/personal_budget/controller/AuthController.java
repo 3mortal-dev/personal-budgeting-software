@@ -3,7 +3,8 @@ package com.example.personal_budget.controller;
 import com.example.personal_budget.dto.request.AuthenticationRequest;
 import com.example.personal_budget.dto.request.RegisterRequest;
 import com.example.personal_budget.dto.response.AuthenticationResponse;
-import com.example.personal_budget.service.AuthenticationService;
+import com.example.personal_budget.jwt.AuthenticationService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
