@@ -75,6 +75,7 @@ package "Category & Budget Module" {
         + addBudget(int userID, CreateBudgetRequest request)
         + editBudget(int userID, int categoryID)
         + deleteBudget(int userID, int budgetID)
+        + applyExpenseToBudget(int userID, int categoryID, double amount)
     }
 
     enum BudgetStatus {
