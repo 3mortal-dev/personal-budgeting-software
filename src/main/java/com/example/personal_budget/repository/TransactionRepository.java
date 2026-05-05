@@ -10,16 +10,41 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, BigInteger> {
-  List<Transaction> findByUserID(BigInteger userID);
-  List<Transaction> findByUserIDAndType(BigInteger userID, TransactionType type);
-  List<Transaction> findByUserIDAndDateBetweenAndCategoryID(
-          BigInteger userID, LocalDate start, LocalDate end, BigInteger categoryID
-  );
+    List<Transaction> findByUserID(BigInteger userID);
 
-  @Query("""
-    SELECT COALESCE(SUM(t.amount), 0)
-    FROM Transaction t
-    WHERE t.userID = :userID AND t.type = :type
-""")
-  Double sumByUserIDAndType(int userID, TransactionType transactionType);
+    List<Transaction> findByUserIDAndType(BigInteger userID, TransactionType type);
+
+    List<Transaction> findByUserIDAndDateBetweenAndCategoryID(
+            BigInteger userID, LocalDate start, LocalDate end, BigInteger categoryID
+    );
+
+    @Query("""
+                SELECT COALESCE(SUM(t.amount), 0)
+                FROM Transaction t
+                WHERE t.userID = :userID AND t.type = :type
+            """)
+    Double sumByUserIDAndType(BigInteger userID, TransactionType transactionType);
+
+    @Query("""
+                SELECT MONTH(t.date) as month,
+                COALESCE(SUM(t.amount), 0) as totalAmount
+                FROM Transaction t
+                WHERE t.userID = :userID
+                  AND t.type = :type
+                  AND t.date BETWEEN :startDate AND :endDate
+                GROUP BY MONTH(t.date)
+                ORDER BY MONTH(t.date)
+            """)
+    List<Object[]> getMonthlyTotal(BigInteger userID, TransactionType type, LocalDate startDate, LocalDate endDate);
+
+    @Query("""
+                SELECT c.name,
+                COALESCE(SUM(t.amount), 0)
+                FROM Transaction t
+                JOIN Category c ON t.categoryID = c.categoryID
+                WHERE t.userID = :userID
+                  AND t.type = :type
+                GROUP BY c.name
+            """)
+    List<Object[]> getCategoryAmount(BigInteger userID, TransactionType type);
 }
