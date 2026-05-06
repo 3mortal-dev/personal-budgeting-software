@@ -24,7 +24,7 @@ public class TransactionController {
 
     @PostMapping
     public ResponseEntity<Transaction> addTransaction(@Valid @RequestBody CreateTransactionRequest req) {
-        Transaction saved = transactionService.addTransaction(req);
+        Transaction saved = transactionService.addTransaction(getCurrentUser().getID(), req);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 

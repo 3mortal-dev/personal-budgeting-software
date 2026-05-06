@@ -4,50 +4,78 @@ import com.example.personal_budget.entity.Transaction;
 import com.example.personal_budget.enums.TransactionType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
+
+    // JPA generates from method name
     List<Transaction> findByUserID(Long userID);
 
     List<Transaction> findByUserIDAndType(Long userID, TransactionType type);
 
-    List<Transaction> findByUserIDAndDateBetweenAndCategoryID(
-            Long userID, LocalDate start, LocalDate end, Long categoryID
+    List<Transaction> findByUserIDAndDateBetween(Long userID, LocalDate start, LocalDate end);
+
+    List<Transaction> findByUserIDAndDateBetweenAndCategoryID(Long userID, LocalDate start, LocalDate end, Long categoryID);
+
+    // Dashboard
+    List<Transaction> findTop5ByUserIDOrderByDateDescIdDesc(Long userID);
+
+    // Sum income or expense
+    @Query("""
+            SELECT COALESCE(SUM(t.amount), 0)
+            FROM Transaction t
+            WHERE t.userID = :userID
+            AND t.type = :type
+            """)
+    Double sumByUserIDAndType(
+            @Param("userID") Long userID,
+            @Param("type") TransactionType type
     );
 
+    // Monthly totals — for reports
     @Query("""
-                SELECT COALESCE(SUM(t.amount), 0)
-                FROM Transaction t
-                WHERE t.userID = :userID AND t.type = :type
+            SELECT FUNCTION('MONTH', t.date), COALESCE(SUM(t.amount), 0)
+            FROM Transaction t
+            WHERE t.userID = :userID
+            AND t.type = :type
+            AND t.date BETWEEN :startDate AND :endDate
+            GROUP BY FUNCTION('MONTH', t.date)
+            ORDER BY FUNCTION('MONTH', t.date)
             """)
-    Double sumByUserIDAndType(Long userID, TransactionType transactionType);
+    List<Object[]> getMonthlyTotal(
+            @Param("userID") Long userID,
+            @Param("type") TransactionType type,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
 
+    // Category breakdown — for reports
     @Query("""
-                SELECT MONTH(t.date) as month,
-                COALESCE(SUM(t.amount), 0) as totalAmount
-                FROM Transaction t
-                WHERE t.userID = :userID
-                  AND t.type = :type
-                  AND t.date BETWEEN :startDate AND :endDate
-                GROUP BY MONTH(t.date)
-                ORDER BY MONTH(t.date)
+            SELECT c.name, COALESCE(SUM(t.amount), 0)
+            FROM Transaction t
+            JOIN Category c ON t.categoryID = c.id
+            WHERE t.userID = :userID
+            AND t.type = :type
+            GROUP BY c.name
             """)
-    List<Object[]> getMonthlyTotal(Long userID, TransactionType type, LocalDate startDate, LocalDate endDate);
+    List<Object[]> getCategoryAmount(
+            @Param("userID") Long userID,
+            @Param("type") TransactionType type
+    );
 
+    // Date range — for reports
     @Query("""
-                SELECT c.name,
-                COALESCE(SUM(t.amount), 0)
-                FROM Transaction t
-                JOIN Category c ON t.categoryID = c.categoryID
-                WHERE t.userID = :userID
-                  AND t.type = :type
-                GROUP BY c.name
+            SELECT t FROM Transaction t
+            WHERE t.userID = :userID
+            AND t.date BETWEEN :startDate AND :endDate
+            ORDER BY t.date DESC
             """)
-    List<Object[]> getCategoryAmount(Long userID, TransactionType type);
-
-    List<Transaction> findByUserIDAndDateBetween(Long userID, LocalDate startDate, LocalDate end);
-
-    List<Transaction> findTop5ByUserIDOrderByDateDescTransactionIDDesc(Long userID);
+    List<Transaction> findByUserIDAndDateBetweenOrdered(
+            @Param("userID") Long userID,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
 }

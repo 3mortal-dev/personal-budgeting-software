@@ -21,16 +21,21 @@ public class Transaction {
     //@ManyToOne
     //@JoinColumn(name = "user_id")
     Long userID;
+
+    @Column(nullable = false)
     double amount;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     TransactionType type;
 
     // @ManyToOne
     // @JoinColumn(name = "category_id")
     Long categoryID;
+
+    @Column(nullable = false)
     LocalDate date;
     String source;
     String description;
-    
+
 }
