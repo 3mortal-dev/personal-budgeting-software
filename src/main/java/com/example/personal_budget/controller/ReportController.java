@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 
+
+
 @RestController
 @RequestMapping("/api/reports")
 public class ReportController {
@@ -62,6 +64,9 @@ public class ReportController {
     }
 
     private boolean trySetUserId(UserDetails userDetails, java.util.function.Consumer<Long> setter) {
+        if(userDetails == null) {
+            return false;
+        }
         long userId = userService.getUserId(userDetails);
         setter.accept(userId);
         return true;

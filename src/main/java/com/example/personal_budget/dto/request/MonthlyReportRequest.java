@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 public class MonthlyReportRequest {
-    private long userId;
+    private long userId; // always null and set in controller
     private LocalDate startDate;
     private LocalDate endDate;
 
