@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.personal_budget.entity.User;
 import com.example.personal_budget.service.UserService;
 import com.example.personal_budget.service.TransactionService;
-import com.example.personal_budget.entity.TransactionEntity;
+import com.example.personal_budget.entity.Transaction;
 
 import java.util.List;
 
@@ -28,8 +28,9 @@ public class AdminController {
 
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
+
+    public ResponseEntity<Iterable<User>> getAllUsers() {
+        Iterable<User> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
 
@@ -49,8 +50,8 @@ public class AdminController {
 
     @GetMapping("/users/{id}/transactions")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<TransactionEntity>> getUserTransactions(@PathVariable Long id) {
-        List<TransactionEntity> transactions = transactionService.getTransactionsByUserId(id);
+    public ResponseEntity<List<Transaction>> getUserTransactions(@PathVariable Long id) {
+        List<Transaction> transactions = transactionService.getAllTransactions(id);
         return ResponseEntity.ok(transactions);
     }
 
