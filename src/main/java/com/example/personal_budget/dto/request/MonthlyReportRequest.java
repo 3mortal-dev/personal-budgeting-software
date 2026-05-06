@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 public class MonthlyReportRequest {
-    private Long userId;
+    private long userId;
     private LocalDate startDate;
     private LocalDate endDate;
 

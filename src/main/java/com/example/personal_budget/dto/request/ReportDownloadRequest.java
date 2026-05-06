@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Data
 public class ReportDownloadRequest {
-    private Long userId;
+    private long userId; // always null and set in controller
     private ReportFormat format;
     private LocalDate startDate;
     private LocalDate endDate;
