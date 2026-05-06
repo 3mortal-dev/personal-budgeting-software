@@ -6,30 +6,20 @@
 
 // ╔══════════════════════════════════════════════════════════════╗
 // ║  API CONFIGURATION                                           ║
-// ║  Change BASE_URL to your Spring server address.              ║
-// ║  In production, replace with your deployed backend URL.      ║
 // ╚══════════════════════════════════════════════════════════════╝
 
 const API = {
   BASE_URL: "http://localhost:8080/api",
 
-  // ── Endpoint paths ──────────────────────────────────────────
-  // Spring Controller  →  @RequestMapping("/api/...")
-  TRANSACTIONS:        "/transactions",          // TransactionController
-  BUDGETS:             "/budgets",               // BudgetController
-  GOALS:               "/goals",                 // GoalController
-  NOTIFICATIONS:       "/notifications",         // NotificationController
-  MARK_ALL_READ:       "/notifications/mark-all-read",
-  MARK_READ:           (id) => `/notifications/${id}/read`,
+  TRANSACTIONS:   "/transactions",
+  BUDGETS:        "/budgets",
+  GOALS:          "/goals",
+  NOTIFICATIONS:  "/notifications",
+  MARK_ALL_READ:  "/notifications/mark-all-read",
+  MARK_READ:      (id) => `/notifications/${id}/read`,
 };
 
 // ── Shared Fetch Helper ───────────────────────────────────────────────────────
-// Wraps every API call with error handling.
-// Returns parsed JSON on success, or null on failure.
-//
-// Spring side: make sure your controllers return proper HTTP status codes:
-//   200 OK | 201 Created | 204 No Content | 400 Bad Request | 500 Server Error
-
 async function apiFetch(endpoint, options = {}) {
   try {
     const response = await fetch(`${API.BASE_URL}${endpoint}`, {
@@ -37,11 +27,10 @@ async function apiFetch(endpoint, options = {}) {
       ...options,
     });
 
-    if (response.status === 204) return null; // No Content (used by DELETE)
+    if (response.status === 204) return null;
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     return await response.json();
-
   } catch (err) {
     console.error(`[API ERROR] ${options.method || "GET"} ${endpoint}:`, err.message);
     return null;
@@ -51,29 +40,19 @@ async function apiFetch(endpoint, options = {}) {
 
 // ╔══════════════════════════════════════════════════════════════╗
 // ║  📦 IN-MEMORY STATE                                          ║
-// ║  Holds all data for the current session.                     ║
-// ║  Populated via loadAllData() on page load.                   ║
 // ╚══════════════════════════════════════════════════════════════╝
 
 const state = {
-  transactions:  [],   // ← loaded from GET /api/transactions
-  budgets:       [],   // ← loaded from GET /api/budgets
-  goals:         [],   // ← loaded from GET /api/goals
-  notifications: [],   // ← loaded from GET /api/notifications
+  transactions:  [],
+  budgets:       [],
+  goals:         [],
+  notifications: [],
 };
 
 
 // ╔══════════════════════════════════════════════════════════════╗
 // ║  📡 DATA LOADERS                                             ║
-// ║  Each function calls one Spring endpoint and saves           ║
-// ║  the result into state.                                      ║
 // ╚══════════════════════════════════════════════════════════════╝
-
-// ── Load Transactions ─────────────────────────────────────────
-// Spring:  GET /api/transactions
-// Controller method:  @GetMapping → List<Transaction>
-// Response shape expected:
-//   [{ id, type, name, category, amount, date }, ...]
 
 async function loadTransactions() {
   const data = await apiFetch(API.TRANSACTIONS);
@@ -84,12 +63,6 @@ async function loadTransactions() {
   }
 }
 
-// ── Load Budgets ──────────────────────────────────────────────
-// Spring:  GET /api/budgets
-// Controller method:  @GetMapping → List<Budget>
-// Response shape expected:
-//   [{ id, name, spent, limit }, ...]
-
 async function loadBudgets() {
   const data = await apiFetch(API.BUDGETS);
   if (data) {
@@ -97,12 +70,6 @@ async function loadBudgets() {
     renderBudgets();
   }
 }
-
-// ── Load Goals ────────────────────────────────────────────────
-// Spring:  GET /api/goals
-// Controller method:  @GetMapping → List<Goal>
-// Response shape expected:
-//   [{ id, name, status, saved, target }, ...]
 
 async function loadGoals() {
   const data = await apiFetch(API.GOALS);
@@ -112,12 +79,6 @@ async function loadGoals() {
   }
 }
 
-// ── Load Notifications ────────────────────────────────────────
-// Spring:  GET /api/notifications
-// Controller method:  @GetMapping → List<Notification>
-// Response shape expected:
-//   [{ id, type, title, msg, time, unread }, ...]
-
 async function loadNotifications() {
   const data = await apiFetch(API.NOTIFICATIONS);
   if (data) {
@@ -125,10 +86,6 @@ async function loadNotifications() {
     updateNotifBadge();
   }
 }
-
-// ── Load Everything on Page Start ────────────────────────────
-// Called once in DOMContentLoaded.
-// Uses Promise.all so all 4 requests run in parallel (faster).
 
 async function loadAllData() {
   await Promise.all([
@@ -142,13 +99,8 @@ async function loadAllData() {
 
 // ── Navigation ────────────────────────────────────────────────────────────────
 
-function goToBudgets() {
-  window.location.href = "budget.html";
-}
-
-function goToTransactions() {
-  window.location.href = "transactions.html";
-}
+function goToBudgets()      { window.location.href = "budget.html"; }
+function goToTransactions() { window.location.href = "transactions.html"; }
 
 
 // ── Time-based Greeting ───────────────────────────────────────────────────────
@@ -157,7 +109,7 @@ function setGreeting() {
   const hour = new Date().getHours();
   let salutation;
 
-  if (hour >= 5 && hour < 12)       salutation = "Good morning";
+  if (hour >= 5  && hour < 12) salutation = "Good morning";
   else if (hour >= 12 && hour < 17) salutation = "Good afternoon";
   else if (hour >= 17 && hour < 21) salutation = "Good evening";
   else                               salutation = "Good night";
@@ -189,87 +141,211 @@ function setActiveNav() {
 
 
 // ╔══════════════════════════════════════════════════════════════╗
-// ║  ➕ ADD TRANSACTION                                           ║
-// ║  Sends a POST to Spring, then updates state + UI.            ║
+// ║  🔧 MODAL HELPERS                                            ║
+// ║                                                              ║
+// ║  FIX: Visibility is controlled ONLY by the .is-open class.   ║
+// ║  The `hidden` HTML attribute is no longer used on modals     ║
+// ║  because it overrides CSS `display` in all browsers and       ║
+// ║  prevented modals from appearing when .is-open was added     ║
+// ║  without first removing `hidden`.                            ║
 // ╚══════════════════════════════════════════════════════════════╝
 
-function openAddModal() {
-  const modal = document.getElementById("addModal");
+/**
+ * Opens a modal by id.
+ * Traps focus on the first interactive element inside.
+ */
+function openModal(id) {
+  const modal = document.getElementById(id);
   if (!modal) return;
-  modal.removeAttribute("hidden");
   modal.classList.add("is-open");
   document.body.style.overflow = "hidden";
   setTimeout(() => {
-    const first = modal.querySelector("input, select");
+    const first = modal.querySelector("input, select, textarea, button:not(.modal-close)");
     if (first) first.focus();
-  }, 50);
+  }, 60);
 }
 
-function closeAddModal() {
-  const modal = document.getElementById("addModal");
+/**
+ * Closes a modal by id.
+ * Clears all field .error classes and inline error messages within the modal.
+ *
+ * FIX: Budget modal previously had no close-on-Escape and no clear-errors logic.
+ * Both are now handled here centrally so both modals behave identically.
+ */
+function closeModal(id) {
+  const modal = document.getElementById(id);
   if (!modal) return;
   modal.classList.remove("is-open");
-  modal.setAttribute("hidden", "");
   document.body.style.overflow = "";
 
+  // Clear field error states
+  modal.querySelectorAll(".form-control.error").forEach(el => el.classList.remove("error"));
+  // Clear per-field error messages
+  modal.querySelectorAll(".field-error").forEach(el => { el.textContent = ""; });
+  // Clear banner error
+  const banner = modal.querySelector(".form-error-banner");
+  if (banner) { banner.textContent = ""; banner.classList.remove("show"); }
+
+  // Clear loading state from the submit button
+  setButtonLoading(modal.querySelector(".btn-submit"), false);
+}
+
+
+// ── Add Transaction Modal ─────────────────────────────────────────────────────
+
+function openAddModal()   { openModal("addModal"); }
+function closeAddModal()  {
+  closeModal("addModal");
+  // Reset field values
   document.getElementById("txName").value = "";
   document.getElementById("txCat").value  = "";
   document.getElementById("txAmt").value  = "";
   document.getElementById("txType").value = "expense";
-
-  document.querySelectorAll(".form-control.error").forEach(el => el.classList.remove("error"));
 }
 
-// ── addTransaction ────────────────────────────────────────────
-// Spring:  POST /api/transactions
-// Controller method:
-//   @PostMapping
-//   public ResponseEntity<Transaction> create(@RequestBody Transaction tx)
-//
-// Request body sent:
-//   { type, name, category, amount, date }
-//
-// Expected response:
-//   The saved Transaction object with its generated id
-//   → { id, type, name, category, amount, date }
+
+// ── Budget Modal ──────────────────────────────────────────────────────────────
+
+function openBudgetModal()  { openModal("budgetModal"); }
+function closeBudgetModal() {
+  closeModal("budgetModal");
+  // Reset field values
+  document.getElementById("budgetCategory").value = "";
+  document.getElementById("budgetAmount").value   = "";
+  document.getElementById("budgetStart").value    = "";
+  document.getElementById("budgetEnd").value      = "";
+  document.getElementById("budgetAlert").value    = "80";
+}
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  ⏳ BUTTON LOADING STATE                                     ║
+// ║                                                              ║
+// ║  FIX: Submit buttons can be clicked multiple times during    ║
+// ║  an in-flight API request, causing duplicate POSTs.          ║
+// ║  setButtonLoading() disables the button and shows a spinner  ║
+// ║  while the request is in progress.                           ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+function setButtonLoading(btn, loading) {
+  if (!btn) return;
+  btn.disabled = loading;
+  btn.classList.toggle("is-loading", loading);
+}
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  🗒️  INLINE FORM VALIDATION HELPERS                          ║
+// ║                                                              ║
+// ║  FIX: addBudget() previously called alert() for validation   ║
+// ║  errors — a poor UX pattern that blocks the page and loses   ║
+// ║  the form state. Replaced with inline per-field error        ║
+// ║  messages consistent with how addTransaction() works.        ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+/**
+ * Marks a field as invalid and shows a message below it.
+ * @param {HTMLElement} field - The input / select element.
+ * @param {string}      msg   - The error message to display.
+ */
+function setFieldError(field, msg) {
+  if (!field) return;
+  field.classList.add("error");
+  const errEl = document.getElementById(field.id + "Err");
+  if (errEl) errEl.textContent = msg;
+}
+
+/**
+ * Clears a single field's error state.
+ */
+function clearFieldError(field) {
+  if (!field) return;
+  field.classList.remove("error");
+  const errEl = document.getElementById(field.id + "Err");
+  if (errEl) errEl.textContent = "";
+}
+
+/**
+ * Shows a banner-level error inside a modal (e.g. server failure).
+ * @param {string} bannerId - The id of the .form-error-banner element.
+ * @param {string} msg
+ */
+function showBanner(bannerId, msg) {
+  const el = document.getElementById(bannerId);
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add("show");
+}
+
+function hideBanner(bannerId) {
+  const el = document.getElementById(bannerId);
+  if (!el) return;
+  el.textContent = "";
+  el.classList.remove("show");
+}
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  ➕ ADD TRANSACTION                                           ║
+// ╚══════════════════════════════════════════════════════════════╝
 
 async function addTransaction() {
-  const type    = document.getElementById("txType").value;
+  const btn     = document.getElementById("addTxBtn");
+  const typeEl  = document.getElementById("txType");
   const nameEl  = document.getElementById("txName");
   const catEl   = document.getElementById("txCat");
   const amtEl   = document.getElementById("txAmt");
 
+  // Clear previous errors
+  [nameEl, catEl, amtEl].forEach(clearFieldError);
+  hideBanner("addFormError");
+
+  const type     = typeEl.value;
   const name     = nameEl.value.trim();
   const category = catEl.value.trim();
   const amount   = parseFloat(amtEl.value);
 
-  [nameEl, catEl, amtEl].forEach(el => el.classList.remove("error"));
-
   let hasError = false;
-  if (!name)                        { nameEl.classList.add("error"); hasError = true; }
-  if (!category)                    { catEl.classList.add("error");  hasError = true; }
-  if (isNaN(amount) || amount <= 0) { amtEl.classList.add("error");  hasError = true; }
+
+  if (!name) {
+    setFieldError(nameEl, "Please enter a description.");
+    hasError = true;
+  }
+  if (!category) {
+    setFieldError(catEl, "Please enter a category.");
+    hasError = true;
+  }
+  if (isNaN(amount) || amount <= 0) {
+    setFieldError(amtEl, "Please enter a valid amount greater than 0.");
+    hasError = true;
+  }
+
   if (hasError) {
-    document.querySelector(".form-control.error")?.focus();
+    // Focus the first invalid field
+    const firstError = document.querySelector("#addModal .form-control.error");
+    if (firstError) firstError.focus();
     return;
   }
 
   const transaction = { type, name, category, amount, date: new Date().toISOString() };
 
+  setButtonLoading(btn, true);
+
   // 📡 POST /api/transactions
   const saved = await apiFetch(API.TRANSACTIONS, {
     method: "POST",
-    body: JSON.stringify(transaction),
+    body:   JSON.stringify(transaction),
   });
 
+  setButtonLoading(btn, false);
+
   if (saved) {
-    // Use the ID assigned by Spring/database, not a local one
     state.transactions.unshift(saved);
     renderTransactions();
     updateStats();
     closeAddModal();
   } else {
-    alert("Failed to save transaction. Is the server running?");
+    showBanner("addFormError", "Failed to save transaction. Please check your connection and try again.");
   }
 }
 
@@ -361,9 +437,17 @@ function updateStats() {
   set("metExpense", formatCurrency(totalExpense));
   set("statTx",     txs.length);
 
+  // FIX: Only show the badge when there are transactions, and hide it via display
+  // rather than leaving a "+0" badge visible on empty state.
   const statTxBadgeEl = document.getElementById("statTxBadge");
-  if (statTxBadgeEl && txs.length > 0)
-    statTxBadgeEl.textContent = `+${Math.min(txs.length, 99)}`;
+  if (statTxBadgeEl) {
+    if (txs.length > 0) {
+      statTxBadgeEl.textContent    = `+${Math.min(txs.length, 99)}`;
+      statTxBadgeEl.style.display  = "";
+    } else {
+      statTxBadgeEl.style.display  = "none";
+    }
+  }
 
   const max        = Math.max(totalIncome, totalExpense, 1);
   const incomeBar  = document.getElementById("incomeBar");
@@ -458,35 +542,17 @@ function closeNotifications() {
   document.getElementById("notifDropdown")?.classList.remove("is-open");
 }
 
-// ── Mark All Read ─────────────────────────────────────────────
-// Spring:  PATCH /api/notifications/mark-all-read
-// Controller method:
-//   @PatchMapping("/mark-all-read")
-//   public ResponseEntity<Void> markAllRead()
-//   → returns 204 No Content
-
+// 📡 PATCH /api/notifications/mark-all-read
 async function markAllRead() {
-  // 📡 PATCH /api/notifications/mark-all-read
   await apiFetch(API.MARK_ALL_READ, { method: "PATCH" });
-
-  // Update local state regardless (optimistic update)
   state.notifications.forEach(n => { n.unread = false; });
   renderNotificationList();
   updateNotifBadge();
 }
 
-// ── Mark Single Notification Read ────────────────────────────
-// Spring:  PATCH /api/notifications/{id}/read
-// Controller method:
-//   @PatchMapping("/{id}/read")
-//   public ResponseEntity<Void> markRead(@PathVariable Long id)
-//   → returns 204 No Content
-
+// 📡 PATCH /api/notifications/:id/read
 async function markRead(id) {
-  // 📡 PATCH /api/notifications/:id/read
   await apiFetch(API.MARK_READ(id), { method: "PATCH" });
-
-  // Update local state (optimistic update)
   const notif = state.notifications.find(n => n.id === id);
   if (notif) notif.unread = false;
 
@@ -532,56 +598,71 @@ function renderNotificationList() {
 
 
 // ╔══════════════════════════════════════════════════════════════╗
-// ║  💰 BUDGET MODAL                                             ║
+// ║  💰 ADD BUDGET                                               ║
 // ╚══════════════════════════════════════════════════════════════╝
-
-function openBudgetModal() {
-  const modal = document.getElementById("budgetModal");
-  if (!modal) return;
-  modal.removeAttribute("hidden");
-  modal.classList.add("is-open");
-  document.body.style.overflow = "hidden";
-}
-
-function closeBudgetModal() {
-  const modal = document.getElementById("budgetModal");
-  if (!modal) return;
-  modal.classList.remove("is-open");
-  modal.setAttribute("hidden", "");
-  document.body.style.overflow = "";
-}
 
 // ── addBudget ─────────────────────────────────────────────────
 // Spring:  POST /api/budgets
-// Controller method:
-//   @PostMapping
-//   public ResponseEntity<Budget> create(@RequestBody Budget budget)
-//
-// Request body sent:
-//   { category, amount, start_date, end_date, alert_percentage }
-//
-// Expected response:
-//   The saved Budget object → { id, name, spent, limit, ... }
+// Request body: { category, amount, start_date, end_date, alert_percentage }
+// Response:     { id, name, spent, limit, ... }
 
 async function addBudget() {
-  const category = document.getElementById("budgetCategory").value.trim();
-  const amount   = document.getElementById("budgetAmount").value.trim();
-  const start    = document.getElementById("budgetStart").value;
-  const end      = document.getElementById("budgetEnd").value;
-  const alertVal = document.getElementById("budgetAlert").value;
+  const btn         = document.getElementById("addBudgetBtn");
+  const categoryEl  = document.getElementById("budgetCategory");
+  const amountEl    = document.getElementById("budgetAmount");
+  const startEl     = document.getElementById("budgetStart");
+  const endEl       = document.getElementById("budgetEnd");
+  const alertEl     = document.getElementById("budgetAlert");
 
-  if (!category || !amount || !start || !end) {
-    alert("Please fill all fields");
+  // Clear previous errors
+  [categoryEl, amountEl, startEl, endEl].forEach(clearFieldError);
+  hideBanner("budgetFormError");
+
+  const category = categoryEl.value.trim();
+  const amount   = parseFloat(amountEl.value);
+  const start    = startEl.value;
+  const end      = endEl.value;
+  const alertVal = parseInt(alertEl.value, 10);
+
+  let hasError = false;
+
+  if (!category) {
+    setFieldError(categoryEl, "Please enter a budget category.");
+    hasError = true;
+  }
+  if (isNaN(amount) || amount <= 0) {
+    setFieldError(amountEl, "Please enter a valid amount greater than 0.");
+    hasError = true;
+  }
+  if (!start) {
+    setFieldError(startEl, "Please select a start date.");
+    hasError = true;
+  }
+  if (!end) {
+    setFieldError(endEl, "Please select an end date.");
+    hasError = true;
+  }
+  // FIX: Added date-range sanity check
+  if (start && end && end < start) {
+    setFieldError(endEl, "End date must be after the start date.");
+    hasError = true;
+  }
+
+  if (hasError) {
+    const firstError = document.querySelector("#budgetModal .form-control.error");
+    if (firstError) firstError.focus();
     return;
   }
 
   const budgetData = {
     category,
-    amount:           parseFloat(amount),
+    amount,
     start_date:       start,
     end_date:         end,
-    alert_percentage: parseInt(alertVal),
+    alert_percentage: alertVal,
   };
+
+  setButtonLoading(btn, true);
 
   // 📡 POST /api/budgets
   const saved = await apiFetch(API.BUDGETS, {
@@ -589,19 +670,14 @@ async function addBudget() {
     body:   JSON.stringify(budgetData),
   });
 
+  setButtonLoading(btn, false);
+
   if (saved) {
     state.budgets.push(saved);
     renderBudgets();
     closeBudgetModal();
-
-    // Reset form fields
-    document.getElementById("budgetCategory").value = "";
-    document.getElementById("budgetAmount").value   = "";
-    document.getElementById("budgetStart").value    = "";
-    document.getElementById("budgetEnd").value      = "";
-    document.getElementById("budgetAlert").value    = "80";
   } else {
-    alert("Failed to save budget. Is the server running?");
+    showBanner("budgetFormError", "Failed to save budget. Please check your connection and try again.");
   }
 }
 
@@ -621,7 +697,6 @@ function escapeHtml(str) {
 
 // ╔══════════════════════════════════════════════════════════════╗
 // ║  🚀 INIT                                                     ║
-// ║  Runs when the page finishes loading.                        ║
 // ╚══════════════════════════════════════════════════════════════╝
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -633,24 +708,43 @@ document.addEventListener("DOMContentLoaded", () => {
   loadAllData();
 
   // ── Modal: close on overlay click ───────────────────────────
-  const modal = document.getElementById("addModal");
-  if (modal) {
+  // FIX: Wired up for BOTH modals. Previously only addModal had this.
+  ["addModal", "budgetModal"].forEach(id => {
+    const modal = document.getElementById(id);
+    if (!modal) return;
     modal.addEventListener("click", function (e) {
-      if (e.target === this) closeAddModal();
+      if (e.target === this) {
+        if (id === "addModal")    closeAddModal();
+        if (id === "budgetModal") closeBudgetModal();
+      }
     });
-  }
+  });
 
   // ── Close modal / notifications on Escape ───────────────────
+  // FIX: Now handles BOTH modals, not just addModal.
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      if (modal?.classList.contains("is-open")) closeAddModal();
-      closeNotifications();
-    }
+    if (e.key !== "Escape") return;
+
+    const addModal    = document.getElementById("addModal");
+    const budgetModal = document.getElementById("budgetModal");
+
+    if (addModal?.classList.contains("is-open"))    { closeAddModal();    return; }
+    if (budgetModal?.classList.contains("is-open")) { closeBudgetModal(); return; }
+
+    closeNotifications();
   });
 
   // ── Close notification dropdown on outside click ─────────────
   document.addEventListener("click", (e) => {
     const wrapper = document.getElementById("notifWrapper");
     if (wrapper && !wrapper.contains(e.target)) closeNotifications();
+  });
+
+  // ── Live validation: clear errors as user types ──────────────
+  // Improves UX by removing the red border the moment the field is corrected.
+  document.querySelectorAll(".form-control").forEach(el => {
+    el.addEventListener("input", () => {
+      if (el.classList.contains("error")) clearFieldError(el);
+    });
   });
 });
