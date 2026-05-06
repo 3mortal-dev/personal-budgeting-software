@@ -21,49 +21,40 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/goals")
-@RequiredArgsConstructor
 public class GoalController {
 
     private final GoalService goalService;
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<GoalEntity> addGoal(
-            @RequestBody GoalRequest goalRequest,
-            @AuthenticationPrincipal UserDetails userDetails) {
-
-        long userId = getUserId(userDetails);
+    public ResponseEntity<GoalEntity> addGoal(@RequestBody GoalRequest goalRequest , @AuthenticationPrincipal UserDetails userDetails) 
+    {
+        long userId = userService.getUserId(userDetails) ; 
         return ResponseEntity.ok(goalService.addGoal(goalRequest, userId));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<GoalEntity> editGoal(
-            @PathVariable Long id,
-            @RequestBody GoalRequest goalRequest,
-            @AuthenticationPrincipal UserDetails userDetails) {
 
-        long userId = getUserId(userDetails);
+    @PutMapping("/{id}") 
+    public ResponseEntity<GoalEntity> editGoal(@PathVariable Long id, @RequestBody GoalRequest goalRequest , @AuthenticationPrincipal UserDetails userDetails) 
+    {
+        long userId = userService.getUserId(userDetails) ; 
         return ResponseEntity.ok(goalService.editGoal(id, goalRequest, userId));
     }
 
-    @PatchMapping("/{id}/progress")
-    public ResponseEntity<GoalEntity> updateProgress(
-            @PathVariable long id,
-            @RequestParam double amount,
-            @AuthenticationPrincipal UserDetails userDetails) {
-
-        long userId = getUserId(userDetails);
+   @PatchMapping("/{id}/progress")
+    public ResponseEntity<GoalEntity> updateProgress(@PathVariable long id,@RequestParam double amount,@AuthenticationPrincipal UserDetails userDetails) 
+    {
+        long userId = userService.getUserId(userDetails);
         return ResponseEntity.ok(goalService.updateProgress(id, amount, userId));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteGoal(
-            @PathVariable long id,
-            @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<String> deleteGoal( @PathVariable long id,@AuthenticationPrincipal UserDetails userDetails) {
 
-        long userId = getUserId(userDetails);
+        long userId = userService.getUserId(userDetails);
         goalService.deleteGoal(id, userId);
         return ResponseEntity.ok("Goal deleted");
     }
@@ -81,5 +72,7 @@ public class GoalController {
 
         return userService.getUserId(userDetails);
     }
+
+    
 }
 

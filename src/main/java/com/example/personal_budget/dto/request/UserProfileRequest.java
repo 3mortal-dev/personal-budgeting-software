@@ -15,5 +15,9 @@ import lombok.NoArgsConstructor;
 public class UserProfileRequest {
     private String name;
     private String email;
-    Role role ;
+    private Role role;
+
+    private int transactionsCount;
+    private int goalsCount;
+    private int budgetsCount;
 }
