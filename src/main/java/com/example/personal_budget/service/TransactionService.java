@@ -1,9 +1,7 @@
 package com.example.personal_budget.service;
 
-import com.example.personal_budget.dto.CreateTransactionRequest;
-import com.example.personal_budget.dto.MonthlyReportRequest;
-import com.example.personal_budget.dto.TransactionFilterRequest;
-import com.example.personal_budget.dto.request.MonthlyReportRequest;
+import com.example.personal_budget.dto.request.AuthenticationRequest;
+import com.example.personal_budget.dto.request.TransactionFilterRequest;
 import com.example.personal_budget.entity.Transaction;
 import com.example.personal_budget.enums.TransactionType;
 import com.example.personal_budget.exception.TransactionNotFoundException;
@@ -37,7 +35,7 @@ public class TransactionService {
     }
 
     @Transactional
-    public Transaction addTransaction(Long userID, @NonNull CreateTransactionRequest request) {
+    public Transaction addTransaction(Long userID, @NonNull AuthenticationRequest.CreateTransactionRequest request) {
 
         verifyUserAccess(userID, request.getUserID());
 
@@ -64,7 +62,7 @@ public class TransactionService {
     }
 
     @Transactional
-    public Transaction updateTransaction(Long transactionID, Long userID, CreateTransactionRequest request) throws AccessDeniedException {
+    public Transaction updateTransaction(Long transactionID, Long userID, AuthenticationRequest.CreateTransactionRequest request) throws AccessDeniedException {
 
         Transaction transaction = transactionRepo.findById(transactionID)
                 .orElseThrow(() -> new EntityNotFoundException("Transaction not found"));

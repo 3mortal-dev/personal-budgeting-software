@@ -53,14 +53,16 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     );
 
     // Category breakdown — for reports
-    @Query("""
+    @Query(value = """
             SELECT c.name, COALESCE(SUM(t.amount), 0)
-            FROM Transaction t
-            JOIN Category c ON t.categoryID = c.id
-            WHERE t.userID = :userID
+            FROM transactions t
+            JOIN categories c ON t.category_id = c.category_id
+            WHERE t.user_id = :userID
             AND t.type = :type
             GROUP BY c.name
-            """)
+            """, nativeQuery = true)
+    List<Object[]> getCategoryAmount(@Param("userID") Long userID, @Param("type") String type);
+
     List<Object[]> getCategoryAmount(
             @Param("userID") Long userID,
             @Param("type") TransactionType type

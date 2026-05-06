@@ -1,6 +1,6 @@
 package com.example.personal_budget.controller;
 
-import com.example.personal_budget.dto.CreateTransactionRequest;
+import com.example.personal_budget.dto.request.AuthenticationRequest;
 import com.example.personal_budget.entity.Transaction;
 import com.example.personal_budget.service.TransactionService;
 import com.example.personal_budget.service.UserService;
@@ -22,7 +22,7 @@ public class TransactionController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<Transaction> addTransaction(@Valid @RequestBody CreateTransactionRequest req) {
+    public ResponseEntity<Transaction> addTransaction(@Valid @RequestBody AuthenticationRequest.CreateTransactionRequest req) {
         Transaction saved = transactionService.addTransaction(userService.getUserIdByEmail(SecurityContextHolder.getContext().getAuthentication().getName()), req);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
@@ -46,7 +46,7 @@ public class TransactionController {
     }
 
     @PutMapping("/{transactionID}")
-    public ResponseEntity<Transaction> updateTransaction(@PathVariable Long transactionID, @Valid @RequestBody CreateTransactionRequest req) {
+    public ResponseEntity<Transaction> updateTransaction(@PathVariable Long transactionID, @Valid @RequestBody AuthenticationRequest.CreateTransactionRequest req) {
         Transaction t = transactionService.updateTransaction(transactionID, userService.getUserIdByEmail(SecurityContextHolder.getContext().getAuthentication().getName()), req);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(t);
     }

@@ -12,30 +12,29 @@ import java.time.LocalDate;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "transactions")
 public class Transaction {
 
     @Id
-    @GeneratedValue
-    Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    //@ManyToOne
-    //@JoinColumn(name = "user_id")
-    Long userID;
+    @Column(name = "user_id", nullable = false)
+    private Long userID;
+
+    @Column(name = "category_id")
+    private Long categoryID;
 
     @Column(nullable = false)
-    double amount;
+    private double amount;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    TransactionType type;
-
-    // @ManyToOne
-    // @JoinColumn(name = "category_id")
-    Long categoryID;
+    private TransactionType type;
 
     @Column(nullable = false)
-    LocalDate date;
-    String source;
-    String description;
+    private LocalDate date;
 
+    private String source;
+    private String description;
 }
