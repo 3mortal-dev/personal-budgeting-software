@@ -2,7 +2,6 @@ package com.example.personal_budget.controller;
 
 import com.example.personal_budget.dto.CreateTransactionRequest;
 import com.example.personal_budget.entity.Transaction;
-import com.example.personal_budget.entity.User;
 import com.example.personal_budget.service.TransactionService;
 import com.example.personal_budget.service.UserService;
 import jakarta.validation.Valid;
@@ -24,44 +23,37 @@ public class TransactionController {
 
     @PostMapping
     public ResponseEntity<Transaction> addTransaction(@Valid @RequestBody CreateTransactionRequest req) {
-        Transaction saved = transactionService.addTransaction(getCurrentUser().getID(), req);
+        Transaction saved = transactionService.addTransaction(userService.getUserIdByEmail(SecurityContextHolder.getContext().getAuthentication().getName()), req);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @GetMapping
     public ResponseEntity<List<Transaction>> getAllTransactions() {
-        List<Transaction> transactions = transactionService.getAllTransactions(getCurrentUser().getID());
+        List<Transaction> transactions = transactionService.getAllTransactions(userService.getUserIdByEmail(SecurityContextHolder.getContext().getAuthentication().getName()));
         return ResponseEntity.ok(transactions);
     }
 
     @GetMapping("/income")
     public ResponseEntity<List<Transaction>> getIncomeTransactions() {
-        List<Transaction> transactions = transactionService.getIncomeTransactions(getCurrentUser().getID());
+        List<Transaction> transactions = transactionService.getIncomeTransactions(userService.getUserIdByEmail(SecurityContextHolder.getContext().getAuthentication().getName()));
         return ResponseEntity.ok(transactions);
     }
 
     @GetMapping("/expense")
     public ResponseEntity<List<Transaction>> getExpenseTransactions() {
-        List<Transaction> transactions = transactionService.getExpenseTransactions(getCurrentUser().getID());
+        List<Transaction> transactions = transactionService.getExpenseTransactions(userService.getUserIdByEmail(SecurityContextHolder.getContext().getAuthentication().getName()));
         return ResponseEntity.ok(transactions);
     }
 
     @PutMapping("/{transactionID}")
     public ResponseEntity<Transaction> updateTransaction(@PathVariable Long transactionID, @Valid @RequestBody CreateTransactionRequest req) {
-        Transaction t = transactionService.updateTransaction(transactionID, getCurrentUser().getID(), req);
+        Transaction t = transactionService.updateTransaction(transactionID, userService.getUserIdByEmail(SecurityContextHolder.getContext().getAuthentication().getName()), req);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body(t);
     }
 
     @DeleteMapping("/{transactionID}")
     public ResponseEntity<Void> deleteTransaction(@PathVariable Long transactionID) {
-        transactionService.deleteTransaction(transactionID, getCurrentUser().getID);
+        transactionService.deleteTransaction(transactionID, userService.getUserIdByEmail(SecurityContextHolder.getContext().getAuthentication().getName()));
         return ResponseEntity.noContent().build();
-    }
-
-    private User getCurrentUser() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        return userService.findByEmail(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }
