@@ -1,6 +1,7 @@
 package com.example.personal_budget.service;
 
-import com.example.personal_budget.dto.request.AuthenticationRequest;
+import com.example.personal_budget.dto.request.CreateTransactionRequest;
+import com.example.personal_budget.dto.request.MonthlyReportRequest;
 import com.example.personal_budget.dto.request.TransactionFilterRequest;
 import com.example.personal_budget.entity.Transaction;
 import com.example.personal_budget.enums.TransactionType;
@@ -35,9 +36,9 @@ public class TransactionService {
     }
 
     @Transactional
-    public Transaction addTransaction(Long userID, @NonNull AuthenticationRequest.CreateTransactionRequest request) {
+    public Transaction addTransaction(Long userID, @NonNull CreateTransactionRequest request) {
 
-        verifyUserAccess(userID, request.getUserID());
+        verifyUserAccess(request.getUserID(), userID);
 
         Transaction transaction = Transaction.builder()
                 .userID(userID)
@@ -62,7 +63,7 @@ public class TransactionService {
     }
 
     @Transactional
-    public Transaction updateTransaction(Long transactionID, Long userID, AuthenticationRequest.CreateTransactionRequest request) throws AccessDeniedException {
+    public Transaction updateTransaction(Long transactionID, Long userID, CreateTransactionRequest request) throws AccessDeniedException {
 
         Transaction transaction = transactionRepo.findById(transactionID)
                 .orElseThrow(() -> new EntityNotFoundException("Transaction not found"));
@@ -125,9 +126,9 @@ public class TransactionService {
     // For Reports
     public Map<Month, Double> getMonthlyTotal(Long userID, @NonNull MonthlyReportRequest request, TransactionType type) {
 
-        verifyUserAccess(userID, request.getUserID());
+        verifyUserAccess(userID, request.getUserId());
 
-        return transactionRepo.getMonthlyTotal(request.getUserID(), type, request.getStartDate(), request.getEndDate())
+        return transactionRepo.getMonthlyTotal(request.getUserId(), type, request.getStartDate(), request.getEndDate())
                 .stream()
                 .collect(Collectors.toMap(
                         row -> Month.of((Integer) row[0]),
@@ -161,7 +162,7 @@ public class TransactionService {
 
     // For Dashboard
     public List<Transaction> getRecentTransactions(Long userID) {
-        return transactionRepo.findTop5ByUserIDOrderByDateDescTransactionIDDesc(userID);
+        return transactionRepo.findTop5ByUserIDOrderByDateDescIdDesc(userID);
     }
 
     private void verifyUserAccess(@NonNull Long contextUserID, Long requestUserID) {
