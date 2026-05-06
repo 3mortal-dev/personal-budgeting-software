@@ -8,6 +8,7 @@ import com.example.personal_budget.enums.TransactionType;
 import com.example.personal_budget.exception.TransactionNotFoundException;
 import com.example.personal_budget.repository.TransactionRepository;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.access.AccessDeniedException;
@@ -26,52 +27,40 @@ import java.util.stream.Collectors;
 public class TransactionService {
 
     private final TransactionRepository transactionRepo;
+    @Getter
     private final UserService userService;
 
-    public Transaction getById(Long userId, Long transactionId) {
+    public Transaction getById (Long contextUserId, Long transactionId) {
+        Transaction transaction = transactionRepo.findById(transactionId).orElseThrow(
+                () -> new TransactionNotFoundException(transactionId));
 
-        Transaction t = transactionRepo.findById(transactionId)
-                .orElseThrow(() -> new TransactionNotFoundException(transactionId));
-        verifyUserAccess(userId, t.getUser().getId());
-        return t;
+        verifyUserAccess(contextUserId, transaction.getUser().getId());
+        return transaction;
     }
 
     @Transactional
-    public Transaction addTransaction(Long userId, @NonNull CreateTransactionRequest request) {
+    public Transaction addTransaction (Long userId, @NonNull CreateTransactionRequest request) {
+        verifyUserAccess(userId, request.getUser().getId());
 
-        verifyUserAccess(request.getUserId(), userId);
-
-        Transaction transaction = Transaction.builder()
-                .user(userService.getUser())
-                .amount(request.getAmount())
-                .type(request.getType())
-                .date(request.getDate())
-                .categoryId(request.getCategoryId())
-                .source(request.getSource())
-                .description(request.getDescription())
-                .build();
+        Transaction transaction = Transaction.builder().user(request.getUser()).amount(request.getAmount()).type(
+                request.getType()).date(request.getDate()).category(request.getCategory()).source(
+                request.getSource()).description(request.getDescription()).build();
 
         return transactionRepo.save(transaction);
     }
 
-    public List<Transaction> getAllTransactions(Long userId) {
-
-        List<Transaction> list = transactionRepo.findByUserId(userId);
-        if (!list.isEmpty())
-            verifyUserAccess(userId, list.getFirst().getUser().getId());
-
-        return list;
+    public List<Transaction> getAllTransactions (Long contextUserId) {
+        return transactionRepo.findByUserId(contextUserId);
     }
 
     @Transactional
-    public Transaction updateTransaction(Long transactionId, Long userId, CreateTransactionRequest request) throws AccessDeniedException {
+    public Transaction updateTransaction (Long transactionId,
+                                          Long contextUserId,
+                                          @NonNull CreateTransactionRequest request) {
+        Transaction transaction = transactionRepo.findById(transactionId).orElseThrow(
+                () -> new EntityNotFoundException("Transaction not found"));
 
-        Transaction transaction = transactionRepo.findById(transactionId)
-                .orElseThrow(() -> new EntityNotFoundException("Transaction not found"));
-
-        if (!transaction.getUser().getId().equals(userId)) {
-            throw new AccessDeniedException("You are not allowed to update this transaction");
-        }
+        verifyUserAccess(contextUserId, transaction.getUser().getId());
 
         transaction.setAmount(request.getAmount());
         transaction.setDate(request.getDate());
@@ -84,92 +73,69 @@ public class TransactionService {
     }
 
     @Transactional
-    public void deleteTransaction(Long transactionId, Long userId) throws AccessDeniedException {
+    public void deleteTransaction (Long transactionId, Long userId) {
+        Transaction transaction = transactionRepo.findById(transactionId).orElseThrow(
+                () -> new EntityNotFoundException("Transaction not found"));
 
-        Transaction transaction = transactionRepo.findById(transactionId)
-                .orElseThrow(() -> new EntityNotFoundException("Transaction not found"));
-
-        if (!transaction.getUser().getId().equals(userId)) {
-            throw new AccessDeniedException("You are not allowed to delete this transaction");
-        }
-
+        verifyUserAccess(userId, transaction.getUser().getId());
         transactionRepo.delete(transaction);
     }
 
-    public List<Transaction> getIncomeTransactions(Long userId) {
-        return transactionRepo.findByUserIdAndType(userId, TransactionType.INCOME);
+    public List<Transaction> getIncomeTransactions (Long contextUserId) {
+        return transactionRepo.findByUserIdAndType(contextUserId, TransactionType.INCOME);
     }
 
-    public List<Transaction> getExpenseTransactions(Long userId) {
-        return transactionRepo.findByUserIdAndType(userId, TransactionType.EXPENSE);
+    public List<Transaction> getExpenseTransactions (Long contextUserId) {
+        return transactionRepo.findByUserIdAndType(contextUserId, TransactionType.EXPENSE);
     }
 
-    public Double getTotalIncome(Long userId) {
-        return transactionRepo.sumByUserIdAndType(userId, TransactionType.INCOME);
+    public Double getTotalIncome (Long contextUserId) {
+        return transactionRepo.sumByUserIdAndType(contextUserId, TransactionType.INCOME);
     }
 
-    public Double getTotalExpense(Long userId) {
-        return transactionRepo.sumByUserIdAndType(userId, TransactionType.EXPENSE);
+    public Double getTotalExpense (Long contextUserId) {
+        return transactionRepo.sumByUserIdAndType(contextUserId, TransactionType.EXPENSE);
     }
 
-    public List<Transaction> filterHistory(Long userId, @NonNull TransactionFilterRequest request) {
-
+    public List<Transaction> filterHistory (Long userId, @NonNull TransactionFilterRequest request) {
         verifyUserAccess(userId, request.getUserId());
 
-        return transactionRepo.findByUserIdAndDateBetweenAndCategoryId(
-                request.getUserId(),
-                request.getStartDate(),
-                request.getEndDate(),
-                request.getCategoryId()
-        );
+        return transactionRepo.findByUserIdAndDateBetweenAndCategoryId(request.getUserId(), request.getStartDate(),
+                                                                       request.getEndDate(), request.getCategoryId());
     }
 
-    // For Reports
-    public Map<Month, Double> getMonthlyTotal(Long userId, @NonNull MonthlyReportRequest request, TransactionType type) {
-
+    public Map<Month, Double> getMonthlyTotal (Long userId,
+                                               @NonNull MonthlyReportRequest request,
+                                               TransactionType type) {
         verifyUserAccess(userId, request.getUserId());
 
-        return transactionRepo.getMonthlyTotal(request.getUserId(), type, request.getStartDate(), request.getEndDate())
-                .stream()
-                .collect(Collectors.toMap(
-                        row -> Month.of((Integer) row[0]),
-                        row -> ((Number) row[1]).doubleValue(),
-                        (a, b) -> a,
-                        LinkedHashMap::new
-                ));
+        return transactionRepo.getMonthlyTotal(request.getUserId(), type, request.getStartDate(),
+                                               request.getEndDate()).stream().collect(
+                Collectors.toMap(row -> Month.of((Integer) row[0]), row -> ((Number) row[1]).doubleValue(), (a, b) -> a,
+                                 LinkedHashMap::new));
     }
 
-    // For Reports
-    public Map<String, Double> getCategoryMap(Long userId, TransactionType type) {
-        return transactionRepo.getCategoryAmount(userId, type)
-                .stream()
-                .collect(Collectors.toMap(
-                        row -> (String) row[0],
-                        row -> ((Number) row[1]).doubleValue(),
-                        (a, b) -> a,
-                        LinkedHashMap::new
-                ));
+    public Map<String, Double> getCategoryMap (Long contextId, Long requestUserId, TransactionType type) {
+        verifyUserAccess(contextId, requestUserId);
+
+        return transactionRepo.getCategoryAmount(requestUserId, type).stream().collect(
+                Collectors.toMap(row -> (String) row[0], row -> ((Number) row[1]).doubleValue(), (a, b) -> a,
+                                 LinkedHashMap::new));
     }
 
-    // For Reports
-    public Map<String, Double> getCategoryMap(Long userId) {
-        return getCategoryMap(userId, TransactionType.EXPENSE);
+    public List<Transaction> getTransactionsByDateRange (Long contextUserId, LocalDate startDate, LocalDate end) {
+        return transactionRepo.findByUserIdAndDateBetween(contextUserId, startDate, end);
     }
 
-    // For Reports
-    public List<Transaction> getTransactionsByDateRange(Long userId, LocalDate startDate, LocalDate end) {
-        return transactionRepo.findByUserIdAndDateBetween(userId, startDate, end);
+    public List<Transaction> getRecentTransactions (Long contextUserId) {
+        return transactionRepo.findTop5ByUserIdOrderByDateDescIdDesc(contextUserId);
     }
 
-    // For Dashboard
-    public List<Transaction> getRecentTransactions(Long userId) {
-        return transactionRepo.findTop5ByUserIdOrderByDateDescIdDesc(userId);
-    }
+    private void verifyUserAccess (Long contextUserId, Long requestUserId) {
 
-    private void verifyUserAccess(@NonNull Long contextUserId, Long requestUserId) {
         if (!contextUserId.equals(requestUserId)) {
             throw new AccessDeniedException("You are not allowed to access this resource");
         }
     }
-}
 
+}
