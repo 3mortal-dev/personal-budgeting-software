@@ -38,7 +38,7 @@ public class ExcelExporter implements ReportExporter {
             row.createCell(0).setCellValue(transaction.getId().toString());
             row.createCell(1).setCellValue(transaction.getAmount());
             row.createCell(2).setCellValue(transaction.getType().toString());
-            row.createCell(3).setCellValue(transaction.getCategoryID().toString());
+            row.createCell(3).setCellValue(transaction.getCategory().toString());
             row.createCell(4).setCellValue(transaction.getDate().toString());
             row.createCell(5).setCellValue(transaction.getSource());
             row.createCell(6).setCellValue(transaction.getDescription());

@@ -44,7 +44,7 @@ public class PDFExporter implements ReportExporter {
             table.addCell(new Cell(new Phrase(transaction.getId().toString())));
             table.addCell(new Cell(new Phrase(String.valueOf(transaction.getAmount()))));
             table.addCell(new Cell(new Phrase(transaction.getType().toString())));
-            table.addCell(new Cell(new Phrase(transaction.getCategoryID().toString())));
+            table.addCell(new Cell(new Phrase(transaction.getCategory().toString())));
             table.addCell(new Cell(new Phrase(transaction.getDate().toString())));
             table.addCell(new Cell(new Phrase(transaction.getSource())));
             table.addCell(new Cell(new Phrase(transaction.getDescription())));

@@ -26,7 +26,7 @@ public class CSVExporter implements ReportExporter {
                         transaction.getId(),
                         transaction.getAmount(),
                         transaction.getType(),
-                        transaction.getCategoryID(),
+                        transaction.getCategory(),
                         transaction.getDate(),
                         transaction.getSource(),
                         transaction.getDescription()
