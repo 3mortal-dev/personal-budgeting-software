@@ -1,23 +1,16 @@
 package com.example.personal_budget.controller;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.example.personal_budget.dto.request.GoalRequest;
 import com.example.personal_budget.entity.GoalEntity;
 import com.example.personal_budget.service.GoalService;
 import com.example.personal_budget.service.UserService;
 import java.util.List;
-
-import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -75,15 +68,8 @@ public class GoalController {
         return ResponseEntity.ok("Goal deleted");
     }
 
-<<<<<<< HEAD
     @GetMapping("/user")
     public ResponseEntity<List<GoalEntity>> getUserGoals(@AuthenticationPrincipal UserDetails userDetails) {
-=======
-    @GetMapping
-    public ResponseEntity<List<GoalEntity>> getUserGoals(
-            @AuthenticationPrincipal UserDetails userDetails) {
-
->>>>>>> 31087a91e883c101e463a0ebfc6de381f5b77671
         long userId = getUserId(userDetails);
         return ResponseEntity.ok(goalService.getGoalsByUserId(userId));
     }
@@ -93,7 +79,7 @@ public class GoalController {
             throw new RuntimeException("User not authenticated");
         }
 
-        return userService.getUserIdByEmail(userDetails.getUsername());
+        return userService.getUserId(userDetails);
     }
 }
 
