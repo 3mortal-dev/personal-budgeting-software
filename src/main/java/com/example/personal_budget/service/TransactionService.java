@@ -25,7 +25,7 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepo;
     private final BudgetService budgetService;
-    private final DashboardService dashboardService;
+    // private final DashboardService dashboardService;
 
     public Transaction getById(Long id) {
         return transactionRepo.findById(id)

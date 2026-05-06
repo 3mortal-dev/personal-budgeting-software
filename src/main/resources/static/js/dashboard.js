@@ -3,29 +3,142 @@
    dashboard.js
 ═══════════════════════════════════════════════════ */
 
-// ── In-Memory State ───────────────────────────────────────────────────────────
-// All data lives here during the session.
-// TODO: replace each section's data with your API responses.
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  API CONFIGURATION                                           ║
+// ║  Change BASE_URL to your Spring server address.              ║
+// ║  In production, replace with your deployed backend URL.      ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+const API = {
+  BASE_URL: "http://localhost:8080/api",
+
+  // ── Endpoint paths ──────────────────────────────────────────
+  // Spring Controller  →  @RequestMapping("/api/...")
+  TRANSACTIONS:        "/transactions",          // TransactionController
+  BUDGETS:             "/budgets",               // BudgetController
+  GOALS:               "/goals",                 // GoalController
+  NOTIFICATIONS:       "/notifications",         // NotificationController
+  MARK_ALL_READ:       "/notifications/mark-all-read",
+  MARK_READ:           (id) => `/notifications/${id}/read`,
+};
+
+// ── Shared Fetch Helper ───────────────────────────────────────────────────────
+// Wraps every API call with error handling.
+// Returns parsed JSON on success, or null on failure.
+//
+// Spring side: make sure your controllers return proper HTTP status codes:
+//   200 OK | 201 Created | 204 No Content | 400 Bad Request | 500 Server Error
+
+async function apiFetch(endpoint, options = {}) {
+  try {
+    const response = await fetch(`${API.BASE_URL}${endpoint}`, {
+      headers: { "Content-Type": "application/json" },
+      ...options,
+    });
+
+    if (response.status === 204) return null; // No Content (used by DELETE)
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    return await response.json();
+
+  } catch (err) {
+    console.error(`[API ERROR] ${options.method || "GET"} ${endpoint}:`, err.message);
+    return null;
+  }
+}
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  📦 IN-MEMORY STATE                                          ║
+// ║  Holds all data for the current session.                     ║
+// ║  Populated via loadAllData() on page load.                   ║
+// ╚══════════════════════════════════════════════════════════════╝
 
 const state = {
-  transactions: [
-    // TODO: fetch from GET /api/transactions
-  ],
-  budgets: [
-    // TODO: fetch from GET /api/budgets
-  ],
-  goals: [
-    // TODO: fetch from GET /api/goals
-  ],
-  notifications: [
-    // TODO: fetch from GET /api/notifications
-    { id: 1, type: "alert",   title: "Budget limit reached",      msg: "Your Food & Dining budget has reached 90% of its monthly limit.", time: "2 min ago",   unread: true  },
-    { id: 2, type: "success", title: "Salary received",           msg: "A payment of $3,500.00 was credited to your account.",            time: "1 hour ago",  unread: true  },
-    { id: 3, type: "warning", title: "Unusual spending detected", msg: "You've spent 40% more on Transport than last month.",             time: "3 hours ago", unread: true  },
-    { id: 4, type: "info",    title: "Goal update",               msg: "You're 65% of the way to your Vacation Fund goal. Keep it up!",   time: "Yesterday",   unread: false },
-    { id: 5, type: "success", title: "Bill paid successfully",    msg: "Your electricity bill of $85.00 was paid on time.",               time: "2 days ago",  unread: false },
-  ],
+  transactions:  [],   // ← loaded from GET /api/transactions
+  budgets:       [],   // ← loaded from GET /api/budgets
+  goals:         [],   // ← loaded from GET /api/goals
+  notifications: [],   // ← loaded from GET /api/notifications
 };
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  📡 DATA LOADERS                                             ║
+// ║  Each function calls one Spring endpoint and saves           ║
+// ║  the result into state.                                      ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+// ── Load Transactions ─────────────────────────────────────────
+// Spring:  GET /api/transactions
+// Controller method:  @GetMapping → List<Transaction>
+// Response shape expected:
+//   [{ id, type, name, category, amount, date }, ...]
+
+async function loadTransactions() {
+  const data = await apiFetch(API.TRANSACTIONS);
+  if (data) {
+    state.transactions = data;
+    renderTransactions();
+    updateStats();
+  }
+}
+
+// ── Load Budgets ──────────────────────────────────────────────
+// Spring:  GET /api/budgets
+// Controller method:  @GetMapping → List<Budget>
+// Response shape expected:
+//   [{ id, name, spent, limit }, ...]
+
+async function loadBudgets() {
+  const data = await apiFetch(API.BUDGETS);
+  if (data) {
+    state.budgets = data;
+    renderBudgets();
+  }
+}
+
+// ── Load Goals ────────────────────────────────────────────────
+// Spring:  GET /api/goals
+// Controller method:  @GetMapping → List<Goal>
+// Response shape expected:
+//   [{ id, name, status, saved, target }, ...]
+
+async function loadGoals() {
+  const data = await apiFetch(API.GOALS);
+  if (data) {
+    state.goals = data;
+    renderGoals();
+  }
+}
+
+// ── Load Notifications ────────────────────────────────────────
+// Spring:  GET /api/notifications
+// Controller method:  @GetMapping → List<Notification>
+// Response shape expected:
+//   [{ id, type, title, msg, time, unread }, ...]
+
+async function loadNotifications() {
+  const data = await apiFetch(API.NOTIFICATIONS);
+  if (data) {
+    state.notifications = data;
+    updateNotifBadge();
+  }
+}
+
+// ── Load Everything on Page Start ────────────────────────────
+// Called once in DOMContentLoaded.
+// Uses Promise.all so all 4 requests run in parallel (faster).
+
+async function loadAllData() {
+  await Promise.all([
+    loadTransactions(),
+    loadBudgets(),
+    loadGoals(),
+    loadNotifications(),
+  ]);
+}
+
 
 // ── Navigation ────────────────────────────────────────────────────────────────
 
@@ -36,6 +149,7 @@ function goToBudgets() {
 function goToTransactions() {
   window.location.href = "transactions.html";
 }
+
 
 // ── Time-based Greeting ───────────────────────────────────────────────────────
 
@@ -52,6 +166,7 @@ function setGreeting() {
   if (el) el.innerHTML = `${salutation}, Ahmed <span>👋</span>`;
 }
 
+
 // ── Current Month Label ───────────────────────────────────────────────────────
 
 function setCurrentMonth() {
@@ -61,22 +176,22 @@ function setCurrentMonth() {
   el.textContent = now.toLocaleDateString("en-US", { month: "long", year: "numeric" });
 }
 
+
 // ── Active Nav Highlight ──────────────────────────────────────────────────────
 
 function setActiveNav() {
   const current = window.location.pathname.split("/").pop() || "dashboard.html";
-
   document.querySelectorAll(".nav-item").forEach(link => {
     const href = link.getAttribute("href");
-    if (href && href === current) {
-      link.classList.add("active");
-    } else {
-      link.classList.remove("active");
-    }
+    link.classList.toggle("active", href === current);
   });
 }
 
-// ── Modal ─────────────────────────────────────────────────────────────────────
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  ➕ ADD TRANSACTION                                           ║
+// ║  Sends a POST to Spring, then updates state + UI.            ║
+// ╚══════════════════════════════════════════════════════════════╝
 
 function openAddModal() {
   const modal = document.getElementById("addModal");
@@ -105,7 +220,20 @@ function closeAddModal() {
   document.querySelectorAll(".form-control.error").forEach(el => el.classList.remove("error"));
 }
 
-function addTransaction() {
+// ── addTransaction ────────────────────────────────────────────
+// Spring:  POST /api/transactions
+// Controller method:
+//   @PostMapping
+//   public ResponseEntity<Transaction> create(@RequestBody Transaction tx)
+//
+// Request body sent:
+//   { type, name, category, amount, date }
+//
+// Expected response:
+//   The saved Transaction object with its generated id
+//   → { id, type, name, category, amount, date }
+
+async function addTransaction() {
   const type    = document.getElementById("txType").value;
   const nameEl  = document.getElementById("txName");
   const catEl   = document.getElementById("txCat");
@@ -121,29 +249,30 @@ function addTransaction() {
   if (!name)                        { nameEl.classList.add("error"); hasError = true; }
   if (!category)                    { catEl.classList.add("error");  hasError = true; }
   if (isNaN(amount) || amount <= 0) { amtEl.classList.add("error");  hasError = true; }
-
   if (hasError) {
-    const firstError = document.querySelector(".form-control.error");
-    if (firstError) firstError.focus();
+    document.querySelector(".form-control.error")?.focus();
     return;
   }
 
-  const transaction = {
-    id:       Date.now(),
-    type,
-    name,
-    category,
-    amount,
-    date: new Date().toISOString(),
-  };
+  const transaction = { type, name, category, amount, date: new Date().toISOString() };
 
-  // TODO: POST /api/transactions — on success, push to state and re-render
-  state.transactions.unshift(transaction);
+  // 📡 POST /api/transactions
+  const saved = await apiFetch(API.TRANSACTIONS, {
+    method: "POST",
+    body: JSON.stringify(transaction),
+  });
 
-  renderTransactions();
-  updateStats();
-  closeAddModal();
+  if (saved) {
+    // Use the ID assigned by Spring/database, not a local one
+    state.transactions.unshift(saved);
+    renderTransactions();
+    updateStats();
+    closeAddModal();
+  } else {
+    alert("Failed to save transaction. Is the server running?");
+  }
 }
+
 
 // ── Transaction Rendering ─────────────────────────────────────────────────────
 
@@ -176,15 +305,14 @@ function getCategoryKey(category) {
 
 function formatCurrency(amount) {
   return new Intl.NumberFormat("en-US", {
-    style:                "currency",
-    currency:             "USD",
-    minimumFractionDigits: 2,
+    style: "currency", currency: "USD", minimumFractionDigits: 2,
   }).format(amount);
 }
 
 function formatDate(isoString) {
-  const d = new Date(isoString);
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return new Date(isoString).toLocaleDateString("en-US", {
+    month: "short", day: "numeric", year: "numeric",
+  });
 }
 
 function renderTransactions() {
@@ -201,7 +329,6 @@ function renderTransactions() {
     const colors   = CATEGORY_COLORS[catKey];
     const icon     = CATEGORY_ICONS[catKey];
     const isIncome = tx.type === "income";
-
     return `
       <div class="tx-item">
         <div class="tx-icon" style="background:${colors.bg};color:${colors.stroke};">${icon}</div>
@@ -215,34 +342,34 @@ function renderTransactions() {
   }).join("");
 }
 
+
 // ── Stats ─────────────────────────────────────────────────────────────────────
 
 function updateStats() {
   const txs          = state.transactions;
-  const totalIncome  = txs.filter(t => t.type === "income").reduce((s, t)  => s + t.amount, 0);
+  const totalIncome  = txs.filter(t => t.type === "income").reduce((s, t) => s + t.amount, 0);
   const totalExpense = txs.filter(t => t.type === "expense").reduce((s, t) => s + t.amount, 0);
   const balance      = totalIncome - totalExpense;
 
-  const balAmtEl = document.getElementById("balAmt");
-  if (balAmtEl) { balAmtEl.classList.remove("skeleton"); balAmtEl.textContent = formatCurrency(balance); }
+  const set = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove("skeleton"); el.textContent = val; }
+  };
 
-  const metIncomeEl = document.getElementById("metIncome");
-  if (metIncomeEl) { metIncomeEl.classList.remove("skeleton"); metIncomeEl.textContent = formatCurrency(totalIncome); }
+  set("balAmt",     formatCurrency(balance));
+  set("metIncome",  formatCurrency(totalIncome));
+  set("metExpense", formatCurrency(totalExpense));
+  set("statTx",     txs.length);
 
-  const metExpenseEl = document.getElementById("metExpense");
-  if (metExpenseEl) { metExpenseEl.classList.remove("skeleton"); metExpenseEl.textContent = formatCurrency(totalExpense); }
+  const statTxBadgeEl = document.getElementById("statTxBadge");
+  if (statTxBadgeEl && txs.length > 0)
+    statTxBadgeEl.textContent = `+${Math.min(txs.length, 99)}`;
 
   const max        = Math.max(totalIncome, totalExpense, 1);
   const incomeBar  = document.getElementById("incomeBar");
   const expenseBar = document.getElementById("expenseBar");
   if (incomeBar)  incomeBar.style.width  = Math.min((totalIncome  / max) * 100, 100) + "%";
   if (expenseBar) expenseBar.style.width = Math.min((totalExpense / max) * 100, 100) + "%";
-
-  const statTxEl = document.getElementById("statTx");
-  if (statTxEl) statTxEl.textContent = txs.length;
-
-  const statTxBadgeEl = document.getElementById("statTxBadge");
-  if (statTxBadgeEl && txs.length > 0) statTxBadgeEl.textContent = `+${Math.min(txs.length, 99)}`;
 
   const alertCard = document.getElementById("alertCard");
   const alertMsg  = document.getElementById("alertMsg");
@@ -257,6 +384,7 @@ function updateStats() {
   }
 }
 
+
 // ── Budgets ───────────────────────────────────────────────────────────────────
 
 function renderBudgets() {
@@ -267,7 +395,6 @@ function renderBudgets() {
 
   if (statBudgetsEl)    statBudgetsEl.textContent    = budgets.length;
   if (statBudgetsSubEl) statBudgetsSubEl.textContent = budgets.length === 1 ? "1 category" : `${budgets.length} categories`;
-
   if (!budgetsList) return;
 
   if (budgets.length === 0) {
@@ -292,7 +419,8 @@ function renderBudgets() {
   }).join("");
 }
 
-// ── Goals Stat ────────────────────────────────────────────────────────────────
+
+// ── Goals ─────────────────────────────────────────────────────────────────────
 
 function renderGoals() {
   const inProgress     = state.goals.filter(g => g.status === "in_progress" || !g.status);
@@ -300,10 +428,14 @@ function renderGoals() {
   const statGoalsBadge = document.getElementById("statGoalsBadge");
 
   if (statGoalsEl)    statGoalsEl.textContent = inProgress.length;
-  if (statGoalsBadge && inProgress.length > 0) statGoalsBadge.textContent = `${inProgress.length} active`;
+  if (statGoalsBadge && inProgress.length > 0)
+    statGoalsBadge.textContent = `${inProgress.length} active`;
 }
 
-// ── Notifications ─────────────────────────────────────────────────────────────
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  🔔 NOTIFICATIONS                                            ║
+// ╚══════════════════════════════════════════════════════════════╝
 
 const NOTIF_ICONS = {
   alert:   `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
@@ -315,28 +447,46 @@ const NOTIF_ICONS = {
 function toggleNotifications() {
   const dropdown = document.getElementById("notifDropdown");
   const isOpen   = dropdown.classList.contains("is-open");
-  if (isOpen) {
-    closeNotifications();
-  } else {
+  if (isOpen) closeNotifications();
+  else {
     renderNotificationList();
     dropdown.classList.add("is-open");
   }
 }
 
 function closeNotifications() {
-  const dropdown = document.getElementById("notifDropdown");
-  if (dropdown) dropdown.classList.remove("is-open");
+  document.getElementById("notifDropdown")?.classList.remove("is-open");
 }
 
-function markAllRead() {
-  // TODO: PATCH /api/notifications/mark-all-read
+// ── Mark All Read ─────────────────────────────────────────────
+// Spring:  PATCH /api/notifications/mark-all-read
+// Controller method:
+//   @PatchMapping("/mark-all-read")
+//   public ResponseEntity<Void> markAllRead()
+//   → returns 204 No Content
+
+async function markAllRead() {
+  // 📡 PATCH /api/notifications/mark-all-read
+  await apiFetch(API.MARK_ALL_READ, { method: "PATCH" });
+
+  // Update local state regardless (optimistic update)
   state.notifications.forEach(n => { n.unread = false; });
   renderNotificationList();
   updateNotifBadge();
 }
 
-function markRead(id) {
-  // TODO: PATCH /api/notifications/:id/read
+// ── Mark Single Notification Read ────────────────────────────
+// Spring:  PATCH /api/notifications/{id}/read
+// Controller method:
+//   @PatchMapping("/{id}/read")
+//   public ResponseEntity<Void> markRead(@PathVariable Long id)
+//   → returns 204 No Content
+
+async function markRead(id) {
+  // 📡 PATCH /api/notifications/:id/read
+  await apiFetch(API.MARK_READ(id), { method: "PATCH" });
+
+  // Update local state (optimistic update)
   const notif = state.notifications.find(n => n.id === id);
   if (notif) notif.unread = false;
 
@@ -344,8 +494,7 @@ function markRead(id) {
   const item = document.querySelector(`.notif-item[data-id="${id}"]`);
   if (item) {
     item.classList.remove("unread");
-    const dot = item.querySelector(".notif-unread-dot");
-    if (dot) dot.remove();
+    item.querySelector(".notif-unread-dot")?.remove();
   }
 }
 
@@ -381,61 +530,14 @@ function renderNotificationList() {
   `).join("");
 }
 
-// ── Utilities ─────────────────────────────────────────────────────────────────
 
-function escapeHtml(str) {
-  if (typeof str !== "string") return "";
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-// ── Init ──────────────────────────────────────────────────────────────────────
-
-document.addEventListener("DOMContentLoaded", () => {
-  setGreeting();
-  setCurrentMonth();
-  setActiveNav();
-  renderTransactions();
-  updateStats();
-  renderBudgets();
-  renderGoals();
-  updateNotifBadge();
-
-  // Close modal on overlay click
-  const modal = document.getElementById("addModal");
-  if (modal) {
-    modal.addEventListener("click", function (e) {
-      if (e.target === this) closeAddModal();
-    });
-  }
-
-  // Close modal or notifications on Escape key
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      if (modal && modal.classList.contains("is-open")) closeAddModal();
-      closeNotifications();
-    }
-  });
-
-  // Close notification dropdown on outside click
-  document.addEventListener("click", (e) => {
-    const wrapper = document.getElementById("notifWrapper");
-    if (wrapper && !wrapper.contains(e.target)) closeNotifications();
-  });
-});
-
-
-
-// ── Budget Modal ─────────────────────────────
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  💰 BUDGET MODAL                                             ║
+// ╚══════════════════════════════════════════════════════════════╝
 
 function openBudgetModal() {
   const modal = document.getElementById("budgetModal");
   if (!modal) return;
-
   modal.removeAttribute("hidden");
   modal.classList.add("is-open");
   document.body.style.overflow = "hidden";
@@ -444,21 +546,30 @@ function openBudgetModal() {
 function closeBudgetModal() {
   const modal = document.getElementById("budgetModal");
   if (!modal) return;
-
   modal.classList.remove("is-open");
   modal.setAttribute("hidden", "");
   document.body.style.overflow = "";
 }
 
-function addBudget() {
+// ── addBudget ─────────────────────────────────────────────────
+// Spring:  POST /api/budgets
+// Controller method:
+//   @PostMapping
+//   public ResponseEntity<Budget> create(@RequestBody Budget budget)
+//
+// Request body sent:
+//   { category, amount, start_date, end_date, alert_percentage }
+//
+// Expected response:
+//   The saved Budget object → { id, name, spent, limit, ... }
 
+async function addBudget() {
   const category = document.getElementById("budgetCategory").value.trim();
   const amount   = document.getElementById("budgetAmount").value.trim();
   const start    = document.getElementById("budgetStart").value;
   const end      = document.getElementById("budgetEnd").value;
   const alertVal = document.getElementById("budgetAlert").value;
 
-  // validation
   if (!category || !amount || !start || !end) {
     alert("Please fill all fields");
     return;
@@ -466,35 +577,80 @@ function addBudget() {
 
   const budgetData = {
     category,
-    amount: parseFloat(amount),
-    start_date: start,
-    end_date: end,
-    alert_percentage: parseInt(alertVal)
+    amount:           parseFloat(amount),
+    start_date:       start,
+    end_date:         end,
+    alert_percentage: parseInt(alertVal),
   };
 
-  console.log("Budget Ready to Send:", budgetData);
-
-  // For(API)
-  // ex:
-  /*
-  fetch("http://localhost:8080/api/budgets", {
+  // 📡 POST /api/budgets
+  const saved = await apiFetch(API.BUDGETS, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(budgetData)
-  })
-  .then(res => res.json())
-  .then(data => console.log(data))
-  .catch(err => console.error(err));
-  */
+    body:   JSON.stringify(budgetData),
+  });
 
-  closeBudgetModal();
+  if (saved) {
+    state.budgets.push(saved);
+    renderBudgets();
+    closeBudgetModal();
 
-  // reset form
-  document.getElementById("budgetCategory").value = "";
-  document.getElementById("budgetAmount").value = "";
-  document.getElementById("budgetStart").value = "";
-  document.getElementById("budgetEnd").value = "";
-  document.getElementById("budgetAlert").value = "80";
+    // Reset form fields
+    document.getElementById("budgetCategory").value = "";
+    document.getElementById("budgetAmount").value   = "";
+    document.getElementById("budgetStart").value    = "";
+    document.getElementById("budgetEnd").value      = "";
+    document.getElementById("budgetAlert").value    = "80";
+  } else {
+    alert("Failed to save budget. Is the server running?");
+  }
 }
+
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+
+function escapeHtml(str) {
+  if (typeof str !== "string") return "";
+  return str
+    .replace(/&/g,  "&amp;")
+    .replace(/</g,  "&lt;")
+    .replace(/>/g,  "&gt;")
+    .replace(/"/g,  "&quot;")
+    .replace(/'/g,  "&#039;");
+}
+
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  🚀 INIT                                                     ║
+// ║  Runs when the page finishes loading.                        ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+document.addEventListener("DOMContentLoaded", () => {
+  setGreeting();
+  setCurrentMonth();
+  setActiveNav();
+
+  // 📡 Load all data from Spring API
+  loadAllData();
+
+  // ── Modal: close on overlay click ───────────────────────────
+  const modal = document.getElementById("addModal");
+  if (modal) {
+    modal.addEventListener("click", function (e) {
+      if (e.target === this) closeAddModal();
+    });
+  }
+
+  // ── Close modal / notifications on Escape ───────────────────
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      if (modal?.classList.contains("is-open")) closeAddModal();
+      closeNotifications();
+    }
+  });
+
+  // ── Close notification dropdown on outside click ─────────────
+  document.addEventListener("click", (e) => {
+    const wrapper = document.getElementById("notifWrapper");
+    if (wrapper && !wrapper.contains(e.target)) closeNotifications();
+  });
+});
