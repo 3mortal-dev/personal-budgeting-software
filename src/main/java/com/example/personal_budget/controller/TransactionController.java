@@ -8,53 +8,71 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/transactions")
+@RequestMapping ("/api/transactions")
 public class TransactionController {
 
     private final TransactionService transactionService;
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<Transaction> addTransaction(@Valid @RequestBody CreateTransactionRequest req) {
-        Transaction saved = transactionService.addTransaction(userService.getUserIdByEmail(Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName()), req);
+    public ResponseEntity<Transaction> addTransaction (@Valid @RequestBody CreateTransactionRequest request,
+                                                       @AuthenticationPrincipal UserDetails userDetails) {
+
+        Transaction saved = transactionService.addTransaction(userService.getUserId(userDetails), request);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @GetMapping
-    public ResponseEntity<List<Transaction>> getAllTransactions() {
-        List<Transaction> transactions = transactionService.getAllTransactions(userService.getUserIdByEmail(Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName()));
+    public ResponseEntity<List<Transaction>> getAllTransactions (@AuthenticationPrincipal UserDetails userDetails) {
+
+        List<Transaction> transactions = transactionService.getAllTransactions(userService.getUserId(userDetails));
+
         return ResponseEntity.ok(transactions);
     }
 
-    @GetMapping("/income")
-    public ResponseEntity<List<Transaction>> getIncomeTransactions() {
-        List<Transaction> transactions = transactionService.getIncomeTransactions(userService.getUserIdByEmail(Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName()));
+    @GetMapping ("/income")
+    public ResponseEntity<List<Transaction>> getIncomeTransactions (@AuthenticationPrincipal UserDetails userDetails) {
+
+        List<Transaction> transactions = transactionService.getIncomeTransactions(userService.getUserId(userDetails));
+
         return ResponseEntity.ok(transactions);
     }
 
-    @GetMapping("/expense")
-    public ResponseEntity<List<Transaction>> getExpenseTransactions() {
-        List<Transaction> transactions = transactionService.getExpenseTransactions(userService.getUserIdByEmail(Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName()));
+    @GetMapping ("/expense")
+    public ResponseEntity<List<Transaction>> getExpenseTransactions (@AuthenticationPrincipal UserDetails userDetails) {
+
+        List<Transaction> transactions = transactionService.getExpenseTransactions(userService.getUserId(userDetails));
+
         return ResponseEntity.ok(transactions);
     }
 
-    @PutMapping("/{transactionID}")
-    public ResponseEntity<Transaction> updateTransaction(@PathVariable Long transactionID, @Valid @RequestBody CreateTransactionRequest req) {
-        Transaction t = transactionService.updateTransaction(transactionID, userService.getUserIdByEmail(Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName()), req);
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(t);
+    @PutMapping ("/{transactionID}")
+    public ResponseEntity<Transaction> updateTransaction (@PathVariable Long transactionID,
+                                                          @Valid @RequestBody CreateTransactionRequest request,
+                                                          @AuthenticationPrincipal UserDetails userDetails) {
+
+        Transaction t = transactionService.updateTransaction(transactionID, userService.getUserId(userDetails),
+                                                             request);
+
+        return ResponseEntity.ok(t);
     }
 
-    @DeleteMapping("/{transactionID}")
-    public ResponseEntity<Void> deleteTransaction(@PathVariable Long transactionID) {
-        transactionService.deleteTransaction(transactionID, userService.getUserIdByEmail(Objects.requireNonNull(SecurityContextHolder.getContext().getAuthentication()).getName()));
+
+    @DeleteMapping ("/{transactionID}")
+    public ResponseEntity<Void> deleteTransaction (@PathVariable Long transactionID,
+                                                   @AuthenticationPrincipal UserDetails userDetails) {
+
+        transactionService.deleteTransaction(transactionID, userService.getUserId(userDetails));
+
         return ResponseEntity.noContent().build();
     }
 }
