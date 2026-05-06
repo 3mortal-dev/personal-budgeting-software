@@ -33,7 +33,7 @@ public class CategoryController {
 
     @GetMapping
     public ResponseEntity<List<Category>> getAllCategories(@AuthenticationPrincipal UserDetails userDetails) {
-        List<Category> categories = categoryService.getAllCategories(userService.getUserID(userDetails));
+        List<Category> categories = categoryService.getAllCategories(userService.getUserId(userDetails));
         return ResponseEntity.ok(categories);
     }
 
@@ -45,25 +45,25 @@ public class CategoryController {
 
     @GetMapping("/custom")
     public ResponseEntity<List<Category>> getCustomCategories(@AuthenticationPrincipal UserDetails userDetails) {
-        List<Category> categories = categoryService.getCustomCategories(userService.getUserID(userDetails));
+        List<Category> categories = categoryService.getCustomCategories(userService.getUserId(userDetails));
         return ResponseEntity.ok(categories);
     }
 
     @PostMapping
     public ResponseEntity<Category> addCustomCategory(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody CreateCategoryRequest request) {
-        Category category = categoryService.addCustomCategory(userService.getUserID(userDetails), request);
+        Category category = categoryService.addCustomCategory(userService.getUserId(userDetails), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(category);
     }
 
     @PutMapping("/{categoryID}")
     public ResponseEntity<Category> editCustomCategory(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long categoryID, @Valid @RequestBody CreateCategoryRequest request) {
-        Category category = categoryService.editCustomCategory(userService.getUserID(userDetails), categoryID, request);
+        Category category = categoryService.editCustomCategory(userService.getUserId(userDetails), categoryID, request);
         return ResponseEntity.ok(category);
     }
 
     @DeleteMapping("/{categoryID}")
     public ResponseEntity<?> deleteCustomCategory(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long categoryID) {
-        categoryService.deleteCustomCategory(userService.getUserID(userDetails), categoryID);
+        categoryService.deleteCustomCategory(userService.getUserId(userDetails), categoryID);
         return ResponseEntity.noContent().build();
     }
 }
