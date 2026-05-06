@@ -25,7 +25,6 @@ public class ReportService {
     private final TransactionService transactionService;
     private final ExporterFactory exporterFactory;
 
-    @Autowired
     public ReportService(TransactionService transactionService, ExporterFactory exporterFactory) {
         this.transactionService = transactionService;
         this.exporterFactory = exporterFactory;
