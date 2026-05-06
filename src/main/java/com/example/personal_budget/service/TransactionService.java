@@ -3,6 +3,7 @@ package com.example.personal_budget.service;
 import com.example.personal_budget.dto.CreateTransactionRequest;
 import com.example.personal_budget.dto.MonthlyReportRequest;
 import com.example.personal_budget.dto.TransactionFilterRequest;
+import com.example.personal_budget.dto.request.MonthlyReportRequest;
 import com.example.personal_budget.entity.Transaction;
 import com.example.personal_budget.enums.TransactionType;
 import com.example.personal_budget.exception.TransactionNotFoundException;
