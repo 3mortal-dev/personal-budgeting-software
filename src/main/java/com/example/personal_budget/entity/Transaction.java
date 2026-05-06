@@ -19,11 +19,13 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userID;
+    @ManyToOne
+    @JoinColumn(name = "userid", nullable = false)
+    private User user;
 
-    @Column(name = "category_id")
-    private Long categoryID;
+    @ManyToOne
+    @JoinColumn(name = "categoryid")
+    private Category category;
 
     @Column(nullable = false)
     private double amount;

@@ -26,26 +26,27 @@ import java.util.stream.Collectors;
 public class TransactionService {
 
     private final TransactionRepository transactionRepo;
+    private final UserService userService;
 
-    public Transaction getById(Long userID, Long transactionID) {
+    public Transaction getById(Long userId, Long transactionId) {
 
-        Transaction t = transactionRepo.findById(transactionID)
-                .orElseThrow(() -> new TransactionNotFoundException(transactionID));
-        verifyUserAccess(userID, t.getUserID());
+        Transaction t = transactionRepo.findById(transactionId)
+                .orElseThrow(() -> new TransactionNotFoundException(transactionId));
+        verifyUserAccess(userId, t.getUser().getId());
         return t;
     }
 
     @Transactional
-    public Transaction addTransaction(Long userID, @NonNull CreateTransactionRequest request) {
+    public Transaction addTransaction(Long userId, @NonNull CreateTransactionRequest request) {
 
-        verifyUserAccess(request.getUserID(), userID);
+        verifyUserAccess(request.getUserId(), userId);
 
         Transaction transaction = Transaction.builder()
-                .userID(userID)
+                .user(userService.getUser())
                 .amount(request.getAmount())
                 .type(request.getType())
                 .date(request.getDate())
-                .categoryID(request.getCategoryID())
+                .categoryId(request.getCategoryId())
                 .source(request.getSource())
                 .description(request.getDescription())
                 .build();
@@ -53,22 +54,22 @@ public class TransactionService {
         return transactionRepo.save(transaction);
     }
 
-    public List<Transaction> getAllTransactions(Long userID) {
+    public List<Transaction> getAllTransactions(Long userId) {
 
-        List<Transaction> list = transactionRepo.findByUserID(userID);
+        List<Transaction> list = transactionRepo.findByUserId(userId);
         if (!list.isEmpty())
-            verifyUserAccess(userID, list.getFirst().getUserID());
+            verifyUserAccess(userId, list.getFirst().getUser().getId());
 
         return list;
     }
 
     @Transactional
-    public Transaction updateTransaction(Long transactionID, Long userID, CreateTransactionRequest request) throws AccessDeniedException {
+    public Transaction updateTransaction(Long transactionId, Long userId, CreateTransactionRequest request) throws AccessDeniedException {
 
-        Transaction transaction = transactionRepo.findById(transactionID)
+        Transaction transaction = transactionRepo.findById(transactionId)
                 .orElseThrow(() -> new EntityNotFoundException("Transaction not found"));
 
-        if (!transaction.getUserID().equals(userID)) {
+        if (!transaction.getUser().getId().equals(userId)) {
             throw new AccessDeniedException("You are not allowed to update this transaction");
         }
 
@@ -76,57 +77,57 @@ public class TransactionService {
         transaction.setDate(request.getDate());
         transaction.setDescription(request.getDescription());
         transaction.setSource(request.getSource());
-        transaction.setCategoryID(request.getCategoryID());
+        transaction.setCategory(request.getCategory());
         transaction.setType(request.getType());
 
         return transactionRepo.save(transaction);
     }
 
     @Transactional
-    public void deleteTransaction(Long transactionID, Long userID) throws AccessDeniedException {
+    public void deleteTransaction(Long transactionId, Long userId) throws AccessDeniedException {
 
-        Transaction transaction = transactionRepo.findById(transactionID)
+        Transaction transaction = transactionRepo.findById(transactionId)
                 .orElseThrow(() -> new EntityNotFoundException("Transaction not found"));
 
-        if (!transaction.getUserID().equals(userID)) {
+        if (!transaction.getUser().getId().equals(userId)) {
             throw new AccessDeniedException("You are not allowed to delete this transaction");
         }
 
         transactionRepo.delete(transaction);
     }
 
-    public List<Transaction> getIncomeTransactions(Long userID) {
-        return transactionRepo.findByUserIDAndType(userID, TransactionType.INCOME);
+    public List<Transaction> getIncomeTransactions(Long userId) {
+        return transactionRepo.findByUserIdAndType(userId, TransactionType.INCOME);
     }
 
-    public List<Transaction> getExpenseTransactions(Long userID) {
-        return transactionRepo.findByUserIDAndType(userID, TransactionType.EXPENSE);
+    public List<Transaction> getExpenseTransactions(Long userId) {
+        return transactionRepo.findByUserIdAndType(userId, TransactionType.EXPENSE);
     }
 
-    public Double getTotalIncome(Long userID) {
-        return transactionRepo.sumByUserIDAndType(userID, TransactionType.INCOME);
+    public Double getTotalIncome(Long userId) {
+        return transactionRepo.sumByUserIdAndType(userId, TransactionType.INCOME);
     }
 
-    public Double getTotalExpense(Long userID) {
-        return transactionRepo.sumByUserIDAndType(userID, TransactionType.EXPENSE);
+    public Double getTotalExpense(Long userId) {
+        return transactionRepo.sumByUserIdAndType(userId, TransactionType.EXPENSE);
     }
 
-    public List<Transaction> filterHistory(Long userID, @NonNull TransactionFilterRequest request) {
+    public List<Transaction> filterHistory(Long userId, @NonNull TransactionFilterRequest request) {
 
-        verifyUserAccess(userID, request.getUserID());
+        verifyUserAccess(userId, request.getUserId());
 
-        return transactionRepo.findByUserIDAndDateBetweenAndCategoryID(
-                request.getUserID(),
+        return transactionRepo.findByUserIdAndDateBetweenAndCategoryId(
+                request.getUserId(),
                 request.getStartDate(),
                 request.getEndDate(),
-                request.getCategoryID()
+                request.getCategoryId()
         );
     }
 
     // For Reports
-    public Map<Month, Double> getMonthlyTotal(Long userID, @NonNull MonthlyReportRequest request, TransactionType type) {
+    public Map<Month, Double> getMonthlyTotal(Long userId, @NonNull MonthlyReportRequest request, TransactionType type) {
 
-        verifyUserAccess(userID, request.getUserId());
+        verifyUserAccess(userId, request.getUserId());
 
         return transactionRepo.getMonthlyTotal(request.getUserId(), type, request.getStartDate(), request.getEndDate())
                 .stream()
@@ -139,8 +140,8 @@ public class TransactionService {
     }
 
     // For Reports
-    public Map<String, Double> getCategoryMap(Long userID, TransactionType type) {
-        return transactionRepo.getCategoryAmount(userID, type)
+    public Map<String, Double> getCategoryMap(Long userId, TransactionType type) {
+        return transactionRepo.getCategoryAmount(userId, type)
                 .stream()
                 .collect(Collectors.toMap(
                         row -> (String) row[0],
@@ -151,22 +152,22 @@ public class TransactionService {
     }
 
     // For Reports
-    public Map<String, Double> getCategoryMap(Long userID) {
-        return getCategoryMap(userID, TransactionType.EXPENSE);
+    public Map<String, Double> getCategoryMap(Long userId) {
+        return getCategoryMap(userId, TransactionType.EXPENSE);
     }
 
     // For Reports
-    public List<Transaction> getTransactionsByDateRange(Long userID, LocalDate startDate, LocalDate end) {
-        return transactionRepo.findByUserIDAndDateBetween(userID, startDate, end);
+    public List<Transaction> getTransactionsByDateRange(Long userId, LocalDate startDate, LocalDate end) {
+        return transactionRepo.findByUserIdAndDateBetween(userId, startDate, end);
     }
 
     // For Dashboard
-    public List<Transaction> getRecentTransactions(Long userID) {
-        return transactionRepo.findTop5ByUserIDOrderByDateDescIdDesc(userID);
+    public List<Transaction> getRecentTransactions(Long userId) {
+        return transactionRepo.findTop5ByUserIdOrderByDateDescIdDesc(userId);
     }
 
-    private void verifyUserAccess(@NonNull Long contextUserID, Long requestUserID) {
-        if (!contextUserID.equals(requestUserID)) {
+    private void verifyUserAccess(@NonNull Long contextUserId, Long requestUserId) {
+        if (!contextUserId.equals(requestUserId)) {
             throw new AccessDeniedException("You are not allowed to access this resource");
         }
     }
