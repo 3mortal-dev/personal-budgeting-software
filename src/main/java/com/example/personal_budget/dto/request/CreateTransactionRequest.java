@@ -1,4 +1,4 @@
-package com.example.personal_budget.dto;
+package com.example.personal_budget.dto.request;
 
 import com.example.personal_budget.enums.TransactionType;
 import com.fasterxml.jackson.annotation.JsonFormat;

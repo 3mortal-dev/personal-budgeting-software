@@ -1,4 +1,4 @@
-package com.example.personal_budget.dto;
+package com.example.personal_budget.dto.request;
 
 import lombok.Data;
 
