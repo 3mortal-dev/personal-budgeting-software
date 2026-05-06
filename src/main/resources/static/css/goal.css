@@ -23,8 +23,8 @@
   --radius:       14px;
   --radius-sm:    8px;
   --sidebar-w:    240px;
-  --font-head:    'Syne', sans-serif;
-  --font-body:    'DM Sans', sans-serif;
+  --font-head: 'Syne', sans-serif;
+  --font-body: 'Inter', 'DM Sans', sans-serif;
   --transition:   0.2s ease;
 }
 
@@ -612,4 +612,34 @@ input, select { font-family: inherit; }
   .sidebar { display: none; }
   .main { padding: 0 16px 40px; }
   .summary-grid { grid-template-columns: 1fr; }
+}
+
+.notif-dropdown {
+  position: absolute;
+  top: 55px;
+  right: 90px;
+  width: 260px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 10px 0;
+  display: none;
+  z-index: 200;
+}
+
+.notif-dropdown.show {
+  display: block;
+  animation: fadeIn 0.2s ease;
+}
+
+.notif-item {
+  padding: 10px 16px;
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.notif-item:hover {
+  background: var(--green-light);
 }
