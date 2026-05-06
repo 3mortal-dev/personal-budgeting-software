@@ -10,18 +10,18 @@ import java.time.LocalDate;
 
 @Data
 public class CreateTransactionRequest {
-  private Long userID;
+    private Long userID;
 
-  @Positive(message = "Amount must be positive")
-  private double amount;
+    @Positive(message = "Amount must be positive")
+    private double amount;
 
-  @NotNull(message = "Type can't be null")
-  private TransactionType type;
+    @NotNull(message = "Type can't be null")
+    private TransactionType type;
 
-  @JsonFormat(pattern = "yyyy-MM-dd")
-  private LocalDate date;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate date;
 
-  private Long categoryID;
-  private String source;
-  private String description;
+    private Long categoryID;
+    private String source;
+    private String description;
 }

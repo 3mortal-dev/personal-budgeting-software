@@ -1,14 +1,17 @@
 package com.example.personal_budget.service;
 
 import com.example.personal_budget.dto.CreateTransactionRequest;
+import com.example.personal_budget.dto.MonthlyReportRequest;
 import com.example.personal_budget.dto.TransactionFilterRequest;
 import com.example.personal_budget.dto.request.MonthlyReportRequest;
 import com.example.personal_budget.entity.Transaction;
 import com.example.personal_budget.enums.TransactionType;
 import com.example.personal_budget.exception.TransactionNotFoundException;
 import com.example.personal_budget.repository.TransactionRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,51 +27,73 @@ import java.util.stream.Collectors;
 public class TransactionService {
 
     private final TransactionRepository transactionRepo;
-    private final BudgetService budgetService;
-    // private final DashboardService dashboardService;
 
-    public Transaction getById(Long id) {
-        return transactionRepo.findById(id)
-                .orElseThrow(() -> new TransactionNotFoundException(id));
+    public Transaction getById(Long userID, Long transactionID) {
+
+        Transaction t = transactionRepo.findById(transactionID)
+                .orElseThrow(() -> new TransactionNotFoundException(transactionID));
+        verifyUserAccess(userID, t.getUserID());
+        return t;
     }
 
     @Transactional
-    public Transaction addTransaction(@NonNull CreateTransactionRequest req) {
+    public Transaction addTransaction(Long userID, @NonNull CreateTransactionRequest request) {
+
+        verifyUserAccess(userID, request.getUserID());
 
         Transaction transaction = Transaction.builder()
-                .userID(req.getUserID())
-                .amount(req.getAmount())
-                .type(req.getType())
-                .date(req.getDate())
-                .categoryID(req.getCategoryID())
-                .source(req.getSource())
-                .description(req.getDescription())
+                .userID(userID)
+                .amount(request.getAmount())
+                .type(request.getType())
+                .date(request.getDate())
+                .categoryID(request.getCategoryID())
+                .source(request.getSource())
+                .description(request.getDescription())
                 .build();
-
-        budgetService.applyExpenseToBudget(req.getUserID(), req.getCategoryID(), req.getAmount());
-
 
         return transactionRepo.save(transaction);
     }
 
     public List<Transaction> getAllTransactions(Long userID) {
-        return transactionRepo.findByUserID(userID);
+
+        List<Transaction> list = transactionRepo.findByUserID(userID);
+        if (!list.isEmpty())
+            verifyUserAccess(userID, list.getFirst().getUserID());
+
+        return list;
     }
 
-    public Transaction updateTransaction(Long id, @NonNull CreateTransactionRequest req) {
-        Transaction t = getById(id);
-        t.setAmount(req.getAmount());
-        t.setType(req.getType());
-        t.setDate(req.getDate());
-        t.setCategoryID(req.getCategoryID());
-        t.setSource(req.getSource());
-        t.setDescription(req.getDescription());
-        return transactionRepo.save(t);
+    @Transactional
+    public Transaction updateTransaction(Long transactionID, Long userID, CreateTransactionRequest request) throws AccessDeniedException {
+
+        Transaction transaction = transactionRepo.findById(transactionID)
+                .orElseThrow(() -> new EntityNotFoundException("Transaction not found"));
+
+        if (!transaction.getUserID().equals(userID)) {
+            throw new AccessDeniedException("You are not allowed to update this transaction");
+        }
+
+        transaction.setAmount(request.getAmount());
+        transaction.setDate(request.getDate());
+        transaction.setDescription(request.getDescription());
+        transaction.setSource(request.getSource());
+        transaction.setCategoryID(request.getCategoryID());
+        transaction.setType(request.getType());
+
+        return transactionRepo.save(transaction);
     }
 
-    public void deleteTransaction(Long id) {
-        getById(id);
-        transactionRepo.deleteById(id);
+    @Transactional
+    public void deleteTransaction(Long transactionID, Long userID) throws AccessDeniedException {
+
+        Transaction transaction = transactionRepo.findById(transactionID)
+                .orElseThrow(() -> new EntityNotFoundException("Transaction not found"));
+
+        if (!transaction.getUserID().equals(userID)) {
+            throw new AccessDeniedException("You are not allowed to delete this transaction");
+        }
+
+        transactionRepo.delete(transaction);
     }
 
     public List<Transaction> getIncomeTransactions(Long userID) {
@@ -87,17 +112,24 @@ public class TransactionService {
         return transactionRepo.sumByUserIDAndType(userID, TransactionType.EXPENSE);
     }
 
-    public List<Transaction> filterHistory(@NonNull TransactionFilterRequest req) {
+    public List<Transaction> filterHistory(Long userID, @NonNull TransactionFilterRequest request) {
+
+        verifyUserAccess(userID, request.getUserID());
+
         return transactionRepo.findByUserIDAndDateBetweenAndCategoryID(
-                req.getUserID(),
-                req.getStartDate(),
-                req.getEndDate(),
-                req.getCategoryID()
+                request.getUserID(),
+                request.getStartDate(),
+                request.getEndDate(),
+                request.getCategoryID()
         );
     }
 
-    public Map<Month, Double> getMonthlyTotal(@NonNull MonthlyReportRequest request, TransactionType type) {
-        return transactionRepo.getMonthlyTotal(request.getUserId(), type, request.getStartDate(), request.getEndDate())
+    // For Reports
+    public Map<Month, Double> getMonthlyTotal(Long userID, @NonNull MonthlyReportRequest request, TransactionType type) {
+
+        verifyUserAccess(userID, request.getUserID());
+
+        return transactionRepo.getMonthlyTotal(request.getUserID(), type, request.getStartDate(), request.getEndDate())
                 .stream()
                 .collect(Collectors.toMap(
                         row -> Month.of((Integer) row[0]),
@@ -107,6 +139,7 @@ public class TransactionService {
                 ));
     }
 
+    // For Reports
     public Map<String, Double> getCategoryMap(Long userID, TransactionType type) {
         return transactionRepo.getCategoryAmount(userID, type)
                 .stream()
@@ -118,12 +151,25 @@ public class TransactionService {
                 ));
     }
 
+    // For Reports
     public Map<String, Double> getCategoryMap(Long userID) {
         return getCategoryMap(userID, TransactionType.EXPENSE);
     }
 
-    public List<Transaction> getTransactionsByDateRange(Long userId, LocalDate startDate, LocalDate endDate) {
-        return transactionRepo.findByUserIDAndDateBetween(userId, startDate, endDate);
+    // For Reports
+    public List<Transaction> getTransactionsByDateRange(Long userID, LocalDate startDate, LocalDate end) {
+        return transactionRepo.findByUserIDAndDateBetween(userID, startDate, end);
+    }
+
+    // For Dashboard
+    public List<Transaction> getRecentTransactions(Long userID) {
+        return transactionRepo.findTop5ByUserIDOrderByDateDescTransactionIDDesc(userID);
+    }
+
+    private void verifyUserAccess(@NonNull Long contextUserID, Long requestUserID) {
+        if (!contextUserID.equals(requestUserID)) {
+            throw new AccessDeniedException("You are not allowed to access this resource");
+        }
     }
 }
 
