@@ -25,15 +25,43 @@ public class TransactionController {
     @PostMapping
     public ResponseEntity<Transaction> addTransaction(@Valid @RequestBody CreateTransactionRequest req) {
         Transaction saved = transactionService.addTransaction(req);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new Transaction(saved));
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @GetMapping
     public ResponseEntity<List<Transaction>> getAllTransactions() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userService.findByEmail(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        List<Transaction> transactions = transactionService.getAllTransactions(user.getID);
+        List<Transaction> transactions = transactionService.getAllTransactions(getCurrentUser().getID());
         return ResponseEntity.ok(transactions);
+    }
+
+    @GetMapping("/income")
+    public ResponseEntity<List<Transaction>> getIncomeTransactions() {
+        List<Transaction> transactions = transactionService.getIncomeTransactions(getCurrentUser().getID());
+        return ResponseEntity.ok(transactions);
+    }
+
+    @GetMapping("/expense")
+    public ResponseEntity<List<Transaction>> getExpenseTransactions() {
+        List<Transaction> transactions = transactionService.getExpenseTransactions(getCurrentUser().getID());
+        return ResponseEntity.ok(transactions);
+    }
+
+    @PutMapping("/{transactionID}")
+    public ResponseEntity<Transaction> updateTransaction(@PathVariable Long transactionID, @Valid @RequestBody CreateTransactionRequest req) {
+        Transaction t = transactionService.updateTransaction(transactionID, getCurrentUser().getID(), req);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(t);
+    }
+
+    @DeleteMapping("/{transactionID}")
+    public ResponseEntity<Void> deleteTransaction(@PathVariable Long transactionID) {
+        transactionService.deleteTransaction(transactionID, getCurrentUser().getID);
+        return ResponseEntity.noContent().build();
+    }
+
+    private User getCurrentUser() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        return userService.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }
