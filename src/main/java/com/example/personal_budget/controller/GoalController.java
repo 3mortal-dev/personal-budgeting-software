@@ -69,7 +69,7 @@ public class GoalController {
         return ResponseEntity.ok("Goal deleted");
     }
 
-     @GetMapping
+    @GetMapping("/user")
     public ResponseEntity<List<GoalEntity>> getUserGoals(@AuthenticationPrincipal UserDetails userDetails) {
         long userId = getUserId(userDetails);
         List<GoalEntity> goals = goalService.getGoalsByUserId(userId);
