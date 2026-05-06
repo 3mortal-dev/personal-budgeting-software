@@ -34,11 +34,11 @@ public class ReportService {
     // 1. Generate monthly report for a user for visual represtantation    
     public MonthlyReportResponse generateMonthlyReport(MonthlyReportRequest request) {
 
-        Map<Month, Double> expenseMap = transactionService.getMonthlyTotal(request, TransactionType.EXPENSE);
+        Map<Month, Double> expenseMap = transactionService.getMonthlyTotal(request.getUserId(), request, TransactionType.EXPENSE);
 
-        Map<Month, Double> incomeMap = transactionService.getMonthlyTotal(request, TransactionType.INCOME);
+        Map<Month, Double> incomeMap = transactionService.getMonthlyTotal(request.getUserId(), request, TransactionType.INCOME);
 
-        Map<String, Double> categoryExpenseMap = transactionService.getCategoryMap(request.getUserId());
+        Map<String, Double> categoryExpenseMap = transactionService.getCategoryMap(request.getUserId(), request.getUserId(), TransactionType.EXPENSE);
 
         return new MonthlyReportResponse(expenseMap, incomeMap, categoryExpenseMap);
     }

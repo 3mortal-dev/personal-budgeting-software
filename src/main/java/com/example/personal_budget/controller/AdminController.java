@@ -17,7 +17,7 @@ import com.example.personal_budget.entity.TransactionEntity;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/admin")
+@RequestMapping("/api/admin")
 public class AdminController {
 
     @Autowired
