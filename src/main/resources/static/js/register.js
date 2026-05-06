@@ -67,12 +67,45 @@ const checkFormStatus = () => {
 form.addEventListener('input', checkFormStatus);
 termsCheckbox.addEventListener('change', checkFormStatus);
 
-form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (!submitBtn.disabled) {
-        submitBtn.innerHTML = 'Redirecting...';
-        setTimeout(() => {
-            window.location.href = 'login.html';
-        }, 800);
+form.addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const request = {
+    name: document.getElementById('name').value,
+    email: document.getElementById('email').value,
+    password: document.getElementById('password').value
+  };
+
+  if (request.password !== document.getElementById('confirmPassword').value) {
+    alert("Passwords do not match");
+    return;
+  }
+
+  submitBtn.disabled = true;
+
+  try {
+    const response = await fetch("/api/v1/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(request)
+    });
+
+    if (!response.ok) {
+      throw new Error("Registration failed");
     }
+
+    const data = await response.json();
+
+    alert("Account created successfully!");
+
+    window.location.href = "/login";
+
+  } catch (err) {
+    console.error(err);
+    alert("Error during registration");
+  } finally {
+    submitBtn.disabled = false;
+  }
 });
