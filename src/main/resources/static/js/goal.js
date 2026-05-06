@@ -398,9 +398,10 @@ function handleSearch() {
 /* ═══════════════════════════════════════════════════
    LANGUAGE TOGGLE
    ═══════════════════════════════════════════════════ */
+let isArabic = false;
+
 function toggleLanguage() {
-  const isArabic = langLabel.textContent === 'Arabic';
-  langLabel.textContent = isArabic ? 'English' : 'Arabic';
+  isArabic = !isArabic;
   document.documentElement.lang = isArabic ? 'ar' : 'en';
   document.documentElement.dir  = isArabic ? 'rtl' : 'ltr';
 }
@@ -451,4 +452,39 @@ function escapeHtml(str) {
 function getCsrfToken() {
   const meta = document.querySelector('meta[name="_csrf"]');
   return meta ? meta.getAttribute('content') : '';
+}
+
+
+function renderNotifications(list) {
+  notifDropdown.innerHTML = '';
+
+  if (!list || list.length === 0) {
+    const defaults = [
+      "🎉 Welcome to BudgetWise!",
+      "🎯 Start by adding your first goal",
+      "💰 Track your first transaction"
+    ];
+
+    defaults.forEach(msg => {
+      const item = document.createElement('div');
+      item.className = 'notif-item';
+      item.textContent = msg;
+      notifDropdown.appendChild(item);
+    });
+
+    return;
+  }
+
+
+  list.forEach(n => {
+    const item = document.createElement('div');
+    item.className = 'notif-item';
+
+    item.innerHTML = `
+      ${n.message}
+      ${!n.read ? '<span class="dot"></span>' : ''}
+    `;
+
+    notifDropdown.appendChild(item);
+  });
 }
