@@ -29,8 +29,11 @@ async function apiFetch(endpoint, options = {}) {
         });
 
         if (response.status === 204) return null;
-        if (!response.ok)
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        if (!response.ok) {
+            const errorBody = await response.text();
+            console.error(`API Error [${endpoint}]: ${response.status}`, errorBody);
+            throw new Error(`HTTP ${response.status}`);
+        }
 
         return await response.json();
     } catch (err) {
@@ -276,6 +279,7 @@ async function addTransaction(event) {
         description: document.getElementById("transactionDescription").value,
     };
 
+
     const result = await apiFetch(API.TRANSACTIONS, {
         method: "POST",
         body: JSON.stringify(formData),
@@ -287,6 +291,8 @@ async function addTransaction(event) {
         closeAddTransactionModal();
         resetAddTransactionForm();
         showSuccess("Transaction added successfully!");
+    } else {
+        console.error("Failed to add transaction");
     }
 }
 
@@ -320,6 +326,8 @@ async function updateTransaction(event) {
         renderTransactions();
         closeEditTransactionModal();
         showSuccess("Transaction updated successfully!");
+    } else {
+        console.error("Failed to update transaction");
     }
 }
 
