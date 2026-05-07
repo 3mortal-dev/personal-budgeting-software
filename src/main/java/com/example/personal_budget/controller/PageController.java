@@ -33,6 +33,12 @@ public class PageController {
     @GetMapping("/dashboard")
     public String dashboardPage() { return "dashboard"; }
 
+    @GetMapping("/notifications")
+    public String notificationPage() {
+        return "notifications";
+    }
+    
+
     
     // // ─── Main Pages ──────────────────────────────────────────────
     // @GetMapping("/profile")
