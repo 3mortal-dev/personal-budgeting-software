@@ -1,6 +1,31 @@
 package com.example.personal_budget.controller;
 
-public class pageController {
-    
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+public class PageController {
+
+    // ─── Auth Pages ─────────────────────────────────────────────
+    @GetMapping("/login") // html fileName ya 3mortal
+    public String loginPage() { return "login"; }
+
+    @GetMapping("/register")
+    public String registerPage() { return "register"; }
+
+    // // ─── Main Pages ──────────────────────────────────────────────
+    // @GetMapping("/profile")
+    // public String profilePage() { return "profile"; }
+
+    // @GetMapping("/goals")
+    // public String goalsPage() { return "goals"; }
+
+    // @GetMapping("/budget")
+    // public String budgetPage() { return "budget"; }
+
+    // @GetMapping("/transactions")
+    // public String transactionsPage() { return "transactions"; }
+
+    // @GetMapping("/dashboard")
+    // public String dashboardPage() { return "dashboard"; }
 }
-add
