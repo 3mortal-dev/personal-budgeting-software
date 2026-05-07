@@ -24,7 +24,11 @@ public class PageController {
     @GetMapping("/goals")
     public String goalsPage() { return "goals"; }
 
-    @
+    @GetMapping("/budget")
+    public String budgetPage() { return "budget"; }
+    
+    @GetMapping("/transactions")
+    public String transactionsPage() { return "transactions"; }
 
     
     // // ─── Main Pages ──────────────────────────────────────────────
