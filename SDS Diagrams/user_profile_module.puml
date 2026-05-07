@@ -1,0 +1,152 @@
+@startuml User_Profile_Module
+
+title User Module + Profile Module
+
+skinparam classAttributeIconSize 0
+
+package "User Module" {
+
+    class AuthController {
+        - UserService userService
+        - AuthService authService
+        --
+        + register(RegisterRequest request)
+        + login(LoginRequest request)
+    }
+
+    class AuthService {
+        - AuthenticationManager authManager
+        --
+        + login(String username, String password)
+    }
+
+    class RegisterRequest {
+        - String username
+        - String password
+    }
+
+    class LoginRequest {
+        - String username
+        - String password
+    }
+
+    class SecurityConfig {
+        --
+        + passwordEncoder()
+        + authenticationManager()
+        + securityFilterChain()
+    }
+
+    class UserService {
+        - UserRepository repo
+        - PasswordEncoder encoder
+        --
+        + register(String username, String password)
+        + getAllUsers()
+    }
+
+    class AuthenticationManager {
+    }
+
+    class PasswordEncoder {
+    }
+
+    class CustomUserDetailsService {
+        - UserRepository repo
+        --
+        + loadUserByUsername(String username)
+    }
+
+    class CustomUserDetails {
+        - String username
+        - String password
+        - Role role
+    }
+
+    interface UserDetails {
+    }
+
+    class UserRepository {
+        --
+        + findByUserName(String username)
+        + save(User user)
+    }
+
+    class User {
+        - int id
+        - String username
+        - String password
+        - Role role
+        - String email
+    }
+
+    enum Role {
+        USER
+        ADMIN
+    }
+
+    class AdminController {
+        - UserService userService
+        --
+        + getAllUsers()
+        + otherFunctions()
+    }
+
+}
+
+package "Profile Module" {
+
+    class ProfileController {
+        - ProfileService profileService
+        --
+        + getProfile() : UserProfileDTO
+        + updateProfile(UserProfileDTO)
+    }
+
+    class ProfileService {
+        - UserRepository userRepo
+        --
+        + getProfileByUsername(String username) : UserProfileDTO
+        + updateProfile(UserProfileDTO)
+    }
+
+    class UserProfileDTO {
+        - String username
+        - String email
+        - Role role
+    }
+
+}
+
+' User Module relationships
+AuthController --> AuthService
+AuthController --> RegisterRequest
+AuthController --> LoginRequest
+AuthController --> UserService
+
+AuthService --> AuthenticationManager
+
+SecurityConfig --> AuthenticationManager
+SecurityConfig --> PasswordEncoder
+SecurityConfig --> CustomUserDetailsService
+
+UserService --> UserRepository
+UserService --> PasswordEncoder
+
+CustomUserDetailsService --> UserRepository
+CustomUserDetailsService --> CustomUserDetails
+CustomUserDetails ..|> UserDetails
+
+UserRepository --> User
+
+User --> Role
+
+AdminController --> UserService
+
+' Profile Module relationships
+ProfileController --> ProfileService
+ProfileService --> UserRepository
+ProfileService --> UserProfileDTO
+UserProfileDTO --> Role
+
+@enduml
