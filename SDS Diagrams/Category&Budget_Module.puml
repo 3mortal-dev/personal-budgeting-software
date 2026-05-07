@@ -1,4 +1,4 @@
-@startuml Category & Budget Module
+@startuml Category_Budget_Module
 
 package "Category & Budget Module" {
 
