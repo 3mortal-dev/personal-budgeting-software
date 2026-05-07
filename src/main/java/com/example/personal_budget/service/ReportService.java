@@ -36,7 +36,8 @@ public class ReportService {
         Map<Month, Double> incomeMap = transactionService.getMonthlyTotal(contextUserId, request,
                                                                           TransactionType.INCOME);
 
-        Map<String, Double> categoryExpenseMap = transactionService.getCategoryMap(request.getUserId());
+        Map<String, Double> categoryExpenseMap = transactionService.getCategoryMap(contextUserId, request.getUserId(),
+                                                                                   TransactionType.EXPENSE);
 
         return new MonthlyReportResponse(expenseMap, incomeMap, categoryExpenseMap);
     }
