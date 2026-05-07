@@ -101,7 +101,7 @@ public class NotificationController {
         return notifications.stream().map(notification -> {
             NotificationResponse response = new NotificationResponse();
             response.setId(notification.getId());
-            response.setType(notification.getType().name());
+            response.setType(notification.getType());
             response.setMessage(notification.getMessage());
             response.setRead(notification.isRead());
             response.setCreatedAt(notification.getCreatedAt().toString());
