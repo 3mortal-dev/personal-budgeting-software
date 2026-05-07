@@ -32,30 +32,35 @@ public class TransactionService {
     @Getter
     private final UserService userService;
 
-    public Transaction getById (Long transactionId) {
+    public Transaction getById(Long transactionId) {
 
         return transactionRepo.findById(transactionId).orElseThrow(
                 () -> new TransactionNotFoundException(transactionId));
     }
 
     @Transactional
-    public Transaction addTransaction (Long userId, @NonNull CreateTransactionRequest request) {
+    public Transaction addTransaction(
+            Long userId,
+            @NonNull CreateTransactionRequest request) {
 
         Category category = categoryService.getById(request.getCategoryId());
 
-        Transaction transaction = Transaction.builder().user(userService.getUser(userId)).amount(
+        Transaction transaction = Transaction.builder().user(userService.getUserById(userId)).amount(
                 request.getAmount()).type(request.getType()).date(request.getDate()).category(category).source(
                 request.getSource()).description(request.getDescription()).build();
 
         return transactionRepo.save(transaction);
     }
 
-    public List<Transaction> getAllTransactions (Long contextUserId) {
+    public List<Transaction> getAllTransactions(Long contextUserId) {
         return transactionRepo.findByUserId(contextUserId);
     }
 
     @Transactional
-    public Transaction updateTransaction (Long transactionId, Long userId, @NonNull CreateTransactionRequest request) {
+    public Transaction updateTransaction(
+            Long transactionId,
+            Long userId,
+            @NonNull CreateTransactionRequest request) {
         Transaction transaction = transactionRepo.findById(transactionId).orElseThrow(
                 () -> new EntityNotFoundException("Transaction not found"));
 
@@ -76,7 +81,9 @@ public class TransactionService {
     }
 
     @Transactional
-    public void deleteTransaction (Long transactionId, Long userId) {
+    public void deleteTransaction(
+            Long transactionId,
+            Long userId) {
         Transaction transaction = transactionRepo.findById(transactionId).orElseThrow(
                 () -> new EntityNotFoundException("Transaction not found"));
 
@@ -87,31 +94,34 @@ public class TransactionService {
         transactionRepo.delete(transaction);
     }
 
-    public List<Transaction> getIncomeTransactions (Long contextUserId) {
+    public List<Transaction> getIncomeTransactions(Long contextUserId) {
         return transactionRepo.findByUserIdAndType(contextUserId, TransactionType.INCOME);
     }
 
-    public List<Transaction> getExpenseTransactions (Long contextUserId) {
+    public List<Transaction> getExpenseTransactions(Long contextUserId) {
         return transactionRepo.findByUserIdAndType(contextUserId, TransactionType.EXPENSE);
     }
 
-    public Double getTotalIncome (Long contextUserId) {
+    public Double getTotalIncome(Long contextUserId) {
         return transactionRepo.sumByUserIdAndType(contextUserId, TransactionType.INCOME);
     }
 
-    public Double getTotalExpense (Long contextUserId) {
+    public Double getTotalExpense(Long contextUserId) {
         return transactionRepo.sumByUserIdAndType(contextUserId, TransactionType.EXPENSE);
     }
 
-    public List<Transaction> filterHistory (Long userId, @NonNull TransactionFilterRequest request) {
+    public List<Transaction> filterHistory(
+            Long userId,
+            @NonNull TransactionFilterRequest request) {
 
         return transactionRepo.findByUserIdAndDateBetweenAndCategoryId(userId, request.getStartDate(),
                                                                        request.getEndDate(), request.getCategoryId());
     }
 
-    public Map<Month, Double> getMonthlyTotal (Long userId,
-                                               @NonNull MonthlyReportRequest request,
-                                               TransactionType type) {
+    public Map<Month, Double> getMonthlyTotal(
+            Long userId,
+            @NonNull MonthlyReportRequest request,
+            TransactionType type) {
 
         return transactionRepo.getMonthlyTotal(userId, type, request.getStartDate(),
                                                request.getEndDate()).stream().collect(
@@ -119,18 +129,23 @@ public class TransactionService {
                                  LinkedHashMap::new));
     }
 
-    public Map<String, Double> getCategoryMap (Long contextId, TransactionType type) {
+    public Map<String, Double> getCategoryMap(
+            Long contextId,
+            TransactionType type) {
 
         return transactionRepo.getCategoryAmount(contextId, type).stream().collect(
                 Collectors.toMap(row -> (String) row[0], row -> ((Number) row[1]).doubleValue(), (a, b) -> a,
                                  LinkedHashMap::new));
     }
 
-    public List<Transaction> getTransactionsByDateRange (Long contextUserId, LocalDate startDate, LocalDate end) {
+    public List<Transaction> getTransactionsByDateRange(
+            Long contextUserId,
+            LocalDate startDate,
+            LocalDate end) {
         return transactionRepo.findByUserIdAndDateBetween(contextUserId, startDate, end);
     }
 
-    public List<Transaction> getRecentTransactions (Long contextUserId) {
+    public List<Transaction> getRecentTransactions(Long contextUserId) {
         return transactionRepo.findTop5ByUserIdOrderByDateDescIdDesc(contextUserId);
     }
 }

@@ -1,12 +1,10 @@
 package com.example.personal_budget.dto.response;
 
+import com.example.personal_budget.entity.Transaction;
+import lombok.Data;
+
 import java.math.BigDecimal;
 import java.util.List;
-
-import com.example.personal_budget.entity.GoalEntity;
-import com.example.personal_budget.entity.Transaction;
-
-import lombok.Data;
 
 @Data
 public class DashboardResponse {

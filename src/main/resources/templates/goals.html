@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>BudgetWise – Goals</title>
     <!-- Google Fonts -->
@@ -63,7 +63,7 @@
                 <input type="text" placeholder="Search…" id="searchInput"/>
             </div>
             <button class="topbar__lang" id="langToggle">
-    <               i class="fa-solid fa-globe"></i>
+                < i class="fa-solid fa-globe"></i>
             </button>
             <button class="topbar__notif" id="notifBtn">
                 <i class="fa-solid fa-bell"></i>
@@ -111,7 +111,8 @@
              th:classappend="${goal.completed} ? 'goal-card--completed' : ''">
 
             <div class="goal-card__header">
-                <div class="goal-card__icon-wrap" th:classappend="'goal-card__icon-wrap--' + ${goal.iconColor}">
+                <div class="goal-card__icon-wrap"
+                     th:classappend="'goal-card__icon-wrap--' + ${goal.iconColor}">
                     <i class="fa-solid" th:classappend="${goal.iconClass}"></i>
                 </div>
                 <div class="goal-card__info">
@@ -204,12 +205,20 @@
             <div class="form-row">
                 <label>Icon</label>
                 <div class="icon-picker" id="iconPicker">
-                    <button type="button" class="icon-opt" data-icon="fa-plane-departure" data-color="blue" title="Vacation">✈️</button>
-                    <button type="button" class="icon-opt" data-icon="fa-house" data-color="green" title="Home">🏠</button>
+                    <button type="button" class="icon-opt" data-icon="fa-plane-departure" data-color="blue"
+                            title="Vacation">✈️
+                    </button>
+                    <button type="button" class="icon-opt" data-icon="fa-house" data-color="green" title="Home">🏠
+                    </button>
                     <button type="button" class="icon-opt" data-icon="fa-car" data-color="orange" title="Car">🚗</button>
-                    <button type="button" class="icon-opt" data-icon="fa-graduation-cap" data-color="purple" title="Education">🎓</button>
-                    <button type="button" class="icon-opt" data-icon="fa-heart" data-color="red" title="Health">❤️</button>
-                    <button type="button" class="icon-opt" data-icon="fa-sack-dollar" data-color="yellow" title="Savings">💰</button>
+                    <button type="button" class="icon-opt" data-icon="fa-graduation-cap" data-color="purple"
+                            title="Education">🎓
+                    </button>
+                    <button type="button" class="icon-opt" data-icon="fa-heart" data-color="red" title="Health">❤️
+                    </button>
+                    <button type="button" class="icon-opt" data-icon="fa-sack-dollar" data-color="yellow"
+                            title="Savings">💰
+                    </button>
                 </div>
                 <input type="hidden" id="selectedIcon" name="iconClass" value="fa-plane-departure"/>
                 <input type="hidden" id="selectedColor" name="iconColor" value="blue"/>
