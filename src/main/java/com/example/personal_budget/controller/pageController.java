@@ -18,6 +18,15 @@ public class PageController {
     @GetMapping("/userProfile")
     public String profilePage() { return "userProfile"; }
 
+    @GetMapping("/index")
+    public String indexPage() { return "index"; }
+
+    @GetMapping("/goals")
+    public String goalsPage() { return "goals"; }
+
+    @
+
+    
     // // ─── Main Pages ──────────────────────────────────────────────
     // @GetMapping("/profile")
     // public String profilePage() { return "profile"; }

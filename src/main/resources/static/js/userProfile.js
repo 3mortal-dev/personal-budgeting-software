@@ -1,21 +1,16 @@
 /* ═══════════════════════════════════════════════════════════════
    app.js  –  BudgetWise Profile Page
-   All state lives in memory. Replace each TODO block with a real
-   fetch() call to your backend API.
 ═══════════════════════════════════════════════════════════════ */
 
 /* ─────────────────────────────────────────────
    IN-MEMORY STATE
-   TODO: Remove this object. On init, call
-         GET /api/users/me and populate the
-         UI from the response instead.
 ───────────────────────────────────────────── */
 const state = {
   user: {
     name:     '',
     email:    '',
     initials: '',
-    role : ''
+    role:     '',
   },
   stats: {
     transactions: 0,
@@ -37,12 +32,41 @@ const CURRENCIES = {
   EUR: { flag: '🇪🇺', name: 'Euro'            },
 };
 
-/* ═══════════════════════════════════════════
+/* ─────────────────────────────────────────────
    INIT
-═══════════════════════════════════════════ */
-function init() {
+───────────────────────────────────────────── */
+async function init() {
+  try {
+    const response = await fetch('/api/profile', {
+      method:  'GET',
+      headers: { 'Content-Type': 'application/json' },
+      // Cookie sent automatically (HTTP-only)
+    });
 
-  renderAll();
+    if (response.status === 401 || response.status === 403) {
+      window.location.href = '/index';
+      return;
+    }
+
+    if (!response.ok) throw new Error('Failed to load profile');
+
+    const data = await response.json();
+
+    state.user.name          = data.name;
+    state.user.email         = data.email;
+    state.user.role          = data.role;
+    state.user.initials      = getInitials(data.name);
+    state.stats.goals        = data.goalsCount        ?? 0;
+    state.stats.transactions = data.transactionsCount ?? 0;
+    state.stats.budgets      = data.budgetsCount      ?? 0;
+
+    renderAll();
+    setGreeting();
+
+  } catch (err) {
+    console.error('Failed to load profile:', err);
+  }
+
   document.addEventListener('click', (e) => {
     const dropdown = document.getElementById('currency-dropdown');
     const trigger  = document.getElementById('currency-trigger');
@@ -58,18 +82,15 @@ function init() {
 function renderAll() {
   const { user, stats, prefs } = state;
 
-  /* User */
   document.getElementById('profile-name').textContent  = user.name;
   document.getElementById('profile-email').textContent = user.email;
   document.getElementById('avatar-main').textContent   = user.initials;
   document.getElementById('topbar-avatar').textContent = user.initials;
 
-  /* Stats */
   document.getElementById('stat-tx').textContent    = stats.transactions;
   document.getElementById('stat-bud').textContent   = stats.budgets;
   document.getElementById('stat-goals').textContent = stats.goals;
 
-  /* Prefs */
   document.getElementById('notif-toggle').checked = prefs.notifications;
   setCurrencyDisplay(prefs.currency);
 }
@@ -97,22 +118,6 @@ function previewAvatar(event) {
     el.style.backgroundPosition = 'center';
   };
   reader.readAsDataURL(file);
-
-  /*
-    TODO: Upload to API:
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    fetch('/api/users/me/avatar', {
-      method:  'POST',
-      headers: { 'Authorization': 'Bearer ' + getAuthToken() },
-      body:    formData,
-    })
-      .then(res => res.json())
-      .then(data => { state.user.avatarUrl = data.avatarUrl; })
-      .catch(err => console.error('Avatar upload failed:', err));
-  */
 }
 
 /* ═══════════════════════════════════════════
@@ -129,17 +134,13 @@ function onNotifChange(enabled) {
 
   /*
     TODO: Persist to API:
-
     fetch('/api/users/me/preferences', {
       method:  'PATCH',
-      headers: {
-        'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + getAuthToken(),
-      },
+      headers: { 'Content-Type': 'application/json' },
+      // Cookie sent automatically (HTTP-only)
       body: JSON.stringify({ notifications: enabled }),
     })
       .catch(err => {
-        // Roll back on failure
         document.getElementById('notif-toggle').checked = !enabled;
         state.prefs.notifications = !enabled;
         console.error('Notification update failed:', err);
@@ -153,8 +154,7 @@ function onNotifChange(enabled) {
 function toggleCurrencyDropdown(event) {
   event.stopPropagation();
   const dropdown = document.getElementById('currency-dropdown');
-  const isOpen   = dropdown.classList.contains('open');
-  isOpen ? closeCurrencyDropdown() : openCurrencyDropdown();
+  dropdown.classList.contains('open') ? closeCurrencyDropdown() : openCurrencyDropdown();
 }
 
 function openCurrencyDropdown() {
@@ -172,36 +172,12 @@ function closeCurrencyDropdown() {
 function selectCurrency(optionEl) {
   const value = optionEl.dataset.value;
 
-  /* Update active state in dropdown */
   document.querySelectorAll('.currency-option').forEach(el => el.classList.remove('active'));
   optionEl.classList.add('active');
 
-  /* Update trigger display */
   setCurrencyDisplay(value);
-
-  /* Update state */
   state.prefs.currency = value;
-
-  /* Close dropdown */
   closeCurrencyDropdown();
-
-  /*
-    TODO: Persist to API:
-
-    fetch('/api/users/me/preferences', {
-      method:  'PATCH',
-      headers: {
-        'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + getAuthToken(),
-      },
-      body: JSON.stringify({ currency: value }),
-    })
-      .then(() => {
-        // Re-format all monetary values across the app
-        // e.g. refreshAllAmounts(value);
-      })
-      .catch(err => console.error('Currency update failed:', err));
-  */
 }
 
 function setCurrencyDisplay(value) {
@@ -211,13 +187,10 @@ function setCurrencyDisplay(value) {
 }
 
 /* ═══════════════════════════════════════════
-   EDIT MODAL
+   EDIT MODAL  –  name only
 ═══════════════════════════════════════════ */
 function openEditModal() {
-  /* Pre-fill fields with current state */
-  document.getElementById('edit-name').value    = state.user.name;
-  document.getElementById('edit-email').value   = state.user.email;
-  document.getElementById('edit-password').value = '';
+  document.getElementById('edit-name').value = state.user.name;
 
   document.getElementById('modal-overlay').classList.add('open');
   document.getElementById('edit-modal').classList.add('open');
@@ -229,53 +202,35 @@ function closeEditModal() {
   document.getElementById('edit-modal').classList.remove('open');
 }
 
-function saveProfile() {
-  const name     = document.getElementById('edit-name').value.trim();
-  const email    = document.getElementById('edit-email').value.trim();
-  const password = document.getElementById('edit-password').value;
+// FIX: added `async` — function body uses `await`
+async function saveProfile() {
+  const name = document.getElementById('edit-name').value.trim();
 
-  /* Basic validation */
-  if (!name)  { alert('Name cannot be empty.');         return; }
-  if (!email) { alert('Email cannot be empty.');        return; }
-  if (!email.includes('@')) { alert('Invalid email.'); return; }
+  if (!name) { alert('Name cannot be empty.'); return; }
 
-  /*
-    TODO: Send to API:
+  try {
+    const response = await fetch('/api/userProfile', {
+      method:  'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      // Cookie sent automatically (HTTP-only)
+      body: JSON.stringify({ name }),
+    });
 
-    const body = { name, email };
-    if (password) body.password = password;
+    if (!response.ok) throw new Error('Update failed');
 
-    fetch('/api/users/me', {
-      method:  'PATCH',
-      headers: {
-        'Content-Type':  'application/json',
-        'Authorization': 'Bearer ' + getAuthToken(),
-      },
-      body: JSON.stringify(body),
-    })
-      .then(res => res.json())
-      .then(data => {
-        // Update state from API response
-        state.user.name  = data.user.name;
-        state.user.email = data.user.email;
-        state.user.initials = data.user.initials || getInitials(data.user.name);
-        renderAll();
-        setGreeting();
-        closeEditModal();
-      })
-      .catch(err => {
-        console.error('Profile update failed:', err);
-        alert('Failed to save changes. Please try again.');
-      });
-  */
+    await response.json();
 
-  /* --- Local-only update (remove when wired to API) --- */
-  state.user.name     = name;
-  state.user.email    = email;
-  state.user.initials = getInitials(name);
-  renderAll();
-  setGreeting();
-  closeEditModal();
+    // FIX: state update only runs after confirmed API success
+    state.user.name     = name;
+    state.user.initials = getInitials(name);
+    renderAll();
+    setGreeting();
+    closeEditModal();
+
+  } catch (err) {
+    console.error('Profile update failed:', err);
+    alert('Failed to save changes. Please try again.');
+  }
 }
 
 /* ─────────────────────────────────────────────
@@ -290,37 +245,20 @@ function getInitials(fullName) {
     .join('');
 }
 
-function getAuthToken() {
-  /*
-    TODO: Return the real auth token.
-    Read from memory (a module-level variable set at login).
-    Never read tokens from localStorage.
-  */
-  return 'YOUR_TOKEN_HERE';
-}
-
 /* ═══════════════════════════════════════════
    LOGOUT
 ═══════════════════════════════════════════ */
-function handleLogout() {
-  /*
-    TODO: Call logout endpoint, clear token, redirect:
-
-    fetch('/api/auth/logout', {
-      method:  'POST',
-      headers: { 'Authorization': 'Bearer ' + getAuthToken() },
-    })
-      .then(() => {
-        clearAuthToken();
-        window.location.href = '/login';
-      })
-      .catch(err => console.error('Logout failed:', err));
-  */
-  alert('Logout → POST /api/auth/logout');
+async function handleLogout() {
+  try {
+    await fetch('/api/auth/logout', {
+      method: 'POST',
+      // Cookie sent automatically (HTTP-only)
+    });
+  } catch (err) {
+    console.error('Logout error:', err);
+  } finally {
+    window.location.href = '/login'; // always redirect
+  }
 }
 
-/* ─────────────────────────────────────────────
-   BOOT
-───────────────────────────────────────────── */
 init();
-setGreeting();
