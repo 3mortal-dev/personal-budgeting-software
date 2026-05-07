@@ -29,5 +29,5 @@ public class Notification {
     
     private boolean isRead;
 
-    private LocalDateTime timestamp;
+    private LocalDateTime createdAt;
 }
