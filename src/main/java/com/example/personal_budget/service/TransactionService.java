@@ -43,7 +43,9 @@ public class TransactionService {
             Long userId,
             @NonNull CreateTransactionRequest request) {
 
-        Category category = categoryService.getById(request.getCategoryId());
+        // For INCOME transactions, category should be null; for EXPENSE, source should be null
+        Category category = request.getType().equals(TransactionType.INCOME) ?
+            null : categoryService.getById(request.getCategoryId());
 
         Transaction transaction = Transaction.builder().user(userService.getUserById(userId)).amount(
                 request.getAmount()).type(request.getType()).date(request.getDate()).category(category).source(
@@ -68,7 +70,9 @@ public class TransactionService {
             throw new AccessDeniedException("You are not allowed to update this transaction");
         }
 
-        Category category = categoryService.getById(request.getCategoryId());
+        // For INCOME transactions, category should be null; for EXPENSE, use category
+        Category category = request.getType().equals(TransactionType.INCOME) ?
+            null : categoryService.getById(request.getCategoryId());
 
         transaction.setAmount(request.getAmount());
         transaction.setDate(request.getDate());
