@@ -26,10 +26,20 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> register(
             @RequestBody RegisterRequest request,
             HttpServletResponse response   // ← ADD THIS
-    ) {
-        String token = authenticationService.register(request);  // ← now returns String
+    ) 
+    
+    {
+
+   try {
+        String token = authenticationService.register(request);
         addJwtCookie(response, token);
         return ResponseEntity.ok(Map.of("message", "Registered successfully"));
+
+    } catch (RuntimeException e) {
+        // ─── Send error message back to frontend ──────────
+        return ResponseEntity.badRequest()
+               .body(Map.of("message", e.getMessage()));
+    }
     }
 
     @PostMapping("/login")

@@ -12,15 +12,15 @@
 ───────────────────────────────────────────── */
 const state = {
   user: {
-    name:     'Ahmed Salem',
-    email:    'ahmed@example.com',
-    initials: 'AS',
-    plan:     'pro',
+    name:     '',
+    email:    '',
+    initials: '',
+    role : ''
   },
   stats: {
-    transactions: 24,
-    budgets:      3,
-    goals:        4,
+    transactions: 0,
+    budgets:      0,
+    goals:        0,
   },
   prefs: {
     notifications: true,
@@ -41,24 +41,8 @@ const CURRENCIES = {
    INIT
 ═══════════════════════════════════════════ */
 function init() {
-  /*
-    TODO: Replace with real API call:
 
-    fetch('/api/users/me', {
-      headers: { 'Authorization': 'Bearer ' + getAuthToken() }
-    })
-      .then(res => res.json())
-      .then(data => {
-        Object.assign(state.user,  data.user);
-        Object.assign(state.stats, data.stats);
-        Object.assign(state.prefs, data.prefs);
-        renderAll();
-      })
-      .catch(err => console.error('Failed to load profile:', err));
-  */
   renderAll();
-
-  /* Close currency dropdown when clicking outside */
   document.addEventListener('click', (e) => {
     const dropdown = document.getElementById('currency-dropdown');
     const trigger  = document.getElementById('currency-trigger');

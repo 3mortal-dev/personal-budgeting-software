@@ -84,7 +84,7 @@ form.addEventListener('submit', async function (e) {
   submitBtn.disabled = true;
 
   try {
-    const response = await fetch("/api/v1/auth/register", {
+    const response = await fetch("/api/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -93,7 +93,9 @@ form.addEventListener('submit', async function (e) {
     });
 
     if (!response.ok) {
-      throw new Error("Registration failed");
+        const err = await response.json().catch(() => ({}));
+        showError(err.message || "Registration failed. Try again.");
+        return;
     }
 
     const data = await response.json();

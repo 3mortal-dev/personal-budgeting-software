@@ -2,6 +2,8 @@ package com.example.personal_budget.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @Controller
 public class PageController {
@@ -12,6 +14,9 @@ public class PageController {
 
     @GetMapping("/register")
     public String registerPage() { return "register"; }
+
+    @GetMapping("/userProfile")
+    public String profilePage() { return "userProfile"; }
 
     // // ─── Main Pages ──────────────────────────────────────────────
     // @GetMapping("/profile")

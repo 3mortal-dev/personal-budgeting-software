@@ -40,24 +40,43 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http
-            .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(STATELESS)
-            )
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/", "/home", "/index", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
-            )
-            .authenticationProvider(authenticationProvider)
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-            .logout(logout -> logout
-                .logoutUrl("/api/auth/logout")
-                .addLogoutHandler(logoutHandler)
-                .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
-            );
+http
+    .csrf(AbstractHttpConfigurer::disable)
+    .sessionManagement(session ->
+        session.sessionCreationPolicy(STATELESS)
+    )
+    
+    .authorizeHttpRequests(auth -> auth
+        .requestMatchers("/api/auth/**").permitAll()
+        .requestMatchers("/login", "/register").permitAll()
+        .requestMatchers("/css/**", "/js/**", "/images/**", "/static/**").permitAll()
+        .requestMatchers("/v2/api-docs", "/v3/api-docs/**", "/swagger-ui/**",
+                         "/swagger-resources/**", "/webjars/**").permitAll()
+        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+        .anyRequest().authenticated()
+    )
+
+    .exceptionHandling(ex -> ex
+        .authenticationEntryPoint((request, response, authException) -> {
+            // ─── API calls → return 401 JSON ────────────
+            if (request.getRequestURI().startsWith("/api/")) {
+                response.setStatus(401);
+                response.getWriter().write("{\"error\":\"Unauthorized\"}");
+            } else {
+                // ─── Page visits → redirect to /login ───
+                response.sendRedirect("/login");
+            }
+        })
+    )
+
+    .authenticationProvider(authenticationProvider)
+    .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+    .logout(logout -> logout
+        .logoutUrl("/api/auth/logout")
+        .addLogoutHandler(logoutHandler)
+        .logoutSuccessHandler((request, response, authentication) ->
+            SecurityContextHolder.clearContext())
+    );
 
         return http.build();
     }

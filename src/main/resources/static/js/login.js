@@ -75,7 +75,7 @@
 
   /* ── Form submit ── */
 
-  form.addEventListener('submit', function (e) {
+  form.addEventListener('submit', async function  (e) {
     e.preventDefault();
 
     let valid = true;
@@ -107,14 +107,45 @@
     /* Simulate async login */
     submitBtn.classList.add('loading');
     submitBtn.disabled = true;
+    try {
+        const response = await fetch('/api/auth/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+              email: emailInput.value.trim(),
+              password: pwInput.value
+            })
+           
+        });
 
-    setTimeout(function () {
-      submitBtn.classList.remove('loading');
-      submitBtn.disabled = false;
+    // setTimeout(function () {
+    //   submitBtn.classList.remove('loading');
+    //   submitBtn.disabled = false;
 
-      /* ── Replace with real auth logic ── */
-      alert('Login successful! Redirecting to dashboard…');
-    }, 1800);
+    //   /* ── Replace with real auth logic ── */
+    //   alert('Login successful! Redirecting to dashboard…');
+    // }, 1800);
+
+        if (response.ok) {
+            // Cookie is set automatically by Spring Boot
+            window.location.href = '/userProfile'; 
+
+        } else if (response.status === 401 || response.status === 403) {
+            showError(emailInput, emailError, 'Invalid email or password.');
+            showError(pwInput, pwError, 'Invalid email or password.');
+
+        } else {
+            showError(pwInput, pwError, 'Something went wrong. Please try again.');
+        }
+
+    } catch (err) {
+        console.error(err);
+        showError(pwInput, pwError, 'Server error. Please try again.');
+
+    } finally {
+        submitBtn.classList.remove('loading');
+        submitBtn.disabled = false;
+    }
   });
 
   /* ── Slide dots (decorative cycling) ── */

@@ -1,13 +1,13 @@
 <!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>BudgetWise – Profile</title>
-  <link rel="stylesheet" href="../static/css/userProfile.css"/>
+  <link rel="stylesheet" th:href="@{/css/userProfile.css}" href="../static/css/userProfile.css"/>
 </head>
 <body>
-
 <!-- ═══════════ SIDEBAR ═══════════ -->
 <aside class="sidebar">
   <div class="logo">
@@ -274,6 +274,6 @@
   </div>
 </div>
 
-<script src="../static/js/userProfile.js"></script>
+<script src th:src="@{/js/userProfile.js}" src="../static/js/userProfile.js"></script>
 </body>
 </html>
