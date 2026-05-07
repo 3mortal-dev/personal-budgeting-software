@@ -65,12 +65,32 @@
   <header class="topbar">
     <span class="topbar-greeting" id="greeting">Good morning 👋</span>
     <div class="topbar-right">
-      <div class="notif-btn">
-        <svg width="16" height="16" fill="none" stroke="#374151" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
-        </svg>
-        <span class="notif-dot"></span>
-      </div>
+
+      <!-- NOTIFICATION BELL + PANEL -->
+      <div class="notif-wrapper">
+        <button class="notif-btn" id="notif-icon-btn" onclick="toggleNotifPanel(event)" aria-label="Notifications">
+          <svg width="16" height="16" fill="none" stroke="#374151" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
+          </svg>
+          <!-- Red dot for unread count -->
+          <span class="notif-dot" id="notif-dot" style="display:none"></span>
+        </button>
+
+        <!-- DROPDOWN PANEL -->
+        <div class="notif-panel" id="notif-panel">
+          <div class="notif-panel-header">
+            <span class="notif-panel-title">Notifications</span>
+            <button class="notif-mark-all-btn" onclick="markAllRead()">Mark all read</button>
+          </div>
+          <div class="notif-list" id="notif-list">
+            <!-- Rendered by JS -->
+          </div>
+          <div class="notif-panel-footer">
+            <a th:href="@{/notifications}" href="notifications.html" class="notif-view-all-link">View all notifications →</a>
+          </div>
+        </div>
+      </div><!-- /notif-wrapper -->
+
       <div class="avatar-btn" id="topbar-avatar"></div>
     </div>
   </header>
@@ -120,25 +140,45 @@
 
     <!-- SETTINGS CARD -->
     <div class="settings-card">
-      <div class="settings-label">Account</div>
+      <div class="settings-label">Notification Preferences</div>
 
-      <!-- Notifications -->
-      <div class="setting-row" onclick="toggleNotif()">
+      <!-- Goals Notifications -->
+      <div class="setting-row" onclick="toggleNotifGoals()">
         <div class="setting-icon">
           <svg width="17" height="17" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
+            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/>
           </svg>
         </div>
         <div class="setting-text">
-          <div class="setting-name">Notifications</div>
-          <div class="setting-desc">Push &amp; email alerts</div>
+          <div class="setting-name">Goals Notifications</div>
+          <div class="setting-desc">Alerts when you hit or miss a goal</div>
         </div>
         <label class="toggle" onclick="event.stopPropagation()">
-          <input type="checkbox" id="notif-toggle" checked onchange="onNotifChange(this.checked)"/>
+          <input type="checkbox" id="notif-goals-toggle" checked onchange="onNotifGoalsChange(this.checked)"/>
           <span class="toggle-track"></span>
           <span class="toggle-thumb"></span>
         </label>
       </div>
+
+      <!-- Transactions Notifications -->
+      <div class="setting-row" onclick="toggleNotifTransactions()">
+        <div class="setting-icon">
+          <svg width="17" height="17" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
+          </svg>
+        </div>
+        <div class="setting-text">
+          <div class="setting-name">Transaction Notifications</div>
+          <div class="setting-desc">Alerts for incoming &amp; outgoing transactions</div>
+        </div>
+        <label class="toggle" onclick="event.stopPropagation()">
+          <input type="checkbox" id="notif-transactions-toggle" checked onchange="onNotifTransactionsChange(this.checked)"/>
+          <span class="toggle-track"></span>
+          <span class="toggle-thumb"></span>
+        </label>
+      </div>
+
+      <div class="settings-label" style="margin-top: 20px;">Account</div>
 
       <!-- Currency -->
       <div class="setting-row currency-row" onclick="toggleCurrencyDropdown(event)">
@@ -193,6 +233,7 @@
 </div><!-- /main -->
 
 <!-- ═══════════ EDIT MODAL ═══════════ -->
+<!-- BUG FIX: Changed 'is-open' to 'open' so CSS and JS use the same class -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeEditModal()"></div>
 
 <div class="modal" id="edit-modal">
