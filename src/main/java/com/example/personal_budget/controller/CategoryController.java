@@ -55,14 +55,17 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(category);
     }
 
-    @PutMapping("/{categoryID}")
-    public ResponseEntity<Category> editCustomCategory(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long categoryID, @Valid @RequestBody CreateCategoryRequest request) {
+    @PutMapping ("/{categoryID}")
+    public ResponseEntity<Category> editCustomCategory(@AuthenticationPrincipal UserDetails userDetails,
+                                                        @PathVariable Long categoryID,
+                                                        @Valid @RequestBody CreateCategoryRequest request) {
         Category category = categoryService.editCustomCategory(userService.getUserId(userDetails), categoryID, request);
         return ResponseEntity.ok(category);
     }
 
-    @DeleteMapping("/{categoryID}")
-    public ResponseEntity<?> deleteCustomCategory(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long categoryID) {
+    @DeleteMapping ("/{categoryID}")
+    public ResponseEntity<?> deleteCustomCategory(@AuthenticationPrincipal UserDetails userDetails,
+                                                   @PathVariable Long categoryID) {
         categoryService.deleteCustomCategory(userService.getUserId(userDetails), categoryID);
         return ResponseEntity.noContent().build();
     }

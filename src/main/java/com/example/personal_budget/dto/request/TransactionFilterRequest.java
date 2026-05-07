@@ -6,7 +6,6 @@ import java.time.LocalDate;
 
 @Data
 public class TransactionFilterRequest {
-    private Long userId;
     private LocalDate startDate;
     private LocalDate endDate;
     private Long categoryId;
