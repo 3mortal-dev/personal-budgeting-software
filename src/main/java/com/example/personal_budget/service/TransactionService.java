@@ -105,7 +105,7 @@ public class TransactionService {
 
     public List<Transaction> filterHistory (Long userId, @NonNull TransactionFilterRequest request) {
 
-        return transactionRepo.findByUserIdAndDateBetweenAndCategoryId(request.getUserId(), request.getStartDate(),
+        return transactionRepo.findByUserIdAndDateBetweenAndCategoryId(userId, request.getStartDate(),
                                                                        request.getEndDate(), request.getCategoryId());
     }
 
