@@ -70,7 +70,7 @@ public class NotificationService {
     }
 
     public List<Notification> getUnreadNotifications(Long userId) {
-        return notificationRepository.findByUserIdAndReadFalse(userId);
+        return notificationRepository.findByUserIdAndIsReadFalse(userId);
     }
 
     public List<Notification> getNotificationsByType(Long userId, NotificationEventType type) {
