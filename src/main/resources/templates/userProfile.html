@@ -1,13 +1,13 @@
 <!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>BudgetWise – Profile</title>
-  <link rel="stylesheet" href="../static/css/userProfile.css"/>
+  <link rel="stylesheet" th:href="@{/css/userProfile.css}" href="../static/css/userProfile.css"/>
 </head>
 <body>
-
 <!-- ═══════════ SIDEBAR ═══════════ -->
 <aside class="sidebar">
   <div class="logo">
@@ -20,31 +20,31 @@
   </div>
 
   <nav>
-    <a class="nav-item" href="#">
+    <a class="nav-item" th:href="@{/dashboard}" href="dashboard.html">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       Home
     </a>
-    <a class="nav-item" href="#">
+    <a class="nav-item" th:href="@{/transactions}" href="transactions.html">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
       Transactions
     </a>
-    <a class="nav-item" href="#">
+    <a class="nav-item" th:href="@{/budget}" href="budget.html">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
       Budgets
     </a>
-    <a class="nav-item" href="#">
+    <a class="nav-item" th:href="@{/goals}" href="goals.html">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
       Goals
     </a>
-    <a class="nav-item" href="#">
+    <a class="nav-item" th:href="@{/reports}" href="reports.html">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       Reports
     </a>
-    <a class="nav-item" href="#">
+    <a class="nav-item" th:href="@{/notifications}" href="notifications.html">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
       Notifications
     </a>
-    <a class="nav-item active" href="#">
+    <a class="nav-item active" th:href="@{/userProfile}" href="userProfile.html">
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       Profile
     </a>
@@ -61,17 +61,37 @@
 <!-- ═══════════ MAIN ═══════════ -->
 <div class="main">
 
-  <!-- TOPBAR (no search, no language) -->
+  <!-- TOPBAR -->
   <header class="topbar">
-    <span class="topbar-greeting" id="greeting">Good morning, Ahmed 👋</span>
+    <span class="topbar-greeting" id="greeting">Good morning 👋</span>
     <div class="topbar-right">
-      <div class="notif-btn">
-        <svg width="16" height="16" fill="none" stroke="#374151" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
-        </svg>
-        <span class="notif-dot"></span>
-      </div>
-      <div class="avatar-btn" id="topbar-avatar">AS</div>
+
+      <!-- NOTIFICATION BELL + PANEL -->
+      <div class="notif-wrapper">
+        <button class="notif-btn" id="notif-icon-btn" onclick="toggleNotifPanel(event)" aria-label="Notifications">
+          <svg width="16" height="16" fill="none" stroke="#374151" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
+          </svg>
+          <!-- Red dot for unread count -->
+          <span class="notif-dot" id="notif-dot" style="display:none"></span>
+        </button>
+
+        <!-- DROPDOWN PANEL -->
+        <div class="notif-panel" id="notif-panel">
+          <div class="notif-panel-header">
+            <span class="notif-panel-title">Notifications</span>
+            <button class="notif-mark-all-btn" onclick="markAllRead()">Mark all read</button>
+          </div>
+          <div class="notif-list" id="notif-list">
+            <!-- Rendered by JS -->
+          </div>
+          <div class="notif-panel-footer">
+            <a th:href="@{/notifications}" href="notifications.html" class="notif-view-all-link">View all notifications →</a>
+          </div>
+        </div>
+      </div><!-- /notif-wrapper -->
+
+      <div class="avatar-btn" id="topbar-avatar"></div>
     </div>
   </header>
 
@@ -81,12 +101,8 @@
     <!-- PROFILE CARD -->
     <div class="profile-card">
       <div class="avatar-wrap">
-        <div class="avatar-main" id="avatar-main">AS</div>
+        <div class="avatar-main" id="avatar-main"></div>
         <div class="avatar-edit" title="Change photo" onclick="document.getElementById('avatar-input').click()">
-          <!--
-            TODO: On file chosen → POST /api/users/me/avatar (FormData)
-            On success → update avatar src with returned URL
-          -->
           <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
             <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
@@ -95,22 +111,20 @@
         <input id="avatar-input" type="file" accept="image/*" style="display:none" onchange="previewAvatar(event)"/>
       </div>
 
-      <div class="profile-name" id="profile-name">Ahmed Salem</div>
-      <div class="profile-email" id="profile-email">ahmed@example.com</div>
-
-
+      <div class="profile-name" id="profile-name"></div>
+      <div class="profile-email" id="profile-email"></div>
 
       <div class="stats">
         <div class="stat">
-          <span class="stat-val" id="stat-tx">24</span>
+          <span class="stat-val" id="stat-tx">0</span>
           <span class="stat-lbl">Transactions</span>
         </div>
         <div class="stat">
-          <span class="stat-val" id="stat-bud">3</span>
+          <span class="stat-val" id="stat-bud">0</span>
           <span class="stat-lbl">Budgets</span>
         </div>
         <div class="stat">
-          <span class="stat-val" id="stat-goals">4</span>
+          <span class="stat-val" id="stat-goals">0</span>
           <span class="stat-lbl">Goals</span>
         </div>
       </div>
@@ -126,32 +140,47 @@
 
     <!-- SETTINGS CARD -->
     <div class="settings-card">
-      <div class="settings-label">Account</div>
+      <div class="settings-label">Notification Preferences</div>
 
-      <!-- Notifications -->
-      <div class="setting-row" onclick="toggleNotif()">
+      <!-- Goals Notifications -->
+      <div class="setting-row" onclick="toggleNotifGoals()">
         <div class="setting-icon">
           <svg width="17" height="17" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
+            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/>
           </svg>
         </div>
         <div class="setting-text">
-          <div class="setting-name">Notifications</div>
-          <div class="setting-desc">Push &amp; email alerts</div>
+          <div class="setting-name">Goals Notifications</div>
+          <div class="setting-desc">Alerts when you hit or miss a goal</div>
         </div>
         <label class="toggle" onclick="event.stopPropagation()">
-          <!--
-            TODO: on change → PATCH /api/users/me/preferences
-            Body: { notifications: this.checked }
-            Headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer <token>' }
-          -->
-          <input type="checkbox" id="notif-toggle" checked onchange="onNotifChange(this.checked)"/>
+          <input type="checkbox" id="notif-goals-toggle" checked onchange="onNotifGoalsChange(this.checked)"/>
           <span class="toggle-track"></span>
           <span class="toggle-thumb"></span>
         </label>
       </div>
 
-      <!-- Currency – modern custom dropdown -->
+      <!-- Transactions Notifications -->
+      <div class="setting-row" onclick="toggleNotifTransactions()">
+        <div class="setting-icon">
+          <svg width="17" height="17" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
+          </svg>
+        </div>
+        <div class="setting-text">
+          <div class="setting-name">Transaction Notifications</div>
+          <div class="setting-desc">Alerts for incoming &amp; outgoing transactions</div>
+        </div>
+        <label class="toggle" onclick="event.stopPropagation()">
+          <input type="checkbox" id="notif-transactions-toggle" checked onchange="onNotifTransactionsChange(this.checked)"/>
+          <span class="toggle-track"></span>
+          <span class="toggle-thumb"></span>
+        </label>
+      </div>
+
+      <div class="settings-label" style="margin-top: 20px;">Account</div>
+
+      <!-- Currency -->
       <div class="setting-row currency-row" onclick="toggleCurrencyDropdown(event)">
         <div class="setting-icon">
           <svg width="17" height="17" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24">
@@ -171,14 +200,9 @@
         </div>
       </div>
 
-      <!-- Custom Currency Dropdown Panel -->
+      <!-- Currency Dropdown Panel -->
       <div class="currency-dropdown" id="currency-dropdown">
-        <!--
-          TODO: on select → PATCH /api/users/me/preferences
-          Body: { currency: value }
-          On success → re-format all monetary values across the app
-        -->
-        <div class="currency-option" data-value="EGP" data-flag="🇪🇬" data-name="Egyptian Pound" onclick="selectCurrency(this)">
+        <div class="currency-option" data-value="EGP" onclick="selectCurrency(this)">
           <span class="cur-flag">🇪🇬</span>
           <div class="currency-info">
             <span class="currency-name">Egyptian Pound</span>
@@ -186,7 +210,7 @@
           </div>
           <svg class="check-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <div class="currency-option active" data-value="USD" data-flag="🇺🇸" data-name="US Dollar" onclick="selectCurrency(this)">
+        <div class="currency-option active" data-value="USD" onclick="selectCurrency(this)">
           <span class="cur-flag">🇺🇸</span>
           <div class="currency-info">
             <span class="currency-name">US Dollar</span>
@@ -194,7 +218,7 @@
           </div>
           <svg class="check-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
         </div>
-        <div class="currency-option" data-value="EUR" data-flag="🇪🇺" data-name="Euro" onclick="selectCurrency(this)">
+        <div class="currency-option" data-value="EUR" onclick="selectCurrency(this)">
           <span class="cur-flag">🇪🇺</span>
           <div class="currency-info">
             <span class="currency-name">Euro</span>
@@ -209,6 +233,7 @@
 </div><!-- /main -->
 
 <!-- ═══════════ EDIT MODAL ═══════════ -->
+<!-- BUG FIX: Changed 'is-open' to 'open' so CSS and JS use the same class -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeEditModal()"></div>
 
 <div class="modal" id="edit-modal">
@@ -223,7 +248,7 @@
 
   <div class="modal-body">
 
-    <!-- Full Name -->
+    <!-- Full Name only -->
     <div class="field-group">
       <label class="field-label" for="edit-name">Full Name</label>
       <div class="field-input-wrap">
@@ -234,46 +259,14 @@
       </div>
     </div>
 
-    <!-- Email -->
-    <div class="field-group">
-      <label class="field-label" for="edit-email">Email Address</label>
-      <div class="field-input-wrap">
-        <svg width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
-        </svg>
-        <input type="email" id="edit-email" class="field-input" placeholder="your@email.com"/>
-      </div>
-    </div>
-
-    <!-- Password -->
-    <div class="field-group">
-      <label class="field-label" for="edit-password">
-        New Password <span class="optional">(optional)</span>
-      </label>
-      <div class="field-input-wrap">
-        <svg width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
-          <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
-        </svg>
-        <input type="password" id="edit-password" class="field-input" placeholder="Leave blank to keep current"/>
-      </div>
-    </div>
-
   </div><!-- /modal-body -->
 
   <div class="modal-footer">
     <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
-    <button class="btn-save" onclick="saveProfile()">
-      <!--
-        TODO: onClick → PATCH /api/users/me
-        Body: { name, email, password? }
-        Headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer <token>' }
-        On success → re-render profile name/email, close modal
-      -->
-      Save Changes
-    </button>
+    <button class="btn-save" onclick="saveProfile()">Save Changes</button>
   </div>
 </div>
 
-<script src="../static/js/userProfile.js"></script>
+<script th:src="@{/js/userProfile.js}" src="../static/js/userProfile.js"></script>
 </body>
 </html>

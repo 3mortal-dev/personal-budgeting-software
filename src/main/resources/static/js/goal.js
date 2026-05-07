@@ -395,16 +395,7 @@ function handleSearch() {
   renderGoals(filtered);
 }
 
-/* ═══════════════════════════════════════════════════
-   LANGUAGE TOGGLE
-   ═══════════════════════════════════════════════════ */
-let isArabic = false;
 
-function toggleLanguage() {
-  isArabic = !isArabic;
-  document.documentElement.lang = isArabic ? 'ar' : 'en';
-  document.documentElement.dir  = isArabic ? 'rtl' : 'ltr';
-}
 
 /* ═══════════════════════════════════════════════════
    ICON PICKER

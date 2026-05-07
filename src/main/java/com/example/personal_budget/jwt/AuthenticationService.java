@@ -9,6 +9,7 @@ import com.example.personal_budget.enums.Role;
 import com.example.personal_budget.enums.TokenType;
 import com.example.personal_budget.repository.TokenRepository;
 import com.example.personal_budget.repository.UserRepository;
+import com.example.personal_budget.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,8 +29,12 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final UserService userService;
 
     public String register(RegisterRequest request) {
+         if (userService.userExistsByEmail(request.email())) {
+        throw new RuntimeException("Email already in use");
+    }
         User user = User.builder()
                 .name(request.name())
                 .email(request.email())

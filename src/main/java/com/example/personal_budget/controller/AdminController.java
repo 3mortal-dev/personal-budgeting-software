@@ -54,6 +54,5 @@ public class AdminController {
         List<Transaction> transactions = transactionService.getAllTransactions(id);
         return ResponseEntity.ok(transactions);
     }
-
     // Additional admin functionalities can be added here, such as system stats, etc.
 }
