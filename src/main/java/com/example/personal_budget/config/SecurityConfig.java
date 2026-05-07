@@ -1,5 +1,6 @@
 package com.example.personal_budget.config;
 
+import com.example.personal_budget.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,12 +14,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 
-import com.example.personal_budget.jwt.JwtAuthenticationFilter;
-
-import static org.springframework.http.HttpMethod.DELETE;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.HttpMethod.PUT;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
@@ -27,43 +22,23 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private static final String[] WHITE_LIST_URL = {"/api/v1/auth/**",
-            "/v2/api-docs",
-            "/v3/api-docs",
-            "/v3/api-docs/**",
-            "/swagger-resources",
-            "/swagger-resources/**",
-            "/configuration/ui",
-            "/configuration/security",
-            "/swagger-ui/**",
-            "/webjars/**",
-            "/swagger-ui.html"};
+    private static final String[] WHITE_LIST_URL = {"/api/v1/auth/**", "/v2/api-docs", "/v3/api-docs", "/v3/api-docs/**", "/swagger-resources", "/swagger-resources/**", "/configuration/ui", "/configuration/security", "/swagger-ui/**", "/webjars/**", "/swagger-ui.html"};
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final LogoutHandler logoutHandler;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain (HttpSecurity http) throws Exception {
 
-        http
-            .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(STATELESS)
-            )
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/auth/**").permitAll()
-                .requestMatchers("/", "/home", "/index", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
-                .requestMatchers("/api/goals/**").permitAll()
-                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
-            )
-            .authenticationProvider(authenticationProvider)
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-            .logout(logout -> logout
-                .logoutUrl("/api/v1/auth/logout")
-                .addLogoutHandler(logoutHandler)
-                .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
-            );
+        http.csrf(AbstractHttpConfigurer::disable).sessionManagement(
+                session -> session.sessionCreationPolicy(STATELESS)).authorizeHttpRequests(auth -> auth.requestMatchers(
+                WHITE_LIST_URL).permitAll().requestMatchers("/", "/home", "/index", "/static/**", "/css/**", "/js/**",
+                                                            "/images/**").permitAll().requestMatchers(
+                "/api/goals/**").permitAll().requestMatchers("/api/v1/admin/**").hasRole(
+                "ADMIN").anyRequest().authenticated()).authenticationProvider(authenticationProvider).addFilterBefore(
+                jwtAuthFilter, UsernamePasswordAuthenticationFilter.class).logout(logout -> logout.logoutUrl(
+                "/api/v1/auth/logout").addLogoutHandler(logoutHandler).logoutSuccessHandler(
+                (request, response, authentication) -> SecurityContextHolder.clearContext()));
 
         return http.build();
     }
