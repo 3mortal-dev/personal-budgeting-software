@@ -9,5 +9,4 @@ import java.time.LocalDate;
 public class MonthlyReportRequest {
     private LocalDate startDate;
     private LocalDate endDate;
-
 }

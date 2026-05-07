@@ -11,5 +11,4 @@ public class ReportDownloadRequest {
     private ReportFormat format;
     private LocalDate startDate;
     private LocalDate endDate;
-
 }

@@ -13,12 +13,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
+
+
 
 @RestController
 @RequiredArgsConstructor
@@ -28,19 +27,24 @@ public class ReportController {
     private final ReportService reportService;
     private final UserService userService;
 
-    @PostMapping ("/monthly")
-    public ResponseEntity<MonthlyReportResponse> getMonthlyReport (@AuthenticationPrincipal UserDetails userDetails,
-                                                                   @RequestBody MonthlyReportRequest request) {
-        MonthlyReportResponse response = reportService.generateMonthlyReport(userService.getUserId(userDetails),
-                                                                             request);
+    @PostMapping("/monthly")
+    public ResponseEntity<MonthlyReportResponse> getMonthlyReport(@RequestBody MonthlyReportRequest request, @AuthenticationPrincipal UserDetails userDetails) {
+        if (!trySetUserId(userDetails, request::setUserId)) {
+            return ResponseEntity.badRequest().build();
+        }
+    
+        MonthlyReportResponse response = reportService.generateMonthlyReport(request);
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping ("/download")
-    public ResponseEntity<Resource> downloadReport (@AuthenticationPrincipal UserDetails userDetails,
-                                                    @RequestBody ReportDownloadRequest request) {
-        File reportFile = reportService.generateTransactionReport(userService.getUserId(userDetails), request);
+    @PostMapping("/download")
+    public ResponseEntity<Resource> downloadReport(@RequestBody ReportDownloadRequest request, @AuthenticationPrincipal UserDetails userDetails) {
+        if (!trySetUserId(userDetails, request::setUserId)) {
+            return ResponseEntity.badRequest().build();
+        }
 
+        File reportFile = reportService.generateTransactionReport(request);
+        
         Resource resource = new FileSystemResource(reportFile);
         String filename = reportFile.getName();
 
@@ -51,7 +55,17 @@ public class ReportController {
                 resource);
     }
 
-    private MediaType getMediaType (String format) {
+    private boolean trySetUserId(UserDetails userDetails, java.util.function.Consumer<Long> setter) {
+        if(userDetails == null) {
+            return false;
+        }
+        long userId = userService.getUserId(userDetails);
+        setter.accept(userId);
+        return true;
+    }
+
+    // helper function
+    private MediaType getMediaType(String format) {
         return switch (format.toUpperCase()) {
             case "PDF" -> MediaType.APPLICATION_PDF;
             case "EXCEL" -> MediaType.valueOf("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");

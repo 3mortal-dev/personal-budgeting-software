@@ -1,10 +1,13 @@
 package com.example.personal_budget.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
+import com.example.personal_budget.dto.request.UpdateNotificationSettings;
 import com.example.personal_budget.entity.User;
 import com.example.personal_budget.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -39,19 +42,29 @@ public class UserService {
         return getUserByEmail(username);
     }
 
-    // get user by userId
-    public User getUser (Long userId) {
-        return userRepository.findById(userId).orElseThrow(
-                () -> new RuntimeException("User with id " + userId + "not found"));
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
 
-    public Iterable<User> getAllUsers () {
+    public Iterable<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    public void deleteUserById (Long id) {
+    public User saveUser(User user) {
+        return userRepository.save(user);
+    }
+
+    public void deleteUserById(Long id) {
         userRepository.deleteById(id);
     }
 
+    public void updateNotificationSettings(UpdateNotificationSettings request, long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new RuntimeException("User not found with id: " + userId);
+        }
+        userRepository.updateNotificationSettingsById(userId, request.isBudgetAlerts(), request.isGoalReminders());
+    }
 
+    
 }
