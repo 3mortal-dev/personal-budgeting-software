@@ -1,7 +1,7 @@
 package com.example.personal_budget.controller;
 
 import com.example.personal_budget.dto.request.GoalRequest;
-import com.example.personal_budget.entity.GoalEntity;
+import com.example.personal_budget.entity.Goal;
 import com.example.personal_budget.service.GoalService;
 import com.example.personal_budget.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,7 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping ("/api/goals")
+@RequestMapping("/api/goals")
 @RequiredArgsConstructor
 public class GoalController {
 
@@ -22,33 +22,38 @@ public class GoalController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<GoalEntity> addGoal (@RequestBody GoalRequest goalRequest,
-                                               @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Goal> addGoal(
+            @RequestBody GoalRequest goalRequest,
+            @AuthenticationPrincipal UserDetails userDetails) {
 
         long userId = getUserId(userDetails);
         return ResponseEntity.ok(goalService.addGoal(goalRequest, userId));
     }
 
-    @PutMapping ("/{id}")
-    public ResponseEntity<GoalEntity> editGoal (@PathVariable Long id,
-                                                @RequestBody GoalRequest goalRequest,
-                                                @AuthenticationPrincipal UserDetails userDetails) {
+    @PutMapping("/{id}")
+    public ResponseEntity<Goal> editGoal(
+            @PathVariable Long id,
+            @RequestBody GoalRequest goalRequest,
+            @AuthenticationPrincipal UserDetails userDetails) {
 
         long userId = getUserId(userDetails);
         return ResponseEntity.ok(goalService.editGoal(id, goalRequest, userId));
     }
 
-    @PatchMapping ("/{id}/progress")
-    public ResponseEntity<GoalEntity> updateProgress (@PathVariable long id,
-                                                      @RequestParam double amount,
-                                                      @AuthenticationPrincipal UserDetails userDetails) {
+    @PatchMapping("/{id}/progress")
+    public ResponseEntity<Goal> updateProgress(
+            @PathVariable long id,
+            @RequestParam double amount,
+            @AuthenticationPrincipal UserDetails userDetails) {
 
         long userId = getUserId(userDetails);
         return ResponseEntity.ok(goalService.updateProgress(id, amount, userId));
     }
 
-    @DeleteMapping ("/{id}")
-    public ResponseEntity<String> deleteGoal (@PathVariable long id, @AuthenticationPrincipal UserDetails userDetails) {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteGoal(
+            @PathVariable long id,
+            @AuthenticationPrincipal UserDetails userDetails) {
 
         long userId = getUserId(userDetails);
         goalService.deleteGoal(id, userId);
@@ -56,12 +61,12 @@ public class GoalController {
     }
 
     @GetMapping
-    public ResponseEntity<List<GoalEntity>> getUserGoals (@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<List<Goal>> getUserGoals(@AuthenticationPrincipal UserDetails userDetails) {
         long userId = getUserId(userDetails);
         return ResponseEntity.ok(goalService.getGoalsByUserId(userId));
     }
 
-    private long getUserId (UserDetails userDetails) {
+    private long getUserId(UserDetails userDetails) {
         if (userDetails == null) {
             throw new RuntimeException("User not authenticated");
         }

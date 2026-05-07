@@ -1,14 +1,14 @@
 package com.example.personal_budget.service;
 
 
-import java.util.List;
+import com.example.personal_budget.dto.request.GoalRequest;
+import com.example.personal_budget.entity.Goal;
+import com.example.personal_budget.enums.GoalStatus;
+import com.example.personal_budget.repository.GoalRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import com.example.personal_budget.dto.request.GoalRequest;
-import com.example.personal_budget.entity.GoalEntity;
-import com.example.personal_budget.repository.GoalRepository;
-import com.example.personal_budget.enums.GoalStatus;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -16,8 +16,10 @@ public class GoalService {
 
     private final GoalRepository goalRepository;
 
-    public GoalEntity addGoal(GoalRequest request , long userId) {
-        GoalEntity goal = new GoalEntity();
+    public Goal addGoal(
+            GoalRequest request,
+            long userId) {
+        Goal goal = new Goal();
         goal.setUserId(userId);
         goal.setGoalName(request.getGoalName());
         goal.setTargetAmount(request.getTargetAmount());
@@ -27,10 +29,12 @@ public class GoalService {
         return goalRepository.save(goal);
     }
 
-    public GoalEntity editGoal(long id, GoalRequest request, long userId) {
+    public Goal editGoal(
+            long id,
+            GoalRequest request,
+            long userId) {
 
-        GoalEntity goal = goalRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Goal not found"));
+        Goal goal = goalRepository.findById(id).orElseThrow(() -> new RuntimeException("Goal not found"));
 
         if (!goal.getUserId().equals(userId)) {
             throw new RuntimeException("Unauthorized");
@@ -42,10 +46,13 @@ public class GoalService {
 
         return goalRepository.save(goal);
     }
-    public GoalEntity updateProgress(long id, double amount, long userId) {
 
-        GoalEntity goal = goalRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Goal not found"));
+    public Goal updateProgress(
+            long id,
+            double amount,
+            long userId) {
+
+        Goal goal = goalRepository.findById(id).orElseThrow(() -> new RuntimeException("Goal not found"));
 
         if (!goal.getUserId().equals(userId)) {
             throw new RuntimeException("Unauthorized");
@@ -71,10 +78,11 @@ public class GoalService {
     }
 
 
-  public void deleteGoal(long id, long userId) {
+    public void deleteGoal(
+            long id,
+            long userId) {
 
-        GoalEntity goal = goalRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Goal not found"));
+        Goal goal = goalRepository.findById(id).orElseThrow(() -> new RuntimeException("Goal not found"));
 
         if (!goal.getUserId().equals(userId)) {
             throw new RuntimeException("Unauthorized");
@@ -82,8 +90,8 @@ public class GoalService {
 
         goalRepository.delete(goal);
     }
-    
-    public List<GoalEntity> getGoalsByUserId(long userId) {
-    return goalRepository.findByUserId(userId);
-}
+
+    public List<Goal> getGoalsByUserId(long userId) {
+        return goalRepository.findByUserId(userId);
+    }
 }
