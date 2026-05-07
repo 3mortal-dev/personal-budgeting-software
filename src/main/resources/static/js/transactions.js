@@ -210,7 +210,7 @@ function renderTransactions() {
       </td>
       <td>${detailText}</td>
       <td>${transaction.description || "-"}</td>
-      <td>${transaction.source || "-"}</td>
+      <td class="col-source" >${transaction.source || "-"}</td>
       <td class="amount ${transaction.type.toLowerCase()}">
         ${transaction.type === "INCOME" ? "+" : "-"}$${transaction.amount.toFixed(2)}
       </td>

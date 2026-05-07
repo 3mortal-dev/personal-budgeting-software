@@ -13,8 +13,11 @@
 
 <div class="layout">
 
+    <!-- ══ SIDEBAR OVERLAY (mobile) ══ -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
     <!-- ══ SIDEBAR ══ -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
         <a th:href="@{/dashboard}" href="dashboard.html" class="logo">
             <div class="logo-icon">
                 <i class="fas fa-wallet"></i>
@@ -66,8 +69,13 @@
 
         <!-- TOP NAV -->
         <div class="topnav">
-            <div class="topnav-greeting" id="greeting">
-                Welcome <span>👋</span>
+            <div style="display:flex;align-items:center;gap:12px;">
+                <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Open menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="topnav-greeting" id="greeting">
+                    Welcome <span>👋</span>
+                </div>
             </div>
             <div class="topnav-actions">
                 <div class="notif-wrapper" id="notifWrapper">
@@ -148,7 +156,7 @@
                         <th>Type</th>
                         <th>Category</th>
                         <th>Description</th>
-                        <th>Source</th>
+                        <th class="col-source">Source</th>
                         <th>Amount</th>
                         <th>Actions</th>
                     </tr>
@@ -268,6 +276,29 @@
     </div>
 </div>
 
+<script>
+    // ── Sidebar toggle (mobile) ──
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const isOpen = sidebar.classList.toggle('open');
+        overlay.classList.toggle('visible', isOpen);
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+    }
+
+    function closeSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        sidebar.classList.remove('open');
+        overlay.classList.remove('visible');
+        document.body.style.overflow = '';
+    }
+
+    // Close sidebar on resize to desktop
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) closeSidebar();
+    });
+</script>
 <script th:src="@{/js/transactions.js}" src="../static/js/transactions.js"></script>
 </body>
 </html>
