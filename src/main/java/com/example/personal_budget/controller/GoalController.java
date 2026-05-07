@@ -75,15 +75,9 @@ public class GoalController {
         return ResponseEntity.ok("Goal deleted");
     }
 
-<<<<<<< HEAD
-    @GetMapping("/user")
-    public ResponseEntity<List<GoalEntity>> getUserGoals(@AuthenticationPrincipal UserDetails userDetails) {
-=======
     @GetMapping
     public ResponseEntity<List<GoalEntity>> getUserGoals(
             @AuthenticationPrincipal UserDetails userDetails) {
-
->>>>>>> 31087a91e883c101e463a0ebfc6de381f5b77671
         long userId = getUserId(userDetails);
         return ResponseEntity.ok(goalService.getGoalsByUserId(userId));
     }
