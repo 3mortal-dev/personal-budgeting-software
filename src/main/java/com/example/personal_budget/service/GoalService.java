@@ -86,4 +86,8 @@ public class GoalService {
     public List<GoalEntity> getGoalsByUserId(long userId) {
     return goalRepository.findByUserId(userId);
 }
+
+    public Integer getActiveGoalsCount(long userId) {
+        return goalRepository.countByUserIdAndStatus(userId, GoalStatus.ONTRACK);
+    }
 }
