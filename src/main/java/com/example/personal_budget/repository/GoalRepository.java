@@ -5,6 +5,7 @@ import com.example.personal_budget.enums.GoalStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 
@@ -15,4 +16,6 @@ public interface GoalRepository extends JpaRepository<Goal, Long> {
     Integer countByUserIdAndStatus(
             Long userId,
             GoalStatus ontrack);
+
+    List<Goal> findByDeadline(LocalDate reminderDate);
 }   
