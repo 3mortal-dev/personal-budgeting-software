@@ -1,7 +1,6 @@
 package com.example.personal_budget.entity;
 
 import com.example.personal_budget.enums.CategoryType;
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,7 +18,7 @@ public class Category {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = true)
+    @JoinColumn(name = "userid", nullable = true)
     private User user;
 
     @Column(nullable = false)
