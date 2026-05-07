@@ -1,7 +1,7 @@
 package com.example.personal_budget.controller;
 
 import com.example.personal_budget.dto.request.GoalRequest;
-import com.example.personal_budget.entity.Goal;
+import com.example.personal_budget.dto.response.GoalResponse;
 import com.example.personal_budget.service.GoalService;
 import com.example.personal_budget.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -10,8 +10,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.rmi.dgc.VMID;
 import java.util.List;
-
 
 @RequiredArgsConstructor
 @RestController
@@ -22,56 +22,49 @@ public class GoalController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<Goal> addGoal(
+    public ResponseEntity<GoalResponse> addGoal(
             @RequestBody GoalRequest goalRequest,
             @AuthenticationPrincipal UserDetails userDetails) {
         long userId = userService.getUserId(userDetails);
-        return ResponseEntity.ok(goalService.addGoal(goalRequest, userId));
+        return ResponseEntity.ok(new GoalResponse(goalService.addGoal(goalRequest, userId)));
     }
 
-
     @PutMapping("/{id}")
-    public ResponseEntity<Goal> editGoal(
+    public ResponseEntity<GoalResponse> editGoal(
             @PathVariable Long id,
             @RequestBody GoalRequest goalRequest,
             @AuthenticationPrincipal UserDetails userDetails) {
         long userId = userService.getUserId(userDetails);
-        return ResponseEntity.ok(goalService.editGoal(id, goalRequest, userId));
+        return ResponseEntity.ok(new GoalResponse(goalService.editGoal(id, goalRequest, userId)));
     }
 
     @PatchMapping("/{id}/progress")
-    public ResponseEntity<Goal> updateProgress(
+    public ResponseEntity<GoalResponse> updateProgress(
             @PathVariable long id,
             @RequestParam double amount,
             @AuthenticationPrincipal UserDetails userDetails) {
         long userId = userService.getUserId(userDetails);
-        return ResponseEntity.ok(goalService.updateProgress(id, amount, userId));
+        return ResponseEntity.ok(new GoalResponse(goalService.updateProgress(id, amount, userId)));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteGoal(
+    public ResponseEntity<Void> deleteGoal(
             @PathVariable long id,
             @AuthenticationPrincipal UserDetails userDetails) {
-
         long userId = userService.getUserId(userDetails);
         goalService.deleteGoal(id, userId);
-        return ResponseEntity.ok("Goal deleted");
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/user")
-    public ResponseEntity<List<Goal>> getUserGoals(@AuthenticationPrincipal UserDetails userDetails) {
-        long userId = getUserId(userDetails);
-        return ResponseEntity.ok(goalService.getGoalsByUserId(userId));
+    public ResponseEntity<List<GoalResponse>> getUserGoals(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        long userId = userService.getUserId(userDetails);
+        return ResponseEntity.ok(
+                goalService.getGoalsByUserId(userId)
+                           .stream()
+                           .map(GoalResponse::new)
+                           .toList()
+        );
     }
-
-    private long getUserId(UserDetails userDetails) {
-        if (userDetails == null) {
-            throw new RuntimeException("User not authenticated");
-        }
-
-        return userService.getUserId(userDetails);
-    }
-
-
 }
-

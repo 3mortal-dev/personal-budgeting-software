@@ -1,14 +1,14 @@
 package com.example.personal_budget.dto.request;
 
+import lombok.Data;
 import java.time.LocalDate;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Setter
-@Getter
+@Data
 public class GoalRequest {
     private String goalName;
-    private double targetAmount;
+    private Double targetAmount;
+    private Double savedAmount;
     private LocalDate deadline;
+    private String iconClass;
+    private String iconColor;
 }
