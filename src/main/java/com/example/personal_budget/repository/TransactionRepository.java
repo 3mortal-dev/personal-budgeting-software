@@ -4,49 +4,69 @@ import com.example.personal_budget.entity.Transaction;
 import com.example.personal_budget.enums.TransactionType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    List<Transaction> findByUserID(Long userID);
 
-    List<Transaction> findByUserIDAndType(Long userID, TransactionType type);
+    // Basic — JPA generates from method name
+    List<Transaction> findByUserId (Long userId);
 
-    List<Transaction> findByUserIDAndDateBetweenAndCategoryID(
-            Long userID, LocalDate start, LocalDate end, Long categoryID
-    );
-      
-    List<Transaction> findByUserIDAndDateBetween(
-            Long userID, LocalDate start, LocalDate end
-    );
+    List<Transaction> findByUserIdAndType (Long userId, TransactionType type);
 
-    @Query("""
-                SELECT COALESCE(SUM(t.amount), 0)
-                FROM Transaction t
-                WHERE t.userID = :userID AND t.type = :type
+    List<Transaction> findByUserIdAndDateBetween (Long userId, LocalDate start, LocalDate end);
+
+    List<Transaction> findByUserIdAndDateBetweenAndCategoryId (Long userId, LocalDate start,
+                                                               LocalDate end, Long categoryId);
+
+    // Dashboard — last 5
+    List<Transaction> findTop5ByUserIdOrderByDateDescIdDesc (Long userId);
+
+    // Sum income or expense
+    @Query ("""
+            SELECT COALESCE(SUM(t.amount), 0)
+            FROM Transaction t
+            WHERE t.user.id = :userId
+            AND t.type = :type
             """)
-    Double sumByUserIDAndType(Long userID, TransactionType transactionType);
+    Double sumByUserIdAndType (@Param ("userId") Long userId, @Param ("type") TransactionType type);
 
-    @Query(nativeQuery = true, value = """
-                SELECT EXTRACT(MONTH FROM t.date) as month,
-                COALESCE(SUM(t.amount), 0) as total_amount
-                FROM transactions t
-                WHERE t.user_id = :userID
-                  AND t.type = :type
-                  AND t.date BETWEEN :startDate AND :endDate
-                GROUP BY EXTRACT(MONTH FROM t.date)
-                ORDER BY EXTRACT(MONTH FROM t.date)
+    // Monthly totals — for reports
+    @Query ("""
+            SELECT FUNCTION('MONTH', t.date), COALESCE(SUM(t.amount), 0)
+            FROM Transaction t
+            WHERE t.user.id = :userId
+            AND t.type = :type
+            AND t.date BETWEEN :startDate AND :endDate
+            GROUP BY FUNCTION('MONTH', t.date)
+            ORDER BY FUNCTION('MONTH', t.date)
             """)
-    List<Object[]> getMonthlyTotal(Long userID, TransactionType type, LocalDate startDate, LocalDate endDate);
+    List<Object[]> getMonthlyTotal (@Param ("userId") Long userId,
+                                    @Param ("type") TransactionType type,
+                                    @Param ("startDate") LocalDate startDate,
+                                    @Param ("endDate") LocalDate endDate);
 
-    @Query(nativeQuery = true, value = """
-                SELECT c.name, COALESCE(SUM(t.amount), 0)
-                FROM transactions t
-                JOIN categories c ON t.category_id = c.category_id
-                WHERE t.user_id = :userID
-                  AND t.type = :type
-                GROUP BY c.name
+    // Category breakdown — for reports
+    @Query ("""
+            SELECT t.category.name, COALESCE(SUM(t.amount), 0)
+            FROM Transaction t
+            WHERE t.user.id = :userId
+            AND t.type = :type
+            GROUP BY t.category.name
             """)
-    List<Object[]> getCategoryAmount(Long userID, TransactionType type);
+    List<Object[]> getCategoryAmount (@Param ("userId") Long userId,
+                                      @Param ("type") TransactionType type);
+
+    // Date range — for reports
+    @Query ("""
+            SELECT t FROM Transaction t
+            WHERE t.user.id = :userId
+            AND t.date BETWEEN :startDate AND :endDate
+            ORDER BY t.date DESC
+            """)
+    List<Transaction> findByUserIdAndDateBetweenOrdered (@Param ("userId") Long userId,
+                                                         @Param ("startDate") LocalDate startDate,
+                                                         @Param ("endDate") LocalDate endDate);
 }

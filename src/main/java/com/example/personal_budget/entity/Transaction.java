@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -13,24 +12,31 @@ import java.time.LocalDateTime;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "transactions")
 public class Transaction {
 
     @Id
-    @GeneratedValue
-    Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    //@ManyToOne
-    //@JoinColumn(name = "user_id")
-    Long userID;
-    double amount;
+    @ManyToOne
+    @JoinColumn(name = "userid", nullable = false)
+    private User user;
 
+    @ManyToOne
+    @JoinColumn(name = "categoryid")
+    private Category category;
+
+    @Column(nullable = false)
+    private double amount;
+
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    TransactionType type;
+    private TransactionType type;
 
-    // @ManyToOne
-    // @JoinColumn(name = "category_id")
-    Long categoryID;
-    LocalDate date;
-    String source;
-    String description;
+    @Column(nullable = false)
+    private LocalDate date;
+
+    private String source;
+    private String description;
 }

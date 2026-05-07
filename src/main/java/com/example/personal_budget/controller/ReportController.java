@@ -4,45 +4,53 @@ import com.example.personal_budget.dto.request.MonthlyReportRequest;
 import com.example.personal_budget.dto.request.ReportDownloadRequest;
 import com.example.personal_budget.dto.response.MonthlyReportResponse;
 import com.example.personal_budget.service.ReportService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.personal_budget.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 
 @RestController
-@RequestMapping("/api/reports")
+@RequiredArgsConstructor
+@RequestMapping ("/api/reports")
 public class ReportController {
 
-    @Autowired
-    private ReportService reportService;
+    private final ReportService reportService;
+    private final UserService userService;
 
-    @PostMapping("/monthly")
-    public ResponseEntity<MonthlyReportResponse> getMonthlyReport(@RequestBody MonthlyReportRequest request) {
-        MonthlyReportResponse response = reportService.generateMonthlyReport(request);
+    @PostMapping ("/monthly")
+    public ResponseEntity<MonthlyReportResponse> getMonthlyReport (@AuthenticationPrincipal UserDetails userDetails,
+                                                                   @RequestBody MonthlyReportRequest request) {
+        MonthlyReportResponse response = reportService.generateMonthlyReport(userService.getUserId(userDetails),
+                                                                             request);
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/download")
-    public ResponseEntity<Resource> downloadReport(@RequestBody ReportDownloadRequest request) {
+    @PostMapping ("/download")
+    public ResponseEntity<Resource> downloadReport (@RequestBody ReportDownloadRequest request) {
         File reportFile = reportService.generateTransactionReport(request);
         
         Resource resource = new FileSystemResource(reportFile);
         String filename = reportFile.getName();
-        
+
         MediaType mediaType = getMediaType(request.getFormat().toString());
-        
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
-                .contentType(mediaType)
-                .body(resource);
+
+        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
+                                          "attachment; filename=\"" + filename + "\"").contentType(mediaType).body(
+                resource);
     }
 
-    private MediaType getMediaType(String format) {
+    private MediaType getMediaType (String format) {
         return switch (format.toUpperCase()) {
             case "PDF" -> MediaType.APPLICATION_PDF;
             case "EXCEL" -> MediaType.valueOf("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
