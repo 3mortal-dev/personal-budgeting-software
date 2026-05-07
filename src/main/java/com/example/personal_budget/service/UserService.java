@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import com.example.personal_budget.dto.request.UpdateNotificationSettings;
 import com.example.personal_budget.entity.User;
 import com.example.personal_budget.repository.UserRepository;
 
@@ -55,5 +56,13 @@ public class UserService {
     public void deleteUserById(Long id) {
         userRepository.deleteById(id);
     }
+
+    public void updateNotificationSettings(UpdateNotificationSettings request, long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new RuntimeException("User not found with id: " + userId);
+        }
+        userRepository.updateNotificationSettingsById(userId, request.isBudgetAlerts(), request.isGoalReminders());
+    }
+
     
 }

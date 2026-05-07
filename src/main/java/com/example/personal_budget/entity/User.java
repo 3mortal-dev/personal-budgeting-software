@@ -20,6 +20,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.Builder.Default;
 
 import com.example.personal_budget.enums.Role;
 
@@ -44,6 +45,11 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @Default
+    private boolean budgetAlertenabled = true;
+    @Default
+    private boolean goalProgressAlertEnabled = true;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
