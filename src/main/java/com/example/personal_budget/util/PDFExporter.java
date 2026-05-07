@@ -7,14 +7,13 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.List;
 
 @Component
 public class PDFExporter implements ReportExporter {
 
     @Override
-    public File export(List<Transaction> transactions, String filePath) throws Exception {
+    public File export (List<Transaction> transactions, String filePath) throws Exception {
         Document document = new Document();
         File file = new File(filePath);
         PdfWriter.getInstance(document, new FileOutputStream(file));
@@ -44,7 +43,7 @@ public class PDFExporter implements ReportExporter {
             table.addCell(new Cell(new Phrase(transaction.getId().toString())));
             table.addCell(new Cell(new Phrase(String.valueOf(transaction.getAmount()))));
             table.addCell(new Cell(new Phrase(transaction.getType().toString())));
-            table.addCell(new Cell(new Phrase(transaction.getCategory().toString())));
+            table.addCell(new Cell(new Phrase(transaction.getCategory().getName())));
             table.addCell(new Cell(new Phrase(transaction.getDate().toString())));
             table.addCell(new Cell(new Phrase(transaction.getSource())));
             table.addCell(new Cell(new Phrase(transaction.getDescription())));

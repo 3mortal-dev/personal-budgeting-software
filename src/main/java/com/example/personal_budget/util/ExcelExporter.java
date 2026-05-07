@@ -7,14 +7,13 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.List;
 
 @Component
 public class ExcelExporter implements ReportExporter {
 
     @Override
-    public File export(List<Transaction> transactions, String filePath) throws Exception {
+    public File export (List<Transaction> transactions, String filePath) throws Exception {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Transactions");
 
@@ -38,7 +37,7 @@ public class ExcelExporter implements ReportExporter {
             row.createCell(0).setCellValue(transaction.getId().toString());
             row.createCell(1).setCellValue(transaction.getAmount());
             row.createCell(2).setCellValue(transaction.getType().toString());
-            row.createCell(3).setCellValue(transaction.getCategory().toString());
+            row.createCell(3).setCellValue(transaction.getCategory().getName());
             row.createCell(4).setCellValue(transaction.getDate().toString());
             row.createCell(5).setCellValue(transaction.getSource());
             row.createCell(6).setCellValue(transaction.getDescription());

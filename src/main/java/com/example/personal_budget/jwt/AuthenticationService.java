@@ -29,7 +29,7 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationResponse register(RegisterRequest request) {
+    public String register(RegisterRequest request) {
         User user = User.builder()
                 .name(request.name())
                 .email(request.email())
@@ -40,10 +40,10 @@ public class AuthenticationService {
         userRepository.save(user);
         String jwtToken = jwtService.generateToken(user);
         saveUserToken(user, jwtToken);
-        return new AuthenticationResponse(jwtToken);
+        return jwtToken;   // ← return String, not AuthenticationResponse
     }
 
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    public String authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.email(),
@@ -57,7 +57,7 @@ public class AuthenticationService {
         revokeAllUserTokens(user);
         String jwtToken = jwtService.generateToken(user);
         saveUserToken(user, jwtToken);
-        return new AuthenticationResponse(jwtToken);
+        return jwtToken;   // ← return String, not AuthenticationResponse
     }
 
     private void revokeAllUserTokens(User user) {
