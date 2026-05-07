@@ -37,9 +37,10 @@ public class ReportController {
     }
 
     @PostMapping ("/download")
-    public ResponseEntity<Resource> downloadReport (@RequestBody ReportDownloadRequest request) {
-        File reportFile = reportService.generateTransactionReport(request);
-        
+    public ResponseEntity<Resource> downloadReport (@AuthenticationPrincipal UserDetails userDetails,
+                                                    @RequestBody ReportDownloadRequest request) {
+        File reportFile = reportService.generateTransactionReport(userService.getUserId(userDetails), request);
+
         Resource resource = new FileSystemResource(reportFile);
         String filename = reportFile.getName();
 

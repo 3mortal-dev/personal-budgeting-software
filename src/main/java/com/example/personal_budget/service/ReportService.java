@@ -36,7 +36,7 @@ public class ReportService {
         Map<Month, Double> incomeMap = transactionService.getMonthlyTotal(contextUserId, request,
                                                                           TransactionType.INCOME);
 
-        Map<String, Double> categoryExpenseMap = transactionService.getCategoryMap(contextUserId, request.getUserId(),
+        Map<String, Double> categoryExpenseMap = transactionService.getCategoryMap(contextUserId,
                                                                                    TransactionType.EXPENSE);
 
         return new MonthlyReportResponse(expenseMap, incomeMap, categoryExpenseMap);
@@ -44,8 +44,8 @@ public class ReportService {
 
 
     // 2. Generate a file with the all transaction when user request it (csv, excel, pdf) with a data range
-    public File generateTransactionReport (ReportDownloadRequest request) {
-        List<Transaction> transactions = transactionService.getTransactionsByDateRange(request.getUserId(),
+    public File generateTransactionReport (Long contextUserId, ReportDownloadRequest request) {
+        List<Transaction> transactions = transactionService.getTransactionsByDateRange(contextUserId,
                                                                                        request.getStartDate(),
                                                                                        request.getEndDate());
 
