@@ -31,7 +31,7 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepo;
     private final CategoryService categoryService;
-	private final BudgetService budgetService;
+    private final BudgetService budgetService;
 
     @Getter
     private final UserService userService;
@@ -48,20 +48,19 @@ public class TransactionService {
             @NonNull CreateTransactionRequest request) {
 
         // For INCOME transactions, category should be null; for EXPENSE, source should be null
-        Category category = request.getType().equals(TransactionType.INCOME) ? null : categoryService.getCategoryById(userId,request.getCategoryId());
-
+        Category category = null;
         if (request.getType().equals(TransactionType.EXPENSE)) {
             if (request.getCategoryId() == null) {
                 throw new IllegalArgumentException("Category is required for EXPENSE transactions");
             }
-            category = categoryService.getCategoryById(userId, request.getCategoryId());  // Built in or custom
+            category = categoryService.getCategoryById(userId, request.getCategoryId());
         }
 
         Transaction transaction = Transaction.builder().user(userService.getUserById(userId)).amount(
                 request.getAmount()).type(request.getType()).date(request.getDate()).category(category).source(
                 request.getSource()).description(request.getDescription()).build();
 
-		// budgetService.onTransactionAdded(userId, userId, transaction.);
+        budgetService.onTransactionAdded(userId, transaction.getCategory().getId(), transaction.getAmount());
 
         return transactionRepo.save(transaction);
     }
@@ -83,7 +82,14 @@ public class TransactionService {
         }
 
         // For INCOME transactions, category should be null; for EXPENSE, use category
-        Category category = request.getType().equals(TransactionType.INCOME) ? null : categoryService.getCategoryById(userId, request.getCategoryId());
+        Category category = null;
+
+        if (request.getType().equals(TransactionType.INCOME)) {
+            category = categoryService.getCategoryById(userId, request.getCategoryId());
+            budgetService.onTransactionEdited(userId, transaction.getCategory().getId(), category.getId(),
+                    transaction.getAmount(), request.getAmount(),
+                    transaction.getDate(), request.getDate());
+        }
 
         transaction.setAmount(request.getAmount());
         transaction.setDate(request.getDate());
@@ -105,6 +111,8 @@ public class TransactionService {
         if (!transaction.getUser().getId().equals(userId)) {
             throw new AccessDeniedException("You are not allowed to update this transaction");
         }
+
+        budgetService.onTransactionDeleted(userId, transaction.getCategory().getId(), transaction.getAmount(), transaction.getDate());
 
         transactionRepo.delete(transaction);
     }
@@ -130,7 +138,7 @@ public class TransactionService {
             @NonNull TransactionFilterRequest request) {
 
         return transactionRepo.findByUserIdAndDateBetweenAndCategoryId(userId, request.getStartDate(),
-                                                                       request.getEndDate(), request.getCategoryId());
+                request.getEndDate(), request.getCategoryId());
     }
 
     public Map<Month, Double> getMonthlyTotal(
@@ -139,9 +147,9 @@ public class TransactionService {
             TransactionType type) {
 
         return transactionRepo.getMonthlyTotal(userId, type, request.getStartDate(),
-                                               request.getEndDate()).stream().collect(
+                request.getEndDate()).stream().collect(
                 Collectors.toMap(row -> Month.of((Integer) row[0]), row -> ((Number) row[1]).doubleValue(), (a, b) -> a,
-                                 LinkedHashMap::new));
+                        LinkedHashMap::new));
     }
 
     public Map<String, Double> getCategoryMap(
@@ -150,7 +158,7 @@ public class TransactionService {
 
         return transactionRepo.getCategoryAmount(contextId, type).stream().collect(
                 Collectors.toMap(row -> (String) row[0], row -> ((Number) row[1]).doubleValue(), (a, b) -> a,
-                                 LinkedHashMap::new));
+                        LinkedHashMap::new));
     }
 
     public List<Transaction> getTransactionsByDateRange(
