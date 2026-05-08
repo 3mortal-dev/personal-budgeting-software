@@ -5,6 +5,8 @@ import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfWriter;
 import org.springframework.stereotype.Component;
 import com.example.personal_budget.enums.TransactionType;
+import com.lowagie.text.pdf.PdfPTable;
+import com.lowagie.text.pdf.PdfPCell;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,6 +27,10 @@ public class PDFExporter implements ReportExporter {
                 : "N/A";
     }
 
+    private PdfPCell createCell(String text, Font font) {
+        return new PdfPCell(new Phrase(text != null ? text : "N/A", font));
+    }
+
     @Override
     public File export(List<Transaction> transactions, String filePath) throws Exception {
         Document document = new Document();
@@ -32,32 +38,35 @@ public class PDFExporter implements ReportExporter {
         PdfWriter.getInstance(document, new FileOutputStream(file));
         document.open();
 
+        Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD);
+        Font bodyFont = FontFactory.getFont(FontFactory.HELVETICA, 10);
+
         // Add title
         Paragraph title = new Paragraph("Transaction Report");
         title.setAlignment(Element.ALIGN_CENTER);
         document.add(title);
         document.add(new Paragraph(" ")); // spacing
 
-        // Create table with 7 columns: ID, Amount, Type, Category, Date, Source, Description
-        Table table = new Table(7);
-        table.setWidth(100);
+        PdfPTable table = new PdfPTable(6);
+        table.setWidthPercentage(100);
+        table.setWidths(new float[]{1f, 2f, 2f, 3f, 2f, 5f});
 
         // Add headers
-        table.addCell(new Cell(new Phrase("ID")));
-        table.addCell(new Cell(new Phrase("Amount")));
-        table.addCell(new Cell(new Phrase("Type")));
-        table.addCell(new Cell(new Phrase("Category / Source")));
-        table.addCell(new Cell(new Phrase("Date")));
-        table.addCell(new Cell(new Phrase("Description")));
+        table.addCell(createCell("ID", headerFont));
+        table.addCell(createCell("Amount", headerFont));
+        table.addCell(createCell("Type", headerFont));
+        table.addCell(createCell("Category / Source", headerFont));
+        table.addCell(createCell("Date", headerFont));
+        table.addCell(createCell("Description", headerFont));
 
         // Add data rows
         for (Transaction transaction : transactions) {
-            table.addCell(new Cell(new Phrase(transaction.getId().toString())));
-            table.addCell(new Cell(new Phrase(String.valueOf(transaction.getAmount()))));
-            table.addCell(new Cell(new Phrase(transaction.getType().toString())));
-            table.addCell(new Cell(new Phrase(getCategoryOrSource(transaction))));
-            table.addCell(new Cell(new Phrase(transaction.getDate().toString())));
-            table.addCell(new Cell(new Phrase(transaction.getDescription())));
+            table.addCell(createCell(transaction.getId().toString(), bodyFont));
+            table.addCell(createCell(String.valueOf(transaction.getAmount()), bodyFont));
+            table.addCell(createCell(transaction.getType().toString(), bodyFont));
+            table.addCell(createCell(getCategoryOrSource(transaction), bodyFont));
+            table.addCell(createCell(transaction.getDate().toString(), bodyFont));
+            table.addCell(createCell(transaction.getDescription(), bodyFont));
         }
 
         document.add(table);
