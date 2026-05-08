@@ -1,17 +1,5 @@
 package com.example.personal_budget.service;
 
-import java.time.LocalDate;
-import java.time.Month;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.jspecify.annotations.NonNull;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.example.personal_budget.dto.request.CreateTransactionRequest;
 import com.example.personal_budget.dto.request.MonthlyReportRequest;
 import com.example.personal_budget.dto.request.TransactionFilterRequest;
@@ -20,10 +8,20 @@ import com.example.personal_budget.entity.Transaction;
 import com.example.personal_budget.enums.TransactionType;
 import com.example.personal_budget.exception.TransactionNotFoundException;
 import com.example.personal_budget.repository.TransactionRepository;
-
 import jakarta.persistence.EntityNotFoundException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -59,8 +57,9 @@ public class TransactionService {
         Transaction transaction = Transaction.builder().user(userService.getUserById(userId)).amount(
                 request.getAmount()).type(request.getType()).date(request.getDate()).category(category).source(
                 request.getSource()).description(request.getDescription()).build();
-
-        budgetService.onTransactionAdded(userId, transaction.getCategory().getId(), transaction.getAmount());
+        if (transaction.getType().equals(TransactionType.EXPENSE)) budgetService.onTransactionAdded(userId,
+                                                                                                    transaction.getCategory().getId(),
+                                                                                                    transaction.getAmount());
 
         return transactionRepo.save(transaction);
     }
@@ -84,11 +83,16 @@ public class TransactionService {
         // For INCOME transactions, category should be null; for EXPENSE, use category
         Category category = null;
 
-        if (request.getType().equals(TransactionType.INCOME)) {
+        if (request.getType().equals(TransactionType.EXPENSE) && request.getCategoryId() != null) {
             category = categoryService.getCategoryById(userId, request.getCategoryId());
-            budgetService.onTransactionEdited(userId, transaction.getCategory().getId(), category.getId(),
-                    transaction.getAmount(), request.getAmount(),
-                    transaction.getDate(), request.getDate());
+            Long oldCategoryId = transaction.getType().equals(
+                    TransactionType.EXPENSE) && transaction.getCategory() != null ? transaction.getCategory().getId() : null;
+            budgetService.onTransactionEdited(userId, oldCategoryId, category.getId(), transaction.getAmount(),
+                                              request.getAmount(), transaction.getDate(), request.getDate());
+        } else if (transaction.getType().equals(TransactionType.EXPENSE) && transaction.getCategory() != null) {
+            // Type changed from EXPENSE to INCOME — reverse the old budget spending
+            budgetService.onTransactionDeleted(userId, transaction.getCategory().getId(), transaction.getAmount(),
+                                               transaction.getDate());
         }
 
         transaction.setAmount(request.getAmount());
@@ -112,7 +116,10 @@ public class TransactionService {
             throw new AccessDeniedException("You are not allowed to update this transaction");
         }
 
-        budgetService.onTransactionDeleted(userId, transaction.getCategory().getId(), transaction.getAmount(), transaction.getDate());
+        if (transaction.getType().equals(TransactionType.EXPENSE) && transaction.getCategory() != null) {
+            budgetService.onTransactionDeleted(userId, transaction.getCategory().getId(), transaction.getAmount(),
+                                               transaction.getDate());
+        }
 
         transactionRepo.delete(transaction);
     }
@@ -133,20 +140,20 @@ public class TransactionService {
         return transactionRepo.sumByUserIdAndType(contextUserId, TransactionType.EXPENSE);
     }
 
-    public Double getMonthlyIncome(Long contextUserId, LocalDate startDate, LocalDate endDate) {
-        return transactionRepo.sumByUserIdAndTypeAndDateBetween(
-                contextUserId,
-                TransactionType.INCOME,
-                startDate,
-                endDate);
+    public Double getMonthlyIncome(
+            Long contextUserId,
+            LocalDate startDate,
+            LocalDate endDate) {
+        return transactionRepo.sumByUserIdAndTypeAndDateBetween(contextUserId, TransactionType.INCOME, startDate,
+                                                                endDate);
     }
 
-    public Double getMonthlyExpense(Long contextUserId, LocalDate startDate, LocalDate endDate) {
-        return transactionRepo.sumByUserIdAndTypeAndDateBetween(
-                contextUserId,
-                TransactionType.EXPENSE,
-                startDate,
-                endDate);
+    public Double getMonthlyExpense(
+            Long contextUserId,
+            LocalDate startDate,
+            LocalDate endDate) {
+        return transactionRepo.sumByUserIdAndTypeAndDateBetween(contextUserId, TransactionType.EXPENSE, startDate,
+                                                                endDate);
     }
 
     public Integer getNumberOfTransactions(Long contextUserId) {
@@ -158,7 +165,7 @@ public class TransactionService {
             @NonNull TransactionFilterRequest request) {
 
         return transactionRepo.findByUserIdAndDateBetweenAndCategoryId(userId, request.getStartDate(),
-                request.getEndDate(), request.getCategoryId());
+                                                                       request.getEndDate(), request.getCategoryId());
     }
 
     public Map<Month, Double> getMonthlyTotal(
@@ -167,9 +174,9 @@ public class TransactionService {
             TransactionType type) {
 
         return transactionRepo.getMonthlyTotal(userId, type.name(), request.getStartDate(),
-                request.getEndDate()).stream().collect(
-                Collectors.toMap(row -> Month.of(((Number) row[0]).intValue()), row -> ((Number) row[1]).doubleValue(), (a, b) -> a,
-                        LinkedHashMap::new));
+                                               request.getEndDate()).stream().collect(
+                Collectors.toMap(row -> Month.of(((Number) row[0]).intValue()), row -> ((Number) row[1]).doubleValue(),
+                                 (a, b) -> a, LinkedHashMap::new));
     }
 
     public Map<String, Double> getCategoryMap(
@@ -178,7 +185,7 @@ public class TransactionService {
 
         return transactionRepo.getCategoryAmount(contextId, type).stream().collect(
                 Collectors.toMap(row -> (String) row[0], row -> ((Number) row[1]).doubleValue(), (a, b) -> a,
-                        LinkedHashMap::new));
+                                 LinkedHashMap::new));
     }
 
     public List<Transaction> getTransactionsByDateRange(

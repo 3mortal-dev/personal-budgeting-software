@@ -1,634 +1,312 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BudgetWise – Budgets</title>
-  <link rel="stylesheet" th:href="@{/css/dashboard.css}" href="../static/css/dashboard.css"/>
-  <style>
-    /* ═══════════════════════════════════════════
-       BUDGET PAGE – EXTENDED STYLES
-    ═══════════════════════════════════════════ */
-
-    /* ── Full-page content area ── */
-    .budget-page-content {
-      padding: 28px;
-      overflow-y: auto;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-
-    /* ── Page header ── */
-    .budget-page-header {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .budget-page-header h1 {
-      font-size: 26px;
-      font-weight: 800;
-      letter-spacing: -.5px;
-    }
-    .budget-page-header p {
-      font-size: 13.5px;
-      color: var(--text2);
-      margin-top: 4px;
-    }
-    .budget-header-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-
-    /* ── Summary stat strip ── */
-    .budget-stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-    }
-    .budget-stat-card {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 18px 20px;
-      box-shadow: var(--shadow);
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-    .budget-stat-icon {
-      width: 44px; height: 44px;
-      border-radius: 11px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-    .budget-stat-icon svg { width: 22px; height: 22px; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-    .bsi--blue   { background: #eff6ff; }
-    .bsi--green  { background: var(--green-light); }
-    .bsi--orange { background: #fffbeb; }
-    .bsi--red    { background: #fee2e2; }
-    .budget-stat-label { font-size: 11.5px; color: var(--text2); font-weight: 500; margin-bottom: 3px; }
-    .budget-stat-val   { font-size: 24px; font-weight: 800; color: var(--text); letter-spacing: -.5px; }
-
-    /* ── Filter tabs ── */
-    .filter-tabs {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 6px;
-      box-shadow: var(--shadow);
-      width: fit-content;
-    }
-    .filter-tab {
-      padding: 8px 18px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text2);
-      background: none;
-      cursor: pointer;
-      border: none;
-      transition: all .18s;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-    }
-    .filter-tab:hover { background: var(--bg); color: var(--text); }
-    .filter-tab.active { background: var(--green); color: #fff; }
-    .tab-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 18px;
-      height: 18px;
-      padding: 0 5px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 700;
-      background: rgba(255,255,255,.25);
-    }
-    .filter-tab:not(.active) .tab-badge {
-      background: var(--bg);
-      color: var(--text3);
-    }
-
-    /* ── Budget grid ── */
-    .budget-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 20px;
-    }
-
-    /* ── Budget card ── */
-    .budget-card {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
-      box-shadow: var(--shadow);
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      transition: box-shadow .2s, transform .2s;
-    }
-    .budget-card:hover {
-      box-shadow: var(--shadow-lg);
-      transform: translateY(-2px);
-    }
-
-    .bc-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    .bc-category-icon {
-      width: 46px; height: 46px;
-      border-radius: 13px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-    }
-    .bc-category-icon svg { width: 22px; height: 22px; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-
-    .bc-title-group { flex: 1; }
-    .bc-category    { font-size: 16px; font-weight: 700; margin-bottom: 3px; }
-    .bc-dates       { font-size: 12px; color: var(--text3); display: flex; align-items: center; gap: 4px; }
-    .bc-dates svg   { width: 11px; height: 11px; stroke: var(--text3); fill: none; }
-
-    .bc-status-badge {
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 700;
-      flex-shrink: 0;
-      letter-spacing: .3px;
-    }
-    .status--ACTIVE    { background: var(--green-light); color: var(--green); }
-    .status--EXPIRED   { background: #f1f5f9; color: var(--text3); }
-    .status--EXCEEDED  { background: #fee2e2; color: var(--red); }
-    .status--NEAR_LIMIT{ background: #fffbeb; color: #d97706; }
-
-    /* Amounts row */
-    .bc-amounts {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-    }
-    .bc-spent-label  { font-size: 11px; color: var(--text3); font-weight: 500; margin-bottom: 4px; }
-    .bc-spent-amount { font-size: 22px; font-weight: 800; letter-spacing: -.5px; }
-    .bc-limit-wrap   { text-align: right; }
-    .bc-limit-label  { font-size: 11px; color: var(--text3); font-weight: 500; margin-bottom: 4px; }
-    .bc-limit-amount { font-size: 15px; font-weight: 700; color: var(--text2); }
-
-    /* Progress bar */
-    .bc-progress-wrap { display: flex; flex-direction: column; gap: 6px; }
-    .bc-progress-bar  {
-      height: 8px;
-      background: var(--bg);
-      border-radius: 99px;
-      overflow: hidden;
-    }
-    .bc-progress-fill {
-      height: 100%;
-      border-radius: 99px;
-      transition: width 1s cubic-bezier(.4,0,.2,1);
-      width: 0%;
-    }
-    .fill--safe     { background: var(--green); }
-    .fill--warning  { background: #f59e0b; }
-    .fill--danger   { background: var(--red); }
-    .fill--exceeded { background: var(--red); opacity: .7; }
-
-    .bc-progress-meta {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      color: var(--text3);
-    }
-    .bc-progress-pct { font-weight: 700; }
-
-    /* Threshold row */
-    .bc-threshold {
-      font-size: 12px;
-      color: var(--text3);
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .bc-threshold svg { width: 12px; height: 12px; stroke: var(--text3); fill: none; }
-
-    /* Action buttons */
-    .bc-actions { display: flex; gap: 8px; padding-top: 4px; border-top: 1px solid var(--border); }
-    .bc-btn {
-      flex: 1;
-      height: 36px;
-      border-radius: 8px;
-      border: 1.5px solid var(--border);
-      background: var(--white);
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text2);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      transition: all .18s;
-    }
-    .bc-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
-    .bc-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-light); }
-    .bc-btn.danger:hover { border-color: var(--red); color: var(--red); background: #fff5f5; }
-
-    /* ── Empty state ── */
-    .budget-empty {
-      grid-column: 1 / -1;
-      padding: 64px 24px;
-      text-align: center;
-      color: var(--text3);
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-    }
-    .budget-empty svg { width: 52px; height: 52px; stroke: var(--text3); fill: none; margin: 0 auto 14px; opacity: .35; }
-    .budget-empty p   { font-size: 14px; margin-bottom: 18px; }
-
-    /* ── Skeleton cards ── */
-    .budget-skel {
-      background: var(--white);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-    .skel-row   { display: flex; gap: 12px; align-items: center; }
-    .skel-circ  { width: 46px; height: 46px; border-radius: 13px; background: var(--border); animation: bpulse 1.4s ease-in-out infinite; flex-shrink: 0; }
-    .skel-line  { height: 12px; border-radius: 6px; background: var(--border); animation: bpulse 1.4s ease-in-out infinite; }
-    .skel-bar   { height: 8px; border-radius: 99px; background: var(--border); animation: bpulse 1.4s ease-in-out infinite; }
-    @keyframes bpulse { 0%,100%{ opacity:1 } 50%{ opacity:.4 } }
-
-    /* ── Add budget button (card style) ── */
-    .budget-add-card {
-      background: var(--white);
-      border: 2px dashed var(--border);
-      border-radius: var(--radius);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 40px 24px;
-      cursor: pointer;
-      color: var(--text3);
-      font-size: 14px;
-      font-weight: 600;
-      transition: all .2s;
-      min-height: 180px;
-    }
-    .budget-add-card svg { width: 28px; height: 28px; stroke: currentColor; fill: none; opacity: .5; }
-    .budget-add-card:hover {
-      border-color: var(--green);
-      color: var(--green);
-      background: var(--green-light);
-    }
-    .budget-add-card:hover svg { opacity: 1; }
-
-    /* ── Modal overrides (budget-specific fields) ── */
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-
-    /* ── Toast ── */
-    #toast {
-      position: fixed;
-      bottom: 28px; right: 28px;
-      background: var(--text);
-      color: #fff;
-      padding: 12px 20px;
-      border-radius: 12px;
-      font-size: 13.5px;
-      font-weight: 600;
-      box-shadow: var(--shadow-lg);
-      z-index: 999;
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity .25s, transform .25s;
-      pointer-events: none;
-    }
-    #toast.show { opacity: 1; transform: translateY(0); }
-
-    /* ── Confirm delete modal ── */
-    .confirm-box     { width: 380px; max-width: 95vw; }
-    .confirm-body    { font-size: 14px; color: var(--text2); line-height: 1.6; }
-    .confirm-actions { display: flex; gap: 10px; margin-top: 20px; }
-    .btn-cancel {
-      flex: 1; height: 44px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      font-size: 14px; font-weight: 600;
-      color: var(--text2); background: var(--white);
-      cursor: pointer; transition: all .18s;
-    }
-    .btn-cancel:hover { border-color: var(--text); color: var(--text); }
-    .btn-confirm-del {
-      flex: 1; height: 44px;
-      background: var(--red); color: #fff;
-      border-radius: 10px;
-      font-size: 14px; font-weight: 700;
-      cursor: pointer; transition: background .18s;
-      border: none;
-    }
-    .btn-confirm-del:hover { background: #c53030; }
-
-    /* form-error-banner (reused from dashboard) */
-    .form-error-banner {
-      display: none;
-      background: #fff5f5;
-      border: 1.5px solid #fecaca;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 13px;
-      color: #dc2626;
-      font-weight: 500;
-    }
-    .form-error-banner.show { display: block; }
-    .field-error { font-size: 12px; color: var(--red); margin-top: 2px; min-height: 16px; display: block; }
-
-    /* Spinner inside submit button */
-    .btn-spinner {
-      display: none;
-      width: 16px; height: 16px;
-      border: 2.5px solid rgba(255,255,255,.4);
-      border-top-color: #fff;
-      border-radius: 50%;
-      animation: spin .6s linear infinite;
-    }
-    .btn-submit.is-loading .btn-label  { display: none; }
-    .btn-submit.is-loading .btn-spinner { display: inline-block; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Responsive */
-    @media (max-width: 1100px) {
-      .budget-stats { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 860px) {
-      .budget-stats { grid-template-columns: repeat(2, 1fr); }
-      .budget-grid  { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 600px) {
-      .budget-page-content { padding: 16px; }
-      .budget-stats { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-      .form-row     { grid-template-columns: 1fr; }
-    }
-  </style>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>BudgetWise – Budgets</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}" href="../static/css/budget.css"/>
 </head>
 <body>
 
-  <div class="layout">
+<div class="layout">
 
     <!-- ══ SIDEBAR ══ -->
     <aside class="sidebar">
-      <div class="logo">
-        <div class="logo-icon">
-          <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2" stroke-width="2"/><path d="M2 10h20" stroke-width="2"/></svg>
+        <div class="logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24">
+                    <rect x="2" y="5" width="20" height="14" rx="2" stroke-width="2"/>
+                    <path d="M2 10h20" stroke-width="2"/>
+                </svg>
+            </div>
+            <span class="logo-text">BudgetWise</span>
         </div>
-        <span class="logo-text">BudgetWise</span>
-      </div>
 
-      <nav class="nav">
-        <a class="nav-item" th:href="@{/dashboard}" href="/dashboard">
-          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          Dashboard
-        </a>
-        <a class="nav-item" th:href="@{/transactions}" href="/transactions">
-          <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-          Transactions
-        </a>
-        <a class="nav-item active" th:href="@{/budget}" href="/budget">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          Budgets
-        </a>
-        <a class="nav-item" th:href="@{/goals}" href="/goals">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
-          Goals
-        </a>
-        <a class="nav-item" th:href="@{/reports}" href="/reports">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-          Reports
-        </a>
-        <a class="nav-item" th:href="@{/notifications}" href="/notifications">
-          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          Notifications
-        </a>
-        <a class="nav-item" th:href="@{/userProfile}" href="/userProfile">
-          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Profile
-        </a>
-      </nav>
+        <nav class="nav">
+            <a class="nav-item" th:href="@{/dashboard}" href="/dashboard">
+                <svg viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                </svg>
+                Dashboard
+            </a>
+            <a class="nav-item" th:href="@{/transactions}" href="/transactions">
+                <svg viewBox="0 0 24 24">
+                    <line x1="8" y1="6" x2="21" y2="6"/>
+                    <line x1="8" y1="12" x2="21" y2="12"/>
+                    <line x1="8" y1="18" x2="21" y2="18"/>
+                    <line x1="3" y1="6" x2="3.01" y2="6"/>
+                    <line x1="3" y1="12" x2="3.01" y2="12"/>
+                    <line x1="3" y1="18" x2="3.01" y2="18"/>
+                </svg>
+                Transactions
+            </a>
+            <a class="nav-item active" th:href="@{/budget}" href="/budget">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                Budgets
+            </a>
+            <a class="nav-item" th:href="@{/goals}" href="/goals">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                Goals
+            </a>
+            <a class="nav-item" th:href="@{/reports}" href="/reports">
+                <svg viewBox="0 0 24 24">
+                    <line x1="18" y1="20" x2="18" y2="10"/>
+                    <line x1="12" y1="20" x2="12" y2="4"/>
+                    <line x1="6" y1="20" x2="6" y2="14"/>
+                </svg>
+                Reports
+            </a>
+            <a class="nav-item" th:href="@{/notifications}" href="/notifications">
+                <svg viewBox="0 0 24 24">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                Notifications
+            </a>
+            <a class="nav-item" th:href="@{/userProfile}" href="/userProfile">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                Profile
+            </a>
+        </nav>
 
-      <div class="logout">
-        <a class="nav-item" th:href="@{/index}" href="/index">
-          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Logout
-        </a>
-      </div>
+        <div class="logout">
+            <a class="nav-item" th:href="@{/index}" href="/index">
+                <svg viewBox="0 0 24 24">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Logout
+            </a>
+        </div>
     </aside>
 
     <!-- ══ MAIN ══ -->
     <div class="main">
 
-      <!-- TOP NAV -->
-      <div class="topnav">
-        <div class="topnav-greeting" id="greeting">Good morning, Ahmed <span>👋</span></div>
-        <div class="topnav-actions">
-          <div class="notif-wrapper" id="notifWrapper">
-            <button class="btn-icon notif-btn" id="notifBtn" onclick="toggleNotifDropdown()" aria-label="Notifications">
-              <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-              <span class="notif-badge" id="notifBadge"></span>
-            </button>
-            <div class="notif-dropdown" id="notifDropdown">
-              <div class="notif-dropdown-header">
-                <span class="notif-dropdown-title">Notifications</span>
-              </div>
-              <div class="notif-list" id="notifDropdownList"></div>
-              <div class="notif-dropdown-footer">
-                <a class="notif-view-all" th:href="@{/notifications}" href="/notifications">View all notifications</a>
-              </div>
+        <!-- TOP NAV -->
+        <div class="topnav">
+            <div class="topnav-greeting" id="greeting">Good morning, Ahmed <span>👋</span></div>
+            <div class="topnav-actions">
+                <div class="notif-wrapper" id="notifWrapper">
+                    <button class="btn-icon notif-btn" id="notifBtn" onclick="toggleNotifDropdown()"
+                            aria-label="Notifications">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                        <span class="notif-badge" id="notifBadge"></span>
+                    </button>
+                    <div class="notif-dropdown" id="notifDropdown">
+                        <div class="notif-dropdown-header">
+                            <span class="notif-dropdown-title">Notifications</span>
+                        </div>
+                        <div class="notif-list" id="notifDropdownList"></div>
+                        <div class="notif-dropdown-footer">
+                            <a class="notif-view-all" th:href="@{/notifications}" href="/notifications">View all
+                                notifications</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="avatar">AS</div>
             </div>
-          </div>
-          <div class="avatar">AS</div>
-        </div>
-      </div>
-
-      <!-- BUDGET PAGE CONTENT -->
-      <div class="budget-page-content">
-
-        <!-- Page Header -->
-        <div class="budget-page-header">
-          <div>
-            <h1>Budgets</h1>
-            <p>Track your spending limits and stay in control of your finances.</p>
-          </div>
-          <div class="budget-header-actions">
-            <button class="btn-add" onclick="openAddModal()">
-              Create Budget
-              <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            </button>
-          </div>
         </div>
 
-        <!-- Summary Stats -->
-        <div class="budget-stats">
-          <div class="budget-stat-card">
-            <div class="budget-stat-icon bsi--blue">
-              <svg viewBox="0 0 24 24" stroke="var(--blue)"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2M8 7V5a2 2 0 0 0-4 0v2"/></svg>
-            </div>
-            <div>
-              <div class="budget-stat-label">Total Budgets</div>
-              <div class="budget-stat-val" id="statTotal">—</div>
-            </div>
-          </div>
-          <div class="budget-stat-card">
-            <div class="budget-stat-icon bsi--green">
-              <svg viewBox="0 0 24 24" stroke="var(--green)"><polyline points="20 6 9 17 4 12"/></svg>
-            </div>
-            <div>
-              <div class="budget-stat-label">Active</div>
-              <div class="budget-stat-val" id="statActive">—</div>
-            </div>
-          </div>
-          <div class="budget-stat-card">
-            <div class="budget-stat-icon bsi--orange">
-              <svg viewBox="0 0 24 24" stroke="#d97706"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            </div>
-            <div>
-              <div class="budget-stat-label">Near Limit</div>
-              <div class="budget-stat-val" id="statNear">—</div>
-            </div>
-          </div>
-          <div class="budget-stat-card">
-            <div class="budget-stat-icon bsi--red">
-              <svg viewBox="0 0 24 24" stroke="var(--red)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            </div>
-            <div>
-              <div class="budget-stat-label">Exceeded</div>
-              <div class="budget-stat-val" id="statExceeded">—</div>
-            </div>
-          </div>
-        </div>
+        <!-- BUDGET PAGE CONTENT -->
+        <div class="budget-page-content">
 
-        <!-- Filter Tabs + Grid -->
-        <div class="filter-tabs" id="filterTabs">
-          <button class="filter-tab active" data-filter="all" onclick="setFilter('all')">
-            All <span class="tab-badge" id="tabAll">0</span>
-          </button>
-          <button class="filter-tab" data-filter="ACTIVE" onclick="setFilter('ACTIVE')">
-            Active <span class="tab-badge" id="tabActive">0</span>
-          </button>
-          <button class="filter-tab" data-filter="NEAR_LIMIT" onclick="setFilter('NEAR_LIMIT')">
-            Near Limit <span class="tab-badge" id="tabNear">0</span>
-          </button>
-          <button class="filter-tab" data-filter="EXCEEDED" onclick="setFilter('EXCEEDED')">
-            Exceeded <span class="tab-badge" id="tabExceeded">0</span>
-          </button>
-          <button class="filter-tab" data-filter="EXPIRED" onclick="setFilter('EXPIRED')">
-            Expired <span class="tab-badge" id="tabExpired">0</span>
-          </button>
-        </div>
+            <!-- Page Header -->
+            <div class="budget-page-header">
+                <div>
+                    <h1>Budgets</h1>
+                    <p>Track your spending limits and stay in control of your finances.</p>
+                </div>
+                <div class="budget-header-actions">
+                    <button class="btn-add" onclick="openAddModal()">
+                        Create Budget
+                        <svg viewBox="0 0 24 24">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
 
-        <!-- Budget Cards Grid -->
-        <div class="budget-grid" id="budgetGrid">
-          <!-- Skeletons rendered by JS on load -->
-        </div>
+            <!-- Summary Stats -->
+            <div class="budget-stats">
+                <div class="budget-stat-card">
+                    <div class="budget-stat-icon bsi--blue">
+                        <svg viewBox="0 0 24 24" stroke="var(--blue)">
+                            <rect x="2" y="7" width="20" height="14" rx="2"/>
+                            <path d="M16 7V5a2 2 0 0 0-4 0v2M8 7V5a2 2 0 0 0-4 0v2"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="budget-stat-label">Total Budgets</div>
+                        <div class="budget-stat-val" id="statTotal">—</div>
+                    </div>
+                </div>
+                <div class="budget-stat-card">
+                    <div class="budget-stat-icon bsi--green">
+                        <svg viewBox="0 0 24 24" stroke="var(--green)">
+                            <polyline points="20 6 9 17 4 12"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="budget-stat-label">Active</div>
+                        <div class="budget-stat-val" id="statActive">—</div>
+                    </div>
+                </div>
+                <div class="budget-stat-card">
+                    <div class="budget-stat-icon bsi--orange">
+                        <svg viewBox="0 0 24 24" stroke="#d97706">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                            <line x1="12" y1="9" x2="12" y2="13"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="budget-stat-label">Near Limit</div>
+                        <div class="budget-stat-val" id="statNear">—</div>
+                    </div>
+                </div>
+                <div class="budget-stat-card">
+                    <div class="budget-stat-icon bsi--red">
+                        <svg viewBox="0 0 24 24" stroke="var(--red)">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="budget-stat-label">Exceeded</div>
+                        <div class="budget-stat-val" id="statExceeded">—</div>
+                    </div>
+                </div>
+            </div>
 
-        <!-- Global error message -->
-        <div class="error-msg" id="errorMsg">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          <span id="errorText"></span>
-        </div>
+            <!-- Filter Tabs + Grid -->
+            <div class="filter-tabs" id="filterTabs">
+                <button class="filter-tab active" data-filter="all" onclick="setFilter('all')">
+                    All <span class="tab-badge" id="tabAll">0</span>
+                </button>
+                <button class="filter-tab" data-filter="ACTIVE" onclick="setFilter('ACTIVE')">
+                    Active <span class="tab-badge" id="tabActive">0</span>
+                </button>
+                <button class="filter-tab" data-filter="NEAR_LIMIT" onclick="setFilter('NEAR_LIMIT')">
+                    Near Limit <span class="tab-badge" id="tabNear">0</span>
+                </button>
+                <button class="filter-tab" data-filter="EXCEEDED" onclick="setFilter('EXCEEDED')">
+                    Exceeded <span class="tab-badge" id="tabExceeded">0</span>
+                </button>
+                <button class="filter-tab" data-filter="EXPIRED" onclick="setFilter('EXPIRED')">
+                    Expired <span class="tab-badge" id="tabExpired">0</span>
+                </button>
+            </div>
 
-      </div><!-- /budget-page-content -->
+            <!-- Budget Cards Grid -->
+            <div class="budget-grid" id="budgetGrid">
+                <!-- Skeletons rendered by JS on load -->
+            </div>
+
+            <!-- Global error message -->
+            <div class="error-msg" id="errorMsg">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <span id="errorText"></span>
+            </div>
+
+        </div><!-- /budget-page-content -->
     </div><!-- /main -->
-  </div><!-- /layout -->
+</div><!-- /layout -->
 
 
-  <!-- ══ ADD / EDIT BUDGET MODAL ══ -->
-  <div id="budgetModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="budgetModalTitle">
+<!-- ══ ADD / EDIT BUDGET MODAL ══ -->
+<div id="budgetModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="budgetModalTitle">
     <div class="modal-box">
-      <div class="modal-header">
-        <h3 class="modal-title" id="budgetModalTitle">Create Budget</h3>
-        <button class="modal-close" onclick="closeAddModal()" aria-label="Close">×</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-error-banner" id="budgetFormError" aria-live="polite"></div>
-
-        <!-- Hidden field for edit mode -->
-        <input type="hidden" id="editBudgetId" value="" />
-
-        <div class="form-group">
-          <label class="form-label" for="budgetCategorySelect">Category</label>
-          <select id="budgetCategorySelect" class="form-control">
-            <option value="" disabled selected>Select a category…</option>
-          </select>
-          <span class="field-error" id="budgetCategorySelectErr"></span>
+        <div class="modal-header">
+            <h3 class="modal-title" id="budgetModalTitle">Create Budget</h3>
+            <button class="modal-close" onclick="closeAddModal()" aria-label="Close">×</button>
         </div>
+        <div class="modal-body">
+            <div class="form-error-banner" id="budgetFormError" aria-live="polite"></div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="budgetLimit">Spending Limit ($)</label>
-            <input id="budgetLimit" type="number" class="form-control" placeholder="0.00" min="0" step="0.01"/>
-            <span class="field-error" id="budgetLimitErr"></span>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="budgetThreshold">Alert Threshold (%)</label>
-            <input id="budgetThreshold" type="number" class="form-control" placeholder="80" min="0" max="100" step="1"/>
-            <span class="field-error" id="budgetThresholdErr"></span>
-          </div>
+            <!-- Hidden field for edit mode -->
+            <input type="hidden" id="editBudgetId" value=""/>
+
+            <div class="form-group">
+                <label class="form-label" for="budgetCategorySelect">Category</label>
+                <select id="budgetCategorySelect" class="form-control">
+                    <option value="" disabled selected>Select a category…</option>
+                </select>
+                <span class="field-error" id="budgetCategorySelectErr"></span>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="budgetLimit">Spending Limit ($)</label>
+                    <input id="budgetLimit" type="number" class="form-control" placeholder="0.00" min="0" step="0.01"/>
+                    <span class="field-error" id="budgetLimitErr"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="budgetThreshold">Alert Threshold (%)</label>
+                    <input id="budgetThreshold" type="number" class="form-control" placeholder="80" min="0" max="100"
+                           step="1"/>
+                    <span class="field-error" id="budgetThresholdErr"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="budgetEndDate">End Date</label>
+                <input id="budgetEndDate" type="date" class="form-control"/>
+                <span class="field-error" id="budgetEndDateErr"></span>
+            </div>
+
+            <button class="btn-submit" id="budgetSubmitBtn" onclick="submitBudget()">
+                <span class="btn-label">Create Budget</span>
+                <span class="btn-spinner" aria-hidden="true"></span>
+            </button>
         </div>
-
-        <div class="form-group">
-          <label class="form-label" for="budgetEndDate">End Date</label>
-          <input id="budgetEndDate" type="date" class="form-control"/>
-          <span class="field-error" id="budgetEndDateErr"></span>
-        </div>
-
-        <button class="btn-submit" id="budgetSubmitBtn" onclick="submitBudget()">
-          <span class="btn-label">Create Budget</span>
-          <span class="btn-spinner" aria-hidden="true"></span>
-        </button>
-      </div>
     </div>
-  </div>
+</div>
 
-  <!-- ══ CONFIRM DELETE MODAL ══ -->
-  <div id="confirmModal" class="modal-overlay" role="dialog" aria-modal="true">
+<!-- ══ CONFIRM DELETE MODAL ══ -->
+<div id="confirmModal" class="modal-overlay" role="dialog" aria-modal="true">
     <div class="modal-box confirm-box">
-      <div class="modal-header">
-        <h3 class="modal-title">Delete Budget?</h3>
-        <button class="modal-close" onclick="closeConfirmModal()" aria-label="Close">×</button>
-      </div>
-      <div class="modal-body">
-        <p class="confirm-body">Are you sure you want to delete the <strong id="confirmBudgetName"></strong> budget? This action cannot be undone.</p>
-        <div class="confirm-actions">
-          <button class="btn-cancel" onclick="closeConfirmModal()">Cancel</button>
-          <button class="btn-confirm-del" id="confirmDelBtn" onclick="confirmDelete()">Delete</button>
+        <div class="modal-header">
+            <h3 class="modal-title">Delete Budget?</h3>
+            <button class="modal-close" onclick="closeConfirmModal()" aria-label="Close">×</button>
         </div>
-      </div>
+        <div class="modal-body">
+            <p class="confirm-body">Are you sure you want to delete the <strong id="confirmBudgetName"></strong> budget?
+                This action cannot be undone.</p>
+            <div class="confirm-actions">
+                <button class="btn-cancel" onclick="closeConfirmModal()">Cancel</button>
+                <button class="btn-confirm-del" id="confirmDelBtn" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>
     </div>
-  </div>
+</div>
 
-  <!-- ══ TOAST ══ -->
-  <div id="toast"></div>
+<!-- ══ TOAST ══ -->
+<div id="toast"></div>
 
-  <script th:src="@{/js/budget.js}" src="../static/js/budget.js"></script>
-  <script th:src="@{/js/navbar-notifications.js}" src="../static/js/navbar-notifications.js"></script>
+<script th:src="@{/js/budget.js}" src="../static/js/budget.js"></script>
+<script th:src="@{/js/navbar-notifications.js}" src="../static/js/navbar-notifications.js"></script>
 </body>
 </html>

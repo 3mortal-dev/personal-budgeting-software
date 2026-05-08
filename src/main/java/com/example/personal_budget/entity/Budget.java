@@ -1,17 +1,15 @@
 package com.example.personal_budget.entity;
 
 import com.example.personal_budget.enums.BudgetStatus;
-
-import java.time.LocalDate;
-
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
-import lombok.*;
-import lombok.Builder.Default;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import lombok.*;
+import lombok.Builder.Default;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -19,9 +17,7 @@ import jakarta.validation.constraints.Min;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "budgets", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user_id", "category_id"})
-})
+@Table(name = "budgets", uniqueConstraints = {@UniqueConstraint(columnNames = {"user_id", "category_id"})})
 public class Budget {
 
     @Id
@@ -29,7 +25,7 @@ public class Budget {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = true)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
 
@@ -42,7 +38,7 @@ public class Budget {
     private Double spendingLimit;
 
     @Column(nullable = false)
-	@Default
+    @Default
     private Double spentAmount = 0.0;
 
     @Column(nullable = false)
