@@ -74,14 +74,15 @@ async function init() {
     state.stats.transactions = data.transactionsCount ?? 0;
     state.stats.budgets      = data.budgetsCount      ?? 0;
 
-    // Load notification preferences from API response
     state.prefs.notifGoals        = data.goalProgressAlertEnabled ?? true;
     state.prefs.notifTransactions = data.budgetAlertEnabled       ?? true;
     state.prefs.currency          = data.currency                 ?? 'USD';
 
     renderAll();
     setGreeting();
-    loadNotifications();
+
+    // FIX 4: await so the badge always reflects real data before init finishes
+    await loadNotifications();
 
   } catch (err) {
     console.error('Failed to load profile:', err);
@@ -127,7 +128,6 @@ function renderAll() {
   document.getElementById('notif-transactions-toggle').checked = prefs.notifTransactions;
   setCurrencyDisplay(prefs.currency);
 
-  // Mark the currently active currency option in the dropdown
   document.querySelectorAll('.currency-option').forEach(el => {
     el.classList.toggle('active', el.dataset.value === prefs.currency);
   });
@@ -143,46 +143,55 @@ function setGreeting() {
 /* ═══════════════════════════════════════════
    NOTIFICATIONS PANEL
 ═══════════════════════════════════════════ */
+
+// FIX 1: fetch from real API instead of mock data
 async function loadNotifications() {
-  // MOCK DATA — replace with real fetch when backend is ready:
-  //   const response = await apiFetch('/api/notifications', { method: 'GET' });
-  //   state.notifications = await response.json();
-  state.notifications = [
-    {
-      id: 1,
-      type: 'goal',
-      title: 'Goal Achieved 🎯',
-      message: 'You reached your "Emergency Fund" savings goal!',
-      time: '2 min ago',
-      read: false,
-    },
-    {
-      id: 2,
-      type: 'transaction',
-      title: 'Large Transaction',
-      message: 'A payment of $450.00 was made to Amazon.',
-      time: '1 hr ago',
-      read: false,
-    },
-    {
-      id: 3,
-      type: 'transaction',
-      title: 'Salary Received',
-      message: 'Your monthly salary of $3,200 has been credited.',
-      time: '3 hrs ago',
-      read: true,
-    },
-    {
-      id: 4,
-      type: 'goal',
-      title: 'Goal Reminder',
-      message: 'You are 80% toward your "Vacation" goal. Keep going!',
-      time: 'Yesterday',
-      read: true,
-    },
-  ];
+  try {
+    const response = await apiFetch('/notifications/all', { method: 'GET' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const data = await response.json();
+
+    // Map backend shape → what renderNotifList() expects, sorted newest first
+    state.notifications = [...data]
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .map(n => ({
+        id:      n.id,
+        type:    n.type?.includes('GOAL') ? 'goal' : 'transaction',
+        title:   formatNotificationType(n.type),
+        message: n.message,
+        time:    formatRelativeTime(n.createdAt),
+        read:    n.read,
+      }));
+
+  } catch (err) {
+    console.error('Failed to load notifications:', err);
+    state.notifications = [];
+  }
 
   renderNotifBadge();
+}
+
+function formatNotificationType(type) {
+  switch (type) {
+    case 'BUDGET_ALERT':  return 'Budget Alert';
+    case 'GOAL_REACHED':  return 'Goal Reached 🎯';
+    case 'GOAL_REMINDER': return 'Goal Reminder';
+    default:              return type ?? 'Notification';
+  }
+}
+
+function formatRelativeTime(isoString) {
+  if (!isoString) return '';
+  const diff = Date.now() - new Date(isoString).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1)  return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24)  return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7)  return `${days}d ago`;
+  return new Date(isoString).toLocaleDateString();
 }
 
 function renderNotifBadge() {
@@ -246,19 +255,43 @@ function renderNotifList() {
   }).join('');
 }
 
-function markNotifRead(id) {
+// FIX 2: async, calls backend, skips already-read, reverts on failure
+async function markNotifRead(id) {
   const notif = state.notifications.find(n => n.id === id);
-  if (notif) notif.read = true;
+  if (!notif || notif.read) return;
+
+  try {
+    const response = await apiFetch(`/notifications/${id}/markRead`, { method: 'PUT' });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    notif.read = true;
+  } catch (err) {
+    console.error('Failed to mark notification as read:', err);
+    return;
+  }
+
   renderNotifList();
   renderNotifBadge();
-  // TODO: await apiFetch(`/api/notifications/${id}/read`, { method: 'PATCH' });
 }
 
-function markAllRead() {
-  state.notifications.forEach(n => n.read = true);
+// FIX 3: async, calls backend per notification, only updates state on success
+async function markAllRead() {
+  const unread = state.notifications.filter(n => !n.read);
+  if (!unread.length) return;
+
+  const results = await Promise.all(
+    unread.map(n =>
+      apiFetch(`/notifications/${n.id}/markRead`, { method: 'PUT' })
+        .then(r => r.ok)
+        .catch(() => false)
+    )
+  );
+
+  unread.forEach((n, i) => {
+    if (results[i]) n.read = true;
+  });
+
   renderNotifList();
   renderNotifBadge();
-  // TODO: await apiFetch('/api/notifications/read-all', { method: 'PATCH' });
 }
 
 /* ═══════════════════════════════════════════
@@ -295,7 +328,6 @@ async function onNotifGoalsChange(enabled) {
     });
     if (!response.ok) throw new Error('Failed');
   } catch (err) {
-    // Revert UI on failure
     state.prefs.notifGoals = !enabled;
     document.getElementById('notif-goals-toggle').checked = !enabled;
     console.error('Goals notification update failed:', err);
@@ -321,7 +353,6 @@ async function onNotifTransactionsChange(enabled) {
     });
     if (!response.ok) throw new Error('Failed');
   } catch (err) {
-    // Revert UI on failure
     state.prefs.notifTransactions = !enabled;
     document.getElementById('notif-transactions-toggle').checked = !enabled;
     console.error('Transactions notification update failed:', err);
@@ -414,7 +445,6 @@ async function saveProfile() {
 
     await response.json();
 
-    // State only updated after confirmed API success
     state.user.name     = name;
     state.user.initials = getInitials(name);
     renderAll();
@@ -452,7 +482,7 @@ async function handleLogout() {
   } catch (err) {
     console.error('Logout error:', err);
   } finally {
-    window.location.href = '/login'; // always redirect
+    window.location.href = '/login';
   }
 }
 
