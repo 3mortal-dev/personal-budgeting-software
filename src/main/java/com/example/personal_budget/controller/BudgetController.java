@@ -1,0 +1,92 @@
+package com.example.personal_budget.controller;
+
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+
+import com.example.personal_budget.dto.request.CreateBudgetRequest;
+import com.example.personal_budget.dto.response.BudgetResponse;
+import com.example.personal_budget.service.BudgetService;
+import com.example.personal_budget.service.UserService;
+
+import java.util.List;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequestMapping("/api/budgets")
+@RequiredArgsConstructor
+public class BudgetController {
+
+    private final BudgetService budgetService;
+    private final UserService userService;
+
+    @GetMapping
+    public ResponseEntity<List<BudgetResponse>> getAllBudgets(@AuthenticationPrincipal UserDetails userDetails) {
+        List<BudgetResponse> budgets = budgetService.getAllBudgets(userService.getUserId(userDetails));
+        return ResponseEntity.ok(budgets);
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<List<BudgetResponse>> getActiveBudgets(@AuthenticationPrincipal UserDetails userDetails) {
+        List<BudgetResponse> budgets = budgetService.getActiveBudgets(userService.getUserId(userDetails));
+        return ResponseEntity.ok(budgets);
+    }
+
+    @GetMapping("/near-limit")
+    public ResponseEntity<List<BudgetResponse>> getNearLimitBudgets(@AuthenticationPrincipal UserDetails userDetails) {
+        List<BudgetResponse> budgets = budgetService.getNearLimitBudgets(userService.getUserId(userDetails));
+        return ResponseEntity.ok(budgets);
+    }
+
+    @GetMapping("/Exeeded-limit")
+    public ResponseEntity<List<BudgetResponse>> getExeededLimitBudgets(@AuthenticationPrincipal UserDetails userDetails) {
+        List<BudgetResponse> budgets = budgetService.getExeededLimitBudgets(userService.getUserId(userDetails));
+        return ResponseEntity.ok(budgets);
+    }
+
+    @GetMapping("/expired")
+    public ResponseEntity<List<BudgetResponse>> getExpiredBudgets(@AuthenticationPrincipal UserDetails userDetails) {
+        List<BudgetResponse> budgets = budgetService.getExpiredBudgets(userService.getUserId(userDetails));
+        return ResponseEntity.ok(budgets);
+    }
+
+    @PostMapping
+    public ResponseEntity<BudgetResponse> addBudget(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody CreateBudgetRequest request) {
+        BudgetResponse budget = budgetService.addBudget(userService.getUserId(userDetails), request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(budget);
+    }
+
+    @PutMapping("/{budgetID}")
+    public ResponseEntity<BudgetResponse> editBudget(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long budgetID, @Valid @RequestBody CreateBudgetRequest request) {
+        BudgetResponse budget = budgetService.editBudget(userService.getUserId(userDetails), budgetID, request);
+        return ResponseEntity.ok(budget);
+    }
+
+    @DeleteMapping("/{budgetID}")
+    public ResponseEntity<Void> deleteBudget(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long budgetID) {
+        budgetService.deleteBudgetById(userService.getUserId(userDetails), budgetID);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/delete-all")
+    public ResponseEntity<Void> deleteAllBudgets(@AuthenticationPrincipal UserDetails userDetails) {
+        budgetService.deleteAllBudgets(userService.getUserId(userDetails));
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/delete-expired")
+    public ResponseEntity<Void> deleteExpiredBudgets(@AuthenticationPrincipal UserDetails userDetails) {
+        budgetService.deleteExpiredBudgets(userService.getUserId(userDetails));
+        return ResponseEntity.noContent().build();
+    }
+}

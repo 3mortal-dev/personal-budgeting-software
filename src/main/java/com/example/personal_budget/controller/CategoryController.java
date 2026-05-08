@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 import com.example.personal_budget.service.CategoryService;
 import com.example.personal_budget.service.UserService;
 import com.example.personal_budget.dto.request.CreateCategoryRequest;
-import com.example.personal_budget.entity.Category;
+import com.example.personal_budget.dto.response.CategoryResponse;
 
 @RestController
 @RequestMapping("/api/categories")
@@ -32,34 +32,32 @@ public class CategoryController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<List<Category>> getAllCategories(@AuthenticationPrincipal UserDetails userDetails) {
-        List<Category> categories = categoryService.getAllCategories(userService.getUserId(userDetails));
+    public ResponseEntity<List<CategoryResponse>> getAllCategories(@AuthenticationPrincipal UserDetails userDetails) {
+        List<CategoryResponse> categories = categoryService.getAllCategories(userService.getUserId(userDetails));
         return ResponseEntity.ok(categories);
     }
 
     @GetMapping("/built-in")
-    public ResponseEntity<List<Category>> getBuiltInCategories() {
-        List<Category> categories = categoryService.getBuiltInCategories();
+    public ResponseEntity<List<CategoryResponse>> getBuiltInCategories() {
+        List<CategoryResponse> categories = categoryService.getBuiltInCategories();
         return ResponseEntity.ok(categories);
     }
 
     @GetMapping("/custom")
-    public ResponseEntity<List<Category>> getCustomCategories(@AuthenticationPrincipal UserDetails userDetails) {
-        List<Category> categories = categoryService.getCustomCategories(userService.getUserId(userDetails));
+    public ResponseEntity<List<CategoryResponse>> getCustomCategories(@AuthenticationPrincipal UserDetails userDetails) {
+        List<CategoryResponse> categories = categoryService.getCustomCategories(userService.getUserId(userDetails));
         return ResponseEntity.ok(categories);
     }
 
     @PostMapping
-    public ResponseEntity<Category> addCustomCategory(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody CreateCategoryRequest request) {
-        Category category = categoryService.addCustomCategory(userService.getUserId(userDetails), request);
+    public ResponseEntity<CategoryResponse> addCustomCategory(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody CreateCategoryRequest request) {
+        CategoryResponse category = categoryService.addCustomCategory(userService.getUserId(userDetails), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(category);
     }
 
-    @PutMapping ("/{categoryID}")
-    public ResponseEntity<Category> editCustomCategory(@AuthenticationPrincipal UserDetails userDetails,
-                                                        @PathVariable Long categoryID,
-                                                        @Valid @RequestBody CreateCategoryRequest request) {
-        Category category = categoryService.editCustomCategory(userService.getUserId(userDetails), categoryID, request);
+    @PutMapping("/{categoryID}")
+    public ResponseEntity<CategoryResponse> editCustomCategory(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long categoryID, @Valid @RequestBody CreateCategoryRequest request) {
+        CategoryResponse category = categoryService.editCustomCategory(userService.getUserId(userDetails), categoryID, request);
         return ResponseEntity.ok(category);
     }
 
