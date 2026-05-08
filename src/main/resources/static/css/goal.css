@@ -799,3 +799,14 @@ body::after {
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition-duration: 0.01ms !important; }
 }
+
+
+.btn-icon--progress {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.btn-icon--progress:hover {
+  background: #bbf7d0;
+  color: #15803d;
+}

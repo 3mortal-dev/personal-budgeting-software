@@ -83,11 +83,18 @@ const COLOR_HEX = {
 let goals          = [];
 let notifications  = [];
 let deleteTargetId = null;
+let progressGoalId = null;
 let activeNotifTab = 'all';
 
 /* ═══════════════════════════════════════════════════
    DOM REFS
    ═══════════════════════════════════════════════════ */
+
+const progressOverlay   = document.getElementById('progressOverlay');
+const progressAmount    = document.getElementById('progressAmount');
+const saveProgressBtn   = document.getElementById('saveProgressBtn');
+const cancelProgressBtn = document.getElementById('cancelProgressBtn');
+const closeProgressBtn  = document.getElementById('closeProgressBtn');
 const goalsGrid           = document.getElementById('goalsGrid');
 const emptyState          = document.getElementById('emptyState');
 const activeGoalsCount    = document.getElementById('activeGoalsCount');
@@ -141,6 +148,18 @@ document.addEventListener('DOMContentLoaded', () => {
    EVENT LISTENERS
    ═══════════════════════════════════════════════════ */
 function attachEventListeners() {
+
+  saveProgressBtn?.addEventListener('click', saveProgress);
+
+  cancelProgressBtn?.addEventListener('click', closeProgressModal);
+
+  closeProgressBtn?.addEventListener('click', closeProgressModal);
+
+  progressOverlay?.addEventListener('click', e => {
+      if (e.target === progressOverlay)
+          closeProgressModal();
+  });
+
   document.getElementById('openModalBtn')?.addEventListener('click', openAddModal);
   document.getElementById('closeModalBtn')?.addEventListener('click', closeModal);
   document.getElementById('cancelModalBtn')?.addEventListener('click', closeModal);
@@ -476,16 +495,23 @@ function buildGoalCard(goal) {
     </div>
     ${!completed ? `<p class="goal-card__left">${formatMoney(left)} left</p>` : ''}
     <div class="goal-card__actions">
-      <button class="btn-icon btn-icon--edit"   title="Edit"   aria-label="Edit goal">
-        <i class="fa-solid fa-pen"></i>
-      </button>
-      <button class="btn-icon btn-icon--delete" title="Delete" aria-label="Delete goal">
-        <i class="fa-solid fa-trash"></i>
-      </button>
-    </div>`;
+
+    <button class="btn-icon btn-icon--progress"
+            title="Add Progress">
+        <i class="fa-solid fa-plus"></i>
+    </button>
+
+    <button class="btn-icon btn-icon--edit"
+            title="Edit">
+        <button class="btn-icon btn-icon--delete" title="Delete" aria-label="Delete goal">
+          <i class="fa-solid fa-trash"></i>
+    </button>
+      </div>`;
 
   card.querySelector('.btn-icon--edit').addEventListener('click',   () => openEditModal(goal.id));
   card.querySelector('.btn-icon--delete').addEventListener('click', () => openDeleteModal(goal.id));
+  card.querySelector('.btn-icon--progress')
+    .addEventListener('click', () => openProgressModal(goal.id));
 
   requestAnimationFrame(() =>
     setTimeout(() => {
@@ -506,6 +532,82 @@ function updateSummary() {
   if (targetAmountSummary) targetAmountSummary.textContent = formatMoney(target);
 }
 
+
+  function openProgressModal(id) {
+
+    progressGoalId = id;
+
+    progressAmount.value = '';
+
+    progressOverlay.classList.add('is-open');
+
+    progressAmount.focus();
+}
+
+
+function closeProgressModal() {
+
+    progressOverlay.classList.remove('is-open');
+
+    progressGoalId = null;
+}
+
+async function saveProgress() {
+
+    const amount = parseFloat(progressAmount.value);
+
+    if (!amount || amount <= 0) {
+
+        showToast('Enter valid amount.', 'error');
+
+        return;
+    }
+
+    const goal = goals.find(g => g.id === progressGoalId);
+
+    if (!goal) return;
+
+    const updatedSaved = (goal.savedAmount || 0) + amount;
+
+    if (updatedSaved > goal.targetAmount) {
+
+        showToast('Amount exceeds target.', 'error');
+
+        return;
+    }
+
+    try {
+
+        await saveGoal({
+
+            id: goal.id,
+
+            goalName: goal.name,
+
+            savedAmount: updatedSaved,
+
+            targetAmount: goal.targetAmount,
+
+            deadline: goal.deadline,
+
+            iconClass: goal.iconClass,
+
+            iconColor: goal.iconColor,
+        });
+
+        closeProgressModal();
+
+        showToast('Progress updated!', 'success');
+
+        await loadGoals(false);
+
+    } catch (err) {
+
+        console.error(err);
+
+        showToast('Failed to update progress.', 'error');
+    }
+}
 /* ═══════════════════════════════════════════════════
    MODAL — ADD / EDIT
    ═══════════════════════════════════════════════════ */
@@ -523,6 +625,84 @@ window.openEditModal = async function(id) {
     try { goal = await fetchGoalById(id); }
     catch { showToast('Could not load goal.', 'error'); return; }
   }
+
+
+//   function openProgressModal(id) {
+
+//     progressGoalId = id;
+
+//     progressAmount.value = '';
+
+//     progressOverlay.classList.add('is-open');
+
+//     progressAmount.focus();
+// }
+
+
+// function closeProgressModal() {
+
+//     progressOverlay.classList.remove('is-open');
+
+//     progressGoalId = null;
+// }
+
+// async function saveProgress() {
+
+//     const amount = parseFloat(progressAmount.value);
+
+//     if (!amount || amount <= 0) {
+
+//         showToast('Enter valid amount.', 'error');
+
+//         return;
+//     }
+
+//     const goal = goals.find(g => g.id === progressGoalId);
+
+//     if (!goal) return;
+
+//     const updatedSaved = (goal.savedAmount || 0) + amount;
+
+//     if (updatedSaved > goal.targetAmount) {
+
+//         showToast('Amount exceeds target.', 'error');
+
+//         return;
+//     }
+
+//     try {
+
+//         await saveGoal({
+
+//             id: goal.id,
+
+//             goalName: goal.name,
+
+//             savedAmount: updatedSaved,
+
+//             targetAmount: goal.targetAmount,
+
+//             deadline: goal.deadline,
+
+//             iconClass: goal.iconClass,
+
+//             iconColor: goal.iconColor,
+//         });
+
+//         closeProgressModal();
+
+//         showToast('Progress updated!', 'success');
+
+//         await loadGoals(false);
+
+//     } catch (err) {
+
+//         console.error(err);
+
+//         showToast('Failed to update progress.', 'error');
+//     }
+// }
+
   modalTitle.textContent     = 'Edit Goal';
   goalIdInput.value          = goal.id;
   goalNameInput.value        = goal.name || '';
