@@ -127,8 +127,7 @@
     // }, 1800);
 
         if (response.ok) {
-            // Cookie is set automatically by Spring Boot
-            window.location.href = '/userProfile'; 
+            window.location.href = '/userProfile';
 
         } else if (response.status === 401 || response.status === 403) {
             showError(emailInput, emailError, 'Invalid email or password.');

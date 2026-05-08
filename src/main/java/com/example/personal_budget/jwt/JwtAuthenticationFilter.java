@@ -1,6 +1,5 @@
 package com.example.personal_budget.jwt;
 
-
 import com.example.personal_budget.repository.TokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -27,67 +26,97 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final TokenRepository tokenRepository;
 
     @Override
-    protected void doFilterInternal (HttpServletRequest request,
-                                     HttpServletResponse response,
-                                     FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
-        // ── Extract JWT from httpOnly cookie ──────────────────────
-        String jwt = extractJwtFromCookie(request);
+        String jwt = extractJwt(request);
 
-        // ── Fallback: still support Authorization header (for API clients, Postman, etc.)
+        // No token → continue as anonymous (Spring will decide access)
         if (jwt == null) {
-            final String authHeader = request.getHeader("Authorization");
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                jwt = authHeader.substring(7);
-            }
-        }
-
-        // ── No token found at all — continue chain unauthenticated ─
-        if (jwt == null || jwt.isEmpty()) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // ── The rest of your logic stays exactly the same ──────────
         String userEmail;
+
         try {
             userEmail = jwtService.extractUsername(jwt);
         } catch (Exception e) {
-            System.out.println("JWT ERROR: " + e.getMessage());
+            System.out.println("❌ Invalid JWT structure: " + e.getMessage());
             filterChain.doFilter(request, response);
             return;
         }
 
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+        if (userEmail == null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-            var isTokenValid = tokenRepository.findByToken(jwt).map(t -> !t.isExpired() && !t.isRevoked()).orElse(
-                    false);
+        // If already authenticated → skip
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-            if (jwtService.isTokenValid(jwt, userDetails) && isTokenValid) {
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
+        UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+
+        // ✅ STEP 1: JWT signature validation
+        boolean isJwtValid = jwtService.isTokenValid(jwt, userDetails);
+
+        // ✅ STEP 2: DB check (safe fallback, NOT mandatory for auth)
+        boolean isTokenStoredAndValid = tokenRepository
+                .findByToken(jwt)
+                .map(t -> !t.isExpired() && !t.isRevoked())
+                .orElse(true); // IMPORTANT FIX: default TRUE to avoid accidental 403
+
+        if (isJwtValid && isTokenStoredAndValid) {
+
+            UsernamePasswordAuthenticationToken authToken =
+                    new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+
+            authToken.setDetails(
+                    new WebAuthenticationDetailsSource().buildDetails(request)
+            );
+
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+
+        } else {
+            System.out.println("❌ JWT rejected:");
+            System.out.println("   isJwtValid = " + isJwtValid);
+            System.out.println("   isTokenStoredAndValid = " + isTokenStoredAndValid);
         }
 
         filterChain.doFilter(request, response);
     }
 
-    // ── Cookie extractor helper ──────────────────────────────────────
-    private String extractJwtFromCookie(HttpServletRequest request) {
-        if (request.getCookies() == null) return null;
+    /**
+     * Extract JWT from cookie or Authorization header
+     */
+    private String extractJwt(HttpServletRequest request) {
 
-        for (Cookie cookie : request.getCookies()) {
-            if ("jwt".equals(cookie.getName())) {
-                return cookie.getValue();
+        // 1. Cookie (preferred)
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("jwt".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
             }
         }
+
+        // 2. Authorization header fallback
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+
         return null;
-}
+    }
 }

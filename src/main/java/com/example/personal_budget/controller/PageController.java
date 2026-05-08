@@ -37,6 +37,11 @@ public class PageController {
     public String notificationPage() {
         return "notifications";
     }
+
+    @GetMapping("/reports")
+    public String reportsPage() {
+        return "reports";
+    }
     
 
     
