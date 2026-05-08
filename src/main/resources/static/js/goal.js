@@ -106,7 +106,6 @@ const modalTitle         = document.getElementById('modalTitle');
 const goalForm           = document.getElementById('goalForm');
 const goalIdInput        = document.getElementById('goalId');
 const goalNameInput      = document.getElementById('goalName');
-const savedAmountInput   = document.getElementById('savedAmount');
 const targetAmountInput  = document.getElementById('targetAmountInput');
 const deadlineInput      = document.getElementById('deadline');
 const selectedIconInput  = document.getElementById('selectedIcon');
@@ -425,6 +424,18 @@ async function saveGoal(payload) {
   return res.json();
 }
 
+async function updateGoalProgress(id, amount) {
+  const res = await fetch(`${API_BASE}/${id}/progress?amount=${encodeURIComponent(amount)}`, {
+    method: 'PATCH',
+    headers: csrfHeaders(),
+  });
+  if (!res.ok) {
+    const msg = await res.text().catch(() => '');
+    throw new Error(`HTTP ${res.status}${msg ? ': ' + msg : ''}`);
+  }
+  return res.json();
+}
+
 async function deleteGoalById(id) {
   const res = await fetch(`${API_BASE}/${id}`, {
     method:  'DELETE',
@@ -578,22 +589,7 @@ async function saveProgress() {
 
     try {
 
-        await saveGoal({
-
-            id: goal.id,
-
-            goalName: goal.name,
-
-            savedAmount: updatedSaved,
-
-            targetAmount: goal.targetAmount,
-
-            deadline: goal.deadline,
-
-            iconClass: goal.iconClass,
-
-            iconColor: goal.iconColor,
-        });
+        await updateGoalProgress(goal.id, updatedSaved);
 
         closeProgressModal();
 
@@ -626,87 +622,9 @@ window.openEditModal = async function(id) {
     catch { showToast('Could not load goal.', 'error'); return; }
   }
 
-
-//   function openProgressModal(id) {
-
-//     progressGoalId = id;
-
-//     progressAmount.value = '';
-
-//     progressOverlay.classList.add('is-open');
-
-//     progressAmount.focus();
-// }
-
-
-// function closeProgressModal() {
-
-//     progressOverlay.classList.remove('is-open');
-
-//     progressGoalId = null;
-// }
-
-// async function saveProgress() {
-
-//     const amount = parseFloat(progressAmount.value);
-
-//     if (!amount || amount <= 0) {
-
-//         showToast('Enter valid amount.', 'error');
-
-//         return;
-//     }
-
-//     const goal = goals.find(g => g.id === progressGoalId);
-
-//     if (!goal) return;
-
-//     const updatedSaved = (goal.savedAmount || 0) + amount;
-
-//     if (updatedSaved > goal.targetAmount) {
-
-//         showToast('Amount exceeds target.', 'error');
-
-//         return;
-//     }
-
-//     try {
-
-//         await saveGoal({
-
-//             id: goal.id,
-
-//             goalName: goal.name,
-
-//             savedAmount: updatedSaved,
-
-//             targetAmount: goal.targetAmount,
-
-//             deadline: goal.deadline,
-
-//             iconClass: goal.iconClass,
-
-//             iconColor: goal.iconColor,
-//         });
-
-//         closeProgressModal();
-
-//         showToast('Progress updated!', 'success');
-
-//         await loadGoals(false);
-
-//     } catch (err) {
-
-//         console.error(err);
-
-//         showToast('Failed to update progress.', 'error');
-//     }
-// }
-
   modalTitle.textContent     = 'Edit Goal';
   goalIdInput.value          = goal.id;
   goalNameInput.value        = goal.name || '';
-  savedAmountInput.value     = goal.savedAmount  ?? 0;
   targetAmountInput.value    = goal.targetAmount ?? 0;
 
   // FIX: deadline from server is "YYYY-MM-DD"; <input type="month"> needs "YYYY-MM"
@@ -737,7 +655,6 @@ async function handleFormSubmit(e) {
   const payload = {
     ...(goalIdInput.value ? { id: +goalIdInput.value } : {}),
     goalName:     goalNameInput.value.trim(),
-    savedAmount:  parseFloat(savedAmountInput.value)  || 0,
     targetAmount: parseFloat(targetAmountInput.value) || 0,
     deadline,
     iconClass:    selectedIconInput?.value  || 'fa-bullseye',
@@ -762,7 +679,6 @@ async function handleFormSubmit(e) {
 
 function validateForm() {
 
-  const saved  = parseFloat(savedAmountInput.value) || 0;
   const target = parseFloat(targetAmountInput.value) || 0;
 
   const nameErr = document.getElementById('nameErr');
@@ -775,21 +691,9 @@ function validateForm() {
     return false;
   }
 
-  if (saved < 0) {
-    showToast('Saved amount cannot be negative.', 'error');
-    savedAmountInput.focus();
-    return false;
-  }
-
   if (target <= 0) {
     showToast('Target amount must be greater than 0.', 'error');
     targetAmountInput.focus();
-    return false;
-  }
-
-  if (saved > target) {
-    showToast('Saved amount cannot exceed target amount.', 'error');
-    savedAmountInput.focus();
     return false;
   }
 

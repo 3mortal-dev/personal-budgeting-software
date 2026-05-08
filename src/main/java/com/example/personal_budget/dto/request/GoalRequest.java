@@ -15,9 +15,6 @@ public class GoalRequest {
 
     @NotNull(message = "Deadline is required")
     private LocalDate deadline;
-
-    @Positive(message = "Saved amount must be positive")
-    private Double savedAmount;
     
     private String iconClass;
     private String iconColor;

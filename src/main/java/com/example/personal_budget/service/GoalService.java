@@ -50,23 +50,20 @@ public class GoalService {
 	 * @param request  the details of the goal to be added, including name, target amount, deadline, etc.
 	 * @param userId   the ID of the user to whom the goal belongs
 	 * @return the created Goal entity with all details filled in, including calculated status
-     */
+    */
     public Goal addGoal(GoalRequest request, long userId) {
-        double saved = (request.getSavedAmount() != null ? request.getSavedAmount() : 0.0);
         double target = (request.getTargetAmount() != null ? request.getTargetAmount() : 0.0);
 
         Goal goal = new Goal();
         goal.setUser(userService.getUserById(userId));
         goal.setGoalName(request.getGoalName());
         goal.setTargetAmount(target);
-        goal.setCurrentAmount(saved);
+        goal.setCurrentAmount(0.0);
         goal.setDeadline(request.getDeadline());
         goal.setIconClass(request.getIconClass());
         goal.setIconColor(request.getIconColor());
 
-        // FIX: status must reflect the initial amounts, not always ONTRACK.
-        // A goal created already at 100% should immediately show as EXCEEDED.
-        goal.setStatus(calculateStatus(saved, target));
+        goal.setStatus(calculateStatus(0.0, target));
 
         return goalRepository.save(goal);
     }
@@ -77,12 +74,11 @@ public class GoalService {
 
         assertOwner(goal, userId);
 
-        double saved = (request.getSavedAmount() != null ? request.getSavedAmount() : goal.getCurrentAmount());
+        double saved = goal.getCurrentAmount();
         double target = (request.getTargetAmount() != null ? request.getTargetAmount() : goal.getTargetAmount());
 
         goal.setGoalName(request.getGoalName());
         goal.setTargetAmount(target);
-        goal.setCurrentAmount(saved);
         goal.setDeadline(request.getDeadline());
         goal.setIconClass(request.getIconClass());
         goal.setIconColor(request.getIconColor());
