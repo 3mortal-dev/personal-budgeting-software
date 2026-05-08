@@ -12,3 +12,39 @@ Explain for the directory
 Flow:
 
 1- controller recieve request and mapped the request to the proper method, which most of times call specefic service to handle needed action, it wrapp the json data in http message in a dto object, which send as a parameter to service
+
+
+========================================================================================================
+
+Fixes:
+
+1- Register:
+	- Fix show password
+	- Terms of service redirect to the register page
+
+2- dashboard:
+	- Still hard coded, needs to be dynamic
+	- Budget does not take a start date and category should be a selector to select from the available categories
+
+3- Hard coded "Good Morning, Ahmed" in some pages and also top right corner icon
+
+4- The whole sidebar theme is DIFFERENT IN EVERY PAGE, make it consistent across all pages
+
+5- The home page is not getting to the log page because of "login.html" it should be "login" only and the same for register page
+
+6- Transactions page is not responsive
+
+7- Budget page is not linked yet
+
+8- The user can not change his username, email, or password
+
+9- The user can not delete his account
+
+10- Dashboard page is called "Home" in the sidebar of the profile page
+
+11- User image is not saved in the database
+
+12- Can you please tell me HOW CAN I ADD A CATEGORY, I can not find the option to add a category in the UI
+
+
+there is more but I'm hungry....
