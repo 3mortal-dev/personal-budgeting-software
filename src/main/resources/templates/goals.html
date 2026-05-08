@@ -22,31 +22,33 @@
         <span class="sidebar__logo-text">BudgetWise</span>
     </div>
     <nav class="sidebar__nav">
-        <a class="sidebar__link" th:href="@{/dashboard}" href="dashboard.html">
+        <a class="sidebar__link" th:href="@{/dashboard}" href="/dashboard">
             <i class="fa-solid fa-house"></i><span>Home</span>
         </a>
-        <a class="sidebar__link" th:href="@{/transactions}" href="transactions.html">
+        <a class="sidebar__link" th:href="@{/transactions}" href="/transactions">
             <i class="fa-solid fa-receipt"></i><span>Transactions</span>
         </a>
-        <a class="sidebar__link" th:href="@{/budgets}" href="budget.html">
+        <a class="sidebar__link" th:href="@{/budget}" href="/budget">
             <i class="fa-solid fa-chart-pie"></i><span>Budgets</span>
         </a>
-        <a class="sidebar__link sidebar__link--active" th:href="@{/goals}" href="goals.html">
+        <a class="sidebar__link sidebar__link--active" th:href="@{/goals}" href="/goals">
             <i class="fa-solid fa-bullseye"></i><span>Goals</span>
         </a>
-        <a class="sidebar__link" th:href="@{/reports}" href="reports.html">
+        <a class="sidebar__link" th:href="@{/reports}" href="/reports">
             <i class="fa-solid fa-chart-bar"></i><span>Reports</span>
         </a>
-        <a class="sidebar__link" th:href="@{/notifications}" href="notifications.html">
+        <a class="sidebar__link" th:href="@{/notifications}" href="/notifications">
             <i class="fa-solid fa-bell"></i><span>Notifications</span>
         </a>
-        <a class="sidebar__link" th:href="@{/profile}" href="profile.html">
+        <a class="sidebar__link" th:href="@{/userProfile}" href="/userProfile">
             <i class="fa-solid fa-user"></i><span>Profile</span>
         </a>
     </nav>
-    <a class="sidebar__logout" th:href="@{/logout}" href="index.html">
-        <i class="fa-solid fa-arrow-right-from-bracket"></i><span>Logout</span>
-    </a>
+    <form class="sidebar__logout-form" th:action="@{/api/auth/logout}" method="post">
+        <button type="submit" class="sidebar__logout">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i><span>Logout</span>
+        </button>
+    </form>
 </aside>
 
 <!-- ═══════════════════════════ MAIN ═══════════════════════════ -->
@@ -82,7 +84,7 @@
                     </div>
                     <div id="notifList" class="notif-list"></div>
                     <div class="notif-footer">
-                        <a href="/notifications" class="notif-view-all">View all notifications</a>
+                        <a class="notif-view-all" th:href="@{/notifications}" href="/notifications">View all notifications</a>
                     </div>
                 </div>
             </div>

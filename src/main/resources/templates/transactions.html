@@ -18,7 +18,7 @@
 
     <!-- ══ SIDEBAR ══ -->
     <aside class="sidebar" id="sidebar">
-        <a th:href="@{/dashboard}" href="dashboard.html" class="logo">
+        <a class="logo" th:href="@{/dashboard}" href="/dashboard">
             <div class="logo-icon">
                 <i class="fas fa-wallet"></i>
             </div>
@@ -26,41 +26,41 @@
         </a>
 
         <nav class="nav">
-            <a th:href="@{/dashboard}" href="dashboard.html" class="nav-item">
+            <a class="nav-item" th:href="@{/dashboard}" href="/dashboard">
                 <i class="fas fa-th-large"></i>
                 Dashboard
             </a>
-            <a th:href="@{/transactions}" href="transactions.html" class="nav-item">
+            <a class="nav-item" th:href="@{/transactions}" href="/transactions">
                 <i class="fas fa-list"></i>
                 Transactions
             </a>
-            <a th:href="@{/budget}" href="budget.html" class="nav-item">
+            <a class="nav-item" th:href="@{/budget}" href="/budget">
                 <i class="fas fa-chart-pie"></i>
                 Budgets
             </a>
-            <a th:href="@{/goals}" href="goals.html" class="nav-item">
+            <a class="nav-item" th:href="@{/goals}" href="/goals">
                 <i class="fas fa-bullseye"></i>
                 Goals
             </a>
-            <a th:href="@{/reports}" href="reports.html" class="nav-item">
+            <a class="nav-item" th:href="@{/reports}" href="/reports">
                 <i class="fas fa-chart-bar"></i>
                 Reports
             </a>
-            <a th:href="@{/notifications}" href="notifications.html" class="nav-item">
+            <a class="nav-item" th:href="@{/notifications}" href="/notifications">
                 <i class="fas fa-bell"></i>
                 Notifications
             </a>
-            <a th:href="@{/userProfile}" href="userProfile.html" class="nav-item">
+            <a class="nav-item" th:href="@{/userProfile}" href="/userProfile">
                 <i class="fas fa-user"></i>
                 Profile
             </a>
         </nav>
 
         <div class="logout">
-            <div class="nav-item" onclick="window.location='index.html'">
+            <a class="nav-item" th:href="@{/index}" href="/index">
                 <i class="fas fa-sign-out-alt"></i>
                 Logout
-            </div>
+            </a>
         </div>
     </aside>
 
@@ -95,7 +95,7 @@
                         </div>
                         <div class="notif-list" id="notifList"></div>
                         <div class="notif-dropdown-footer">
-                            <a href="notifications.html" class="notif-view-all">View all
+                            <a class="notif-view-all" th:href="@{/notifications}" href="/notifications">View all
                                 notifications</a>
                         </div>
                     </div>

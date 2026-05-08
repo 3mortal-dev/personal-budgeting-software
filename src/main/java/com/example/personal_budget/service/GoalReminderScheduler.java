@@ -30,7 +30,7 @@ public class GoalReminderScheduler {
 
             GoalReminderEvent event =
                     new GoalReminderEvent(
-                            goal.getUserId(),
+                            goal.getUser().getId(),
                             goal.getGoalName(),
                             goal.getDeadline()
                     );

@@ -44,14 +44,13 @@ public class TransactionService {
             @NonNull CreateTransactionRequest request) {
 
         // For INCOME transactions, category should be null; for EXPENSE, source should be null
-        Category category = request.getType().equals(TransactionType.INCOME) ? null : categoryService.getById(
-                request.getCategoryId());
+        Category category = request.getType().equals(TransactionType.INCOME) ? null : categoryService.getCategoryById(userId,request.getCategoryId());
 
         if (request.getType().equals(TransactionType.EXPENSE)) {
             if (request.getCategoryId() == null) {
                 throw new IllegalArgumentException("Category is required for EXPENSE transactions");
             }
-            category = categoryService.getById(request.getCategoryId());
+            category = categoryService.getCategoryById(userId, request.getCategoryId());
         }
 
         Transaction transaction = Transaction.builder().user(userService.getUserById(userId)).amount(
@@ -78,8 +77,7 @@ public class TransactionService {
         }
 
         // For INCOME transactions, category should be null; for EXPENSE, use category
-        Category category = request.getType().equals(TransactionType.INCOME) ? null : categoryService.getById(
-                request.getCategoryId());
+        Category category = request.getType().equals(TransactionType.INCOME) ? null : categoryService.getCategoryById(userId, request.getCategoryId());
 
         transaction.setAmount(request.getAmount());
         transaction.setDate(request.getDate());
