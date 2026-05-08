@@ -27,6 +27,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     boolean existsByTypeAndNameIgnoreCase(CategoryType type, String name);
 
     boolean existsByUserIdAndNameIgnoreCase(Long userId, String name);
+
     @Query("""
 		SELECT c FROM Category c
 		WHERE c.id = :categoryId
