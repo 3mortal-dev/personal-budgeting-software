@@ -41,7 +41,7 @@ public class Budget {
     private Double spendingLimit;
 
     @Column(nullable = false)
-    private Double spentAmount;
+    private Double spentAmount = 0.0;
 
     @Column(nullable = false)
     @Min(value = 0, message = "Threshold cannot be less than 0")

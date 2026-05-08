@@ -62,9 +62,9 @@ public class GoalController {
         long userId = userService.getUserId(userDetails);
         return ResponseEntity.ok(
                 goalService.getGoalsByUserId(userId)
-                           .stream()
-                           .map(GoalResponse::new)
-                           .toList()
+                        .stream()
+                        .map(GoalResponse::new)
+                        .toList()
         );
     }
 }

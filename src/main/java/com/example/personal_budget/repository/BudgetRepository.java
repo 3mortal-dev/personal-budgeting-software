@@ -15,17 +15,17 @@ public interface BudgetRepository extends JpaRepository<Budget, Long> {
 
     List<Budget> findByUserId(Long userID);
 
-	List<Budget> findByUserIdAndEndDateGreaterThanEqual(Long userId, LocalDate date);
+    List<Budget> findByUserIdAndEndDateGreaterThanEqual(Long userId, LocalDate date);
 
     List<Budget> findByUserIdAndStatus(Long userID, BudgetStatus status);
 
-    List<Budget> findByUserIdAndEndDateSmallerThan(Long userID, LocalDate date);
+    List<Budget> findByUserIdAndEndDateLessThan(Long userID, LocalDate date);
 
-	Optional<Budget> findByUserIdAndCategoryId(Long userID, Long categoryId);
+    Optional<Budget> findByUserIdAndCategoryId(Long userID, Long categoryId);
 
     Optional<Budget> findByIdAndUserId(Long id, Long userID);
-	
-	Long countByUserIdAndEndDateGreaterThanEqual(Long userId, LocalDate date);
 
-	Long countByUserIdAndEndDateSmallerThan(Long userId, LocalDate date);
+    Long countByUserIdAndEndDateGreaterThanEqual(Long userId, LocalDate date);
+
+    Long countByUserIdAndEndDateLessThan(Long userId, LocalDate date);
 }

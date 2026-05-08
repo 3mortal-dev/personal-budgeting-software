@@ -43,7 +43,7 @@ public class BudgetService {
     }
 
     public List<Budget> getExpiredBudgets(Long userID) {
-        return budgetRepository.findByUserIdAndEndDateSmallerThan(userID, LocalDate.now());
+        return budgetRepository.findByUserIdAndEndDateLessThan(userID, LocalDate.now());
     }
 
     public Long countActiveBudgets(Long userID) {
@@ -51,7 +51,7 @@ public class BudgetService {
     }
 
     public Long countExpiredBudgets(Long userID) {
-        return budgetRepository.countByUserIdAndEndDateSmallerThan(userID, LocalDate.now());
+        return budgetRepository.countByUserIdAndEndDateLessThan(userID, LocalDate.now());
     }
 
     public Budget getBudgetById(Long userID, Long budgetID) {
@@ -83,7 +83,6 @@ public class BudgetService {
                 .user(user)
                 .category(category)
                 .spendingLimit(request.getSpendingLimit())
-                .spentAmount(0.0)
                 .threshold(request.getThreshold())
                 .startDate(LocalDate.now())
                 .endDate(request.getEndDate())
@@ -119,7 +118,7 @@ public class BudgetService {
     }
 
     public void deleteExpiredBudgets(Long userID) {
-        List<Budget> budgets = budgetRepository.findByUserIdAndEndDateSmallerThan(userID, LocalDate.now());
+        List<Budget> budgets = budgetRepository.findByUserIdAndEndDateLessThan(userID, LocalDate.now());
         budgetRepository.deleteAll(budgets);
     }
 

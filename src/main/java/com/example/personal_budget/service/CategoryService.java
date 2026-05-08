@@ -1,17 +1,18 @@
 package com.example.personal_budget.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
-import com.example.personal_budget.repository.CategoryRepository;
-import com.example.personal_budget.repository.UserRepository;
+import com.example.personal_budget.dto.request.CreateCategoryRequest;
 import com.example.personal_budget.entity.Category;
 import com.example.personal_budget.entity.User;
 import com.example.personal_budget.enums.CategoryType;
-import com.example.personal_budget.dto.request.CreateCategoryRequest;
+import com.example.personal_budget.repository.CategoryRepository;
+import com.example.personal_budget.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import java.util.List;
 
 @Service
 @Transactional
@@ -58,7 +59,7 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
-    public void deleteCustomCategory (Long userID, Long categoryID) {
+    public void deleteCustomCategory(Long userID, Long categoryID) {
 
         Category category = categoryRepository.findByIdAndUserId(categoryID, userID).orElseThrow(
                 () -> new RuntimeException("Category not found"));

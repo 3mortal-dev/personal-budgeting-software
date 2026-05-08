@@ -22,10 +22,16 @@ public class GoalService {
     // apply identical thresholds.
     // ─────────────────────────────────────────────────────────────
     private GoalStatus calculateStatus(double saved, double target) {
-        if (target <= 0) return GoalStatus.ONTRACK;
+        if (target <= 0) {
+            return GoalStatus.ONTRACK;
+        }
         double ratio = saved / target;
-        if (ratio >= 1.0) return GoalStatus.EXCEEDED;
-        if (ratio >= 0.8) return GoalStatus.NEARLIMIT;
+        if (ratio >= 1.0) {
+            return GoalStatus.EXCEEDED;
+        }
+        if (ratio >= 0.8) {
+            return GoalStatus.NEARLIMIT;
+        }
         return GoalStatus.ONTRACK;
     }
 
@@ -38,9 +44,16 @@ public class GoalService {
         }
     }
 
+    /*
+	 * Adds a new financial goal for the user.
+	 *
+	 * @param request  the details of the goal to be added, including name, target amount, deadline, etc.
+	 * @param userId   the ID of the user to whom the goal belongs
+	 * @return the created Goal entity with all details filled in, including calculated status
+     */
     public Goal addGoal(GoalRequest request, long userId) {
-        double saved  = request.getSavedAmount()  != null ? request.getSavedAmount()  : 0.0;
-        double target = request.getTargetAmount() != null ? request.getTargetAmount() : 0.0;
+        double saved = (request.getSavedAmount() != null ? request.getSavedAmount() : 0.0);
+        double target = (request.getTargetAmount() != null ? request.getTargetAmount() : 0.0);
 
         Goal goal = new Goal();
         goal.setUser(userService.getUserById(userId));
@@ -64,8 +77,8 @@ public class GoalService {
 
         assertOwner(goal, userId);
 
-        double saved  = request.getSavedAmount()  != null ? request.getSavedAmount()  : goal.getCurrentAmount();
-        double target = request.getTargetAmount() != null ? request.getTargetAmount() : goal.getTargetAmount();
+        double saved = (request.getSavedAmount() != null ? request.getSavedAmount() : goal.getCurrentAmount());
+        double target = (request.getTargetAmount() != null ? request.getTargetAmount() : goal.getTargetAmount());
 
         goal.setGoalName(request.getGoalName());
         goal.setTargetAmount(target);
