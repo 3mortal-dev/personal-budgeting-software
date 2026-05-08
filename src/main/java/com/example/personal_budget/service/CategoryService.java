@@ -35,7 +35,7 @@ public class CategoryService {
     }
 
     public Category getCategoryById(Long userID, Long categoryID) {
-        return categoryRepository.findByIdAndUserId(categoryID, userID)
+        return categoryRepository.findAccessibleCategory(categoryID, userID)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
     }
 

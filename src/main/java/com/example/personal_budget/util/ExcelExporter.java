@@ -4,6 +4,7 @@ import com.example.personal_budget.entity.Transaction;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Component;
+import com.example.personal_budget.enums.TransactionType;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,14 +13,26 @@ import java.util.List;
 @Component
 public class ExcelExporter implements ReportExporter {
 
+    private String getCategoryOrSource(Transaction transaction) {
+        if (transaction.getType() == TransactionType.INCOME) {
+            return transaction.getSource() != null
+                    ? transaction.getSource()
+                    : "N/A";
+        }
+
+        return transaction.getCategory() != null
+                ? transaction.getCategory().getName()
+                : "N/A";
+    }
+
     @Override
-    public File export (List<Transaction> transactions, String filePath) throws Exception {
+    public File export(List<Transaction> transactions, String filePath) throws Exception {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Transactions");
 
         // Create header row
         Row headerRow = sheet.createRow(0);
-        String[] headers = {"ID", "Amount", "Type", "Category ID", "Date", "Source", "Description"};
+        String[] headers = {"ID", "Amount", "Type", "Category / Source", "Date", "Description"};
         CellStyle headerStyle = workbook.createCellStyle();
         headerStyle.setFillForegroundColor(IndexedColors.LIGHT_BLUE.getIndex());
         headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
@@ -37,9 +50,8 @@ public class ExcelExporter implements ReportExporter {
             row.createCell(0).setCellValue(transaction.getId().toString());
             row.createCell(1).setCellValue(transaction.getAmount());
             row.createCell(2).setCellValue(transaction.getType().toString());
-            row.createCell(3).setCellValue(transaction.getCategory().getName());
+            row.createCell(3).setCellValue(getCategoryOrSource(transaction));
             row.createCell(4).setCellValue(transaction.getDate().toString());
-            row.createCell(5).setCellValue(transaction.getSource());
             row.createCell(6).setCellValue(transaction.getDescription());
         }
 

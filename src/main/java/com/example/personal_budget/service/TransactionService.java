@@ -1,5 +1,17 @@
 package com.example.personal_budget.service;
 
+import java.time.LocalDate;
+import java.time.Month;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.jspecify.annotations.NonNull;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.example.personal_budget.dto.request.CreateTransactionRequest;
 import com.example.personal_budget.dto.request.MonthlyReportRequest;
 import com.example.personal_budget.dto.request.TransactionFilterRequest;
@@ -8,20 +20,10 @@ import com.example.personal_budget.entity.Transaction;
 import com.example.personal_budget.enums.TransactionType;
 import com.example.personal_budget.exception.TransactionNotFoundException;
 import com.example.personal_budget.repository.TransactionRepository;
+
 import jakarta.persistence.EntityNotFoundException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.NonNull;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.time.Month;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +31,8 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepo;
     private final CategoryService categoryService;
+	private final BudgetService budgetService;
+
     @Getter
     private final UserService userService;
 
@@ -50,12 +54,14 @@ public class TransactionService {
             if (request.getCategoryId() == null) {
                 throw new IllegalArgumentException("Category is required for EXPENSE transactions");
             }
-            category = categoryService.getCategoryById(userId, request.getCategoryId());
+            category = categoryService.getCategoryById(userId, request.getCategoryId());  // Built in or custom
         }
 
         Transaction transaction = Transaction.builder().user(userService.getUserById(userId)).amount(
                 request.getAmount()).type(request.getType()).date(request.getDate()).category(category).source(
                 request.getSource()).description(request.getDescription()).build();
+
+		// budgetService.onTransactionAdded(userId, userId, transaction.);
 
         return transactionRepo.save(transaction);
     }

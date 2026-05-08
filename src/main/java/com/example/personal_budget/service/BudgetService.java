@@ -2,16 +2,20 @@ package com.example.personal_budget.service;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import com.example.personal_budget.dto.request.CreateBudgetRequest;
-import com.example.personal_budget.entity.User;
 import com.example.personal_budget.entity.Budget;
 import com.example.personal_budget.entity.Category;
+import com.example.personal_budget.entity.User;
+import com.example.personal_budget.enums.BudgetStatus;
 import com.example.personal_budget.repository.BudgetRepository;
 import com.example.personal_budget.repository.CategoryRepository;
 import com.example.personal_budget.repository.UserRepository;
-import com.example.personal_budget.enums.BudgetStatus;
 
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
@@ -133,12 +137,80 @@ public class BudgetService {
         budgetRepository.delete(budget);
     }
 
-    public Budget applyExpensesToBudget(Long userID, Long CategoryID, Double expenseAmount) {
+    public void onTransactionAdded(Long userID, Long categoryID, Double amount) {
 
-        Budget budget = budgetRepository.findByUserIdAndCategoryId(userID, CategoryID)
-                .orElseThrow(() -> new RuntimeException("Budget not found"));
+        if (categoryID == null) {
+            return;
+        }
 
-        Double newSpentAmount = budget.getSpentAmount() + expenseAmount;
+        Optional<Budget> budgetOpt = budgetRepository.findByUserIdAndCategoryId(userID, categoryID);
+        if (budgetOpt.isEmpty()) {
+            return;
+        }
+
+        Budget budget = budgetOpt.get();
+
+        if (budget.getEndDate().isBefore(LocalDate.now())) {
+            return;
+        }
+
+        Double newSpentAmount = budget.getSpentAmount() + amount;
+        updateBudgetSpending(budget, newSpentAmount);
+    }
+
+    public void onTransactionDeleted(Long userID, Long categoryID, Double amount, LocalDate transactionDate) {
+
+        if (categoryID == null) {
+            return;
+        }
+
+        Optional<Budget> budgetOpt = budgetRepository.findByUserIdAndCategoryId(userID, categoryID);
+        if (budgetOpt.isEmpty()) {
+            return;
+        }
+
+        Budget budget = budgetOpt.get();
+
+        if (budget.getEndDate().isBefore(LocalDate.now()) || transactionDate.isBefore(budget.getStartDate())) {
+            return;
+        }
+
+        Double newSpentAmount = Math.max(0.0, budget.getSpentAmount() - amount);
+        updateBudgetSpending(budget, newSpentAmount);
+    }
+
+    // ---------------------------------------------------------------------------------------
+    public void onTransactionEdited(Long userID,
+            Long oldCategoryID, Long newCategoryID,
+            Double oldAmount, Double newAmount,
+            LocalDate oldTransactionDate, LocalDate newTransactionDate) {
+
+        if (oldCategoryID != null) {
+            Optional<Budget> oldBudgetOpt = budgetRepository.findByUserIdAndCategoryId(userID, oldCategoryID);
+            if (oldBudgetOpt.isPresent()) {
+                Budget oldBudget = oldBudgetOpt.get();
+                if (!(oldBudget.getEndDate().isBefore(LocalDate.now()) || oldTransactionDate.isBefore(oldBudget.getStartDate()))) {
+                    Double newSpentAmount = Math.max(0.0, oldBudget.getSpentAmount() - oldAmount);
+                    updateBudgetSpending(oldBudget, newSpentAmount);
+                }
+            }
+        }
+
+        if (newCategoryID != null) {
+            Optional<Budget> newBudgetOpt = budgetRepository.findByUserIdAndCategoryId(userID, newCategoryID);
+            if (newBudgetOpt.isPresent()) {
+                Budget newBudget = newBudgetOpt.get();
+                if (!(newBudget.getEndDate().isBefore(LocalDate.now()) || newTransactionDate.isBefore(newBudget.getStartDate()))) {
+                    Double newSpentAmount = newBudget.getSpentAmount() + newAmount;
+                    updateBudgetSpending(newBudget, newSpentAmount);
+                }
+            }
+        }
+    }
+    // ---------------------------------------------------------------------------------------
+
+    private void updateBudgetSpending(Budget budget, Double newSpentAmount) {
+
         budget.setSpentAmount(newSpentAmount);
 
         Double limit = budget.getSpendingLimit();
@@ -152,7 +224,7 @@ public class BudgetService {
             budget.setStatus(BudgetStatus.ON_TRACK);
         }
 
-        return budgetRepository.save(budget);
+        budgetRepository.save(budget);
     }
 
     public Collection<Budget> getActiveBudgets(Long userId, int limit) {
