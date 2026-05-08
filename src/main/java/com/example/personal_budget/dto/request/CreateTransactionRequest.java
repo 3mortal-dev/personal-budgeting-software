@@ -11,16 +11,15 @@ import java.time.LocalDate;
 @Data
 public class CreateTransactionRequest {
 
-    @Positive (message = "Amount must be positive")
+    @Positive(message = "Amount must be positive")
     private double amount;
 
-    @NotNull (message = "Type can't be null")
+    @NotNull(message = "Type can't be null")
     private TransactionType type;
 
-    @JsonFormat (pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
-
-    @NotNull (message = "Category id can't be null")
+    
     private Long categoryId;
 
     private String source;

@@ -21,7 +21,8 @@ public class TransactionResponse {
     public TransactionResponse(Transaction t) {
         this.id = t.getId();
         this.userId = t.getUser().getId();
-        this.categoryId = t.getCategory().getId();
+        // TransactionResponse.java
+        this.categoryId = t.getCategory() != null ? t.getCategory().getId() : null;
         this.amount = t.getAmount();
         this.type = t.getType();
         this.date = t.getDate();
