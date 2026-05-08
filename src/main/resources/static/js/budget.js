@@ -234,7 +234,7 @@ function renderSkeletons() {
 function buildCard(b) {
     const status = deriveStatus(b);
     const cat = state.categories.find(c => c.id === b.categoryId);
-    const catName = cat?.name ?? `Category #${b.categoryId}`;
+    const catName = cat.name;
     const meta = categoryMeta(catName);
     const pct = spentPct(b);
     const fClass = fillClass(pct, b.threshold);
@@ -248,7 +248,7 @@ function buildCard(b) {
           ${meta.icon}
         </div>
         <div class="bc-title-group">
-          <div class="bc-category">${escapeHtml(catName)}</div>
+          <div class="bc-category">${catName}</div>
           <div class="bc-dates">
             <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             ${escapeHtml(formatDate(b.startDate))} – ${escapeHtml(formatDate(b.endDate))}
@@ -382,6 +382,15 @@ function openAddModal() {
     document.getElementById("budgetModalTitle").textContent = "Create Budget";
     document.getElementById("budgetSubmitBtn").querySelector(".btn-label").textContent = "Create Budget";
     document.getElementById("editBudgetId").value = "";
+
+    // Ensure category select is enabled for new budgets
+    const select = document.getElementById("budgetCategorySelect");
+    if (select) {
+        select.disabled = false;
+        select.style.opacity = "";
+        select.style.cursor = "";
+    }
+
     clearModalFields();
     openModal("budgetModal");
 }
@@ -394,9 +403,14 @@ function openEditModal(id) {
     document.getElementById("budgetSubmitBtn").querySelector(".btn-label").textContent = "Save Changes";
     document.getElementById("editBudgetId").value = id;
 
-    // Pre-select the category that matches the budget's categoryId
+    // Pre-select the category and lock it — category cannot be changed on edit
     const select = document.getElementById("budgetCategorySelect");
-    if (select && b.categoryId) select.value = b.categoryId;
+    if (select && b.categoryId != null) {
+        select.value = String(b.categoryId);
+        select.disabled = true;
+        select.style.opacity = "0.6";
+        select.style.cursor = "not-allowed";
+    }
 
     document.getElementById("budgetLimit").value = b.spendingLimit ?? "";
     document.getElementById("budgetThreshold").value = b.threshold ?? 80;
@@ -405,6 +419,13 @@ function openEditModal(id) {
 }
 
 function closeAddModal() {
+    // Always re-enable category select so it's ready for next open
+    const select = document.getElementById("budgetCategorySelect");
+    if (select) {
+        select.disabled = false;
+        select.style.opacity = "";
+        select.style.cursor = "";
+    }
     closeModal("budgetModal");
     clearModalFields();
 }
@@ -437,13 +458,18 @@ async function submitBudget() {
     [selectEl, limitEl, threshEl, endDateEl].forEach(clearFieldError);
     hideBanner("budgetFormError");
 
-    const categoryId = parseInt(selectEl.value, 10);
+    const isEdit = !!editId;
+    // In edit mode the select is disabled; retrieve categoryId from state instead
+    const originalBudget = isEdit ? state.budgets.find(b => b.id === parseInt(editId, 10)) : null;
+    const categoryId = isEdit
+        ? (originalBudget?.categoryId ?? parseInt(selectEl.value, 10))
+        : parseInt(selectEl.value, 10);
     const spendingLimit = parseFloat(limitEl.value);
     const threshold = parseFloat(threshEl.value);
     const endDate = endDateEl.value;
     let hasError = false;
 
-    if (!selectEl.value || isNaN(categoryId)) {
+    if (!isEdit && (!selectEl.value || isNaN(categoryId))) {
         setFieldError(selectEl, "Please select a category.");
         hasError = true;
     }
@@ -472,7 +498,7 @@ async function submitBudget() {
 
     // Build the CreateBudgetRequest payload the backend expects
     const payload = {categoryId, spendingLimit, threshold, endDate};
-    const isEdit = !!editId;
+    // isEdit already declared above
     const endpoint = isEdit ? API.BY_ID(editId) : API.ALL;
     const method = isEdit ? "PUT" : "POST";
 
