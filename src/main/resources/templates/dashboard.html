@@ -8,6 +8,24 @@
 </head>
 <body>
 
+<!-- ══ PAGE LOADER ══ -->
+<div class="page-loader" id="pageLoader">
+    <div class="page-loader__logo">
+        <div class="page-loader__icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                <path d="M2 10h20"/>
+            </svg>
+        </div>
+        BudgetWise
+    </div>
+    <div class="page-loader__bar-track">
+        <div class="page-loader__bar-fill" id="loaderBar"></div>
+    </div>
+    <div class="page-loader__label" id="loaderLabel">Loading your dashboard…</div>
+</div>
+
 <div class="layout">
 
     <!-- ══ SIDEBAR ══ -->
@@ -98,7 +116,7 @@
 
         <!-- TOP NAV -->
         <div class="topnav">
-            <div class="topnav-greeting" id="greeting">Good morning, there <span>👋</span></div>
+            <div class="topnav-greeting" id="greeting"><span class="skeleton-greeting"></span></div>
             <div class="topnav-actions">
                 <div class="notif-wrapper" id="notifWrapper">
                     <button class="btn-icon notif-btn" id="notifBtn" onclick="toggleNotifications()"
@@ -123,7 +141,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="avatar">AS</div>
+                <div class="avatar skeleton-light" id="topnavAvatar">&nbsp;</div>
             </div>
         </div>
 
@@ -264,7 +282,7 @@
                                href="/transactions">Transactions</a>
                         </div>
                         <div>
-                            <span class="stat-val" id="statTx">—</span>
+                            <span class="stat-val skeleton-light" id="statTx">&nbsp;</span>
                             <span class="stat-badge badge-green" id="statTxBadge" style="display:none;"></span>
                         </div>
                     </div>
@@ -281,7 +299,7 @@
                     <div class="stat-body">
                         <div class="stat-label">Active Budgets</div>
                         <div>
-                            <span class="stat-val" id="statBudgets">—</span>
+                            <span class="stat-val skeleton-light" id="statBudgets">&nbsp;</span>
                         </div>
                         <div class="stat-sub" id="statBudgetsSub"></div>
                     </div>
@@ -298,7 +316,7 @@
                     <div class="stat-body">
                         <div class="stat-label">Goals in Progress</div>
                         <div>
-                            <span class="stat-val" id="statGoals">—</span>
+                            <span class="stat-val skeleton-light" id="statGoals">&nbsp;</span>
                             <span class="stat-badge badge-green" id="statGoalsBadge"></span>
                         </div>
                     </div>
@@ -365,7 +383,10 @@
             </div>
             <div class="tx-form-actions">
                 <button type="button" class="tx-btn-secondary" onclick="closeAddTransactionModal()">Cancel</button>
-                <button type="submit" class="tx-btn-primary">Add Transaction</button>
+                <button type="submit" class="tx-btn-primary" id="addTransactionBtn">
+                    <span class="btn-label">Add Transaction</span>
+                    <span class="btn-spinner" aria-hidden="true"></span>
+                </button>
             </div>
         </form>
     </div>

@@ -600,6 +600,18 @@ button {
 /* ═══════════════════════════════════════════
    SKELETON / LOADING
 ═══════════════════════════════════════════ */
+
+/* ── Shimmer keyframe (shared) ── */
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ── Dark shimmer — used on the blue balance card ── */
 .skeleton {
     background: linear-gradient(90deg,
     rgba(255, 255, 255, .08) 25%,
@@ -612,17 +624,128 @@ button {
     min-height: 36px;
     min-width: 160px;
     display: block;
+    color: transparent !important; /* hide placeholder text while loading */
+    pointer-events: none;
+    user-select: none;
 }
 
-@keyframes shimmer {
-    0% {
-        background-position: 200% 0;
-    }
-    100% {
-        background-position: -200% 0;
-    }
+/* ── Light shimmer — used on white cards (stat cards, section cards, budgets) ── */
+.skeleton-light {
+    background: linear-gradient(90deg,
+    #f0f2f7 25%,
+    #e4e8f0 50%,
+    #f0f2f7 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    border-radius: 6px;
+    display: block;
+    color: transparent !important;
+    pointer-events: none;
+    user-select: none;
 }
 
+/* ── Stat value skeleton ── */
+.stat-val.skeleton-light {
+    min-width: 48px;
+    min-height: 28px;
+    border-radius: 6px;
+}
+
+/* ── Greeting skeleton ── */
+.skeleton-greeting {
+    display: inline-block;
+    width: 200px;
+    height: 22px;
+    border-radius: 6px;
+    vertical-align: middle;
+    background: linear-gradient(90deg, #e8eaf0 25%, #d8dce8 50%, #e8eaf0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+}
+
+/* ── Avatar skeleton ── */
+.avatar.skeleton-light {
+    background: linear-gradient(90deg, #e8eaf0 25%, #d8dce8 50%, #e8eaf0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+    color: transparent !important;
+}
+
+/* ── Skeleton rows for transaction list & budgets list ── */
+.skeleton-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.skeleton-row:last-child {
+    border-bottom: none;
+}
+
+.skeleton-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.skeleton-line {
+    border-radius: 5px;
+    height: 12px;
+}
+
+.skeleton-line--short {
+    width: 80px;
+}
+
+.skeleton-line--medium {
+    width: 130px;
+}
+
+.skeleton-line--long {
+    width: 180px;
+}
+
+.skeleton-lines {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.skeleton-amount {
+    width: 64px;
+    height: 16px;
+    border-radius: 5px;
+    flex-shrink: 0;
+}
+
+/* ── Budget skeleton rows ── */
+.skeleton-budget-row {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.skeleton-budget-row:last-child {
+    border-bottom: none;
+}
+
+.skeleton-budget-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.skeleton-bar {
+    height: 8px;
+    border-radius: 4px;
+    width: 100%;
+}
+
+/* ── Dot-bounce loading pulse (kept for backwards compat) ── */
 .loading-pulse {
     display: flex;
     align-items: center;
@@ -657,6 +780,124 @@ button {
         transform: scale(1);
         opacity: 1;
     }
+}
+
+/* ── Button loading state ── */
+.btn-submit.is-loading .btn-label,
+.tx-btn-primary.is-loading .btn-label {
+    opacity: 0;
+}
+
+.btn-submit.is-loading,
+.tx-btn-primary.is-loading {
+    position: relative;
+    pointer-events: none;
+    opacity: .85;
+}
+
+/* Inline spinner for form submit buttons */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.btn-spinner {
+    display: none;
+    width: 16px;
+    height: 16px;
+    border: 2.5px solid rgba(255, 255, 255, .35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.btn-submit .btn-spinner {
+    display: none;
+}
+
+/* hidden by default */
+.btn-submit.is-loading .btn-spinner,
+.tx-btn-primary.is-loading .btn-spinner {
+    display: block;
+}
+
+/* tx-btn-primary needs relative + overflow for the spinner */
+.tx-btn-primary {
+    position: relative;
+    overflow: hidden;
+}
+
+.tx-btn-primary .btn-label {
+    transition: opacity .15s;
+}
+
+/* ── Full-page loading overlay (initial page load) ── */
+.page-loader {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 9000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    transition: opacity .4s ease, visibility .4s ease;
+}
+
+.page-loader.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.page-loader__logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.page-loader__icon {
+    width: 44px;
+    height: 44px;
+    background: var(--green);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 22px;
+}
+
+.page-loader__bar-track {
+    width: 220px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.page-loader__bar-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--green);
+    border-radius: 4px;
+    transition: width .35s ease;
+}
+
+.page-loader__label {
+    font-size: 13px;
+    color: var(--text3);
+    min-height: 18px;
+    text-align: center;
 }
 
 /* ═══════════════════════════════════════════
@@ -1732,4 +1973,696 @@ button {
     border-color: var(--blue);
     background: #eef4ff;
     font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════
+   BUDGET PAGE – EXTENDED STYLES
+═══════════════════════════════════════════ */
+
+/* ── Full-page content area ── */
+.budget-page-content {
+    padding: 28px;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* ── Page header ── */
+.budget-page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.budget-page-header h1 {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -.5px;
+}
+
+.budget-page-header p {
+    font-size: 13.5px;
+    color: var(--text2);
+    margin-top: 4px;
+}
+
+.budget-header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* ── Summary stat strip ── */
+.budget-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.budget-stat-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.budget-stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.budget-stat-icon svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.bsi--blue {
+    background: #eff6ff;
+}
+
+.bsi--green {
+    background: var(--green-light);
+}
+
+.bsi--orange {
+    background: #fffbeb;
+}
+
+.bsi--red {
+    background: #fee2e2;
+}
+
+.budget-stat-label {
+    font-size: 11.5px;
+    color: var(--text2);
+    font-weight: 500;
+    margin-bottom: 3px;
+}
+
+.budget-stat-val {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -.5px;
+}
+
+/* ── Filter tabs ── */
+.filter-tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 6px;
+    box-shadow: var(--shadow);
+    width: fit-content;
+}
+
+.filter-tab {
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    background: none;
+    cursor: pointer;
+    border: none;
+    transition: all .18s;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.filter-tab:hover {
+    background: var(--bg);
+    color: var(--text);
+}
+
+.filter-tab.active {
+    background: var(--green);
+    color: #fff;
+}
+
+.tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(255, 255, 255, .25);
+}
+
+.filter-tab:not(.active) .tab-badge {
+    background: var(--bg);
+    color: var(--text3);
+}
+
+/* ── Budget grid ── */
+.budget-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+/* ── Budget card ── */
+.budget-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    transition: box-shadow .2s, transform .2s;
+}
+
+.budget-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.bc-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.bc-category-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.bc-category-icon svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.bc-title-group {
+    flex: 1;
+}
+
+.bc-category {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 3px;
+}
+
+.bc-dates {
+    font-size: 12px;
+    color: var(--text3);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.bc-dates svg {
+    width: 11px;
+    height: 11px;
+    stroke: var(--text3);
+    fill: none;
+}
+
+.bc-status-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    letter-spacing: .3px;
+}
+
+.status--ACTIVE {
+    background: var(--green-light);
+    color: var(--green);
+}
+
+.status--EXPIRED {
+    background: #f1f5f9;
+    color: var(--text3);
+}
+
+.status--EXCEEDED {
+    background: #fee2e2;
+    color: var(--red);
+}
+
+.status--NEAR_LIMIT {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+/* Amounts row */
+.bc-amounts {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.bc-spent-label {
+    font-size: 11px;
+    color: var(--text3);
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.bc-spent-amount {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -.5px;
+}
+
+.bc-limit-wrap {
+    text-align: right;
+}
+
+.bc-limit-label {
+    font-size: 11px;
+    color: var(--text3);
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+
+.bc-limit-amount {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text2);
+}
+
+/* Progress bar */
+.bc-progress-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.bc-progress-bar {
+    height: 8px;
+    background: var(--bg);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.bc-progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 1s cubic-bezier(.4, 0, .2, 1);
+    width: 0%;
+}
+
+.fill--safe {
+    background: var(--green);
+}
+
+.fill--warning {
+    background: #f59e0b;
+}
+
+.fill--danger {
+    background: var(--red);
+}
+
+.fill--exceeded {
+    background: var(--red);
+    opacity: .7;
+}
+
+.bc-progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text3);
+}
+
+.bc-progress-pct {
+    font-weight: 700;
+}
+
+/* Threshold row */
+.bc-threshold {
+    font-size: 12px;
+    color: var(--text3);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.bc-threshold svg {
+    width: 12px;
+    height: 12px;
+    stroke: var(--text3);
+    fill: none;
+}
+
+/* Action buttons */
+.bc-actions {
+    display: flex;
+    gap: 8px;
+    padding-top: 4px;
+    border-top: 1px solid var(--border);
+}
+
+.bc-btn {
+    flex: 1;
+    height: 36px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all .18s;
+}
+
+.bc-btn svg {
+    width: 14px;
+    height: 14px;
+    stroke: currentColor;
+    fill: none;
+}
+
+.bc-btn:hover {
+    border-color: var(--green);
+    color: var(--green);
+    background: var(--green-light);
+}
+
+.bc-btn.danger:hover {
+    border-color: var(--red);
+    color: var(--red);
+    background: #fff5f5;
+}
+
+/* ── Empty state ── */
+.budget-empty {
+    grid-column: 1 / -1;
+    padding: 64px 24px;
+    text-align: center;
+    color: var(--text3);
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.budget-empty svg {
+    width: 52px;
+    height: 52px;
+    stroke: var(--text3);
+    fill: none;
+    margin: 0 auto 14px;
+    opacity: .35;
+}
+
+.budget-empty p {
+    font-size: 14px;
+    margin-bottom: 18px;
+}
+
+/* ── Skeleton cards ── */
+.budget-skel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.skel-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.skel-circ {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+    background: var(--border);
+    animation: bpulse 1.4s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+.skel-line {
+    height: 12px;
+    border-radius: 6px;
+    background: var(--border);
+    animation: bpulse 1.4s ease-in-out infinite;
+}
+
+.skel-bar {
+    height: 8px;
+    border-radius: 99px;
+    background: var(--border);
+    animation: bpulse 1.4s ease-in-out infinite;
+}
+
+@keyframes bpulse {
+    0%, 100% {
+        opacity: 1
+    }
+    50% {
+        opacity: .4
+    }
+}
+
+/* ── Add budget button (card style) ── */
+.budget-add-card {
+    background: var(--white);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 40px 24px;
+    cursor: pointer;
+    color: var(--text3);
+    font-size: 14px;
+    font-weight: 600;
+    transition: all .2s;
+    min-height: 180px;
+}
+
+.budget-add-card svg {
+    width: 28px;
+    height: 28px;
+    stroke: currentColor;
+    fill: none;
+    opacity: .5;
+}
+
+.budget-add-card:hover {
+    border-color: var(--green);
+    color: var(--green);
+    background: var(--green-light);
+}
+
+.budget-add-card:hover svg {
+    opacity: 1;
+}
+
+/* ── Modal overrides (budget-specific fields) ── */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+/* ── Toast ── */
+#toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    background: var(--text);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 13.5px;
+    font-weight: 600;
+    box-shadow: var(--shadow-lg);
+    z-index: 999;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity .25s, transform .25s;
+    pointer-events: none;
+}
+
+#toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── Confirm delete modal ── */
+.confirm-box {
+    width: 380px;
+    max-width: 95vw;
+}
+
+.confirm-body {
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.6;
+}
+
+.confirm-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-cancel {
+    flex: 1;
+    height: 44px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text2);
+    background: var(--white);
+    cursor: pointer;
+    transition: all .18s;
+}
+
+.btn-cancel:hover {
+    border-color: var(--text);
+    color: var(--text);
+}
+
+.btn-confirm-del {
+    flex: 1;
+    height: 44px;
+    background: var(--red);
+    color: #fff;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background .18s;
+    border: none;
+}
+
+.btn-confirm-del:hover {
+    background: #c53030;
+}
+
+/* form-error-banner (reused from dashboard) */
+.form-error-banner {
+    display: none;
+    background: #fff5f5;
+    border: 1.5px solid #fecaca;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #dc2626;
+    font-weight: 500;
+}
+
+.form-error-banner.show {
+    display: block;
+}
+
+.field-error {
+    font-size: 12px;
+    color: var(--red);
+    margin-top: 2px;
+    min-height: 16px;
+    display: block;
+}
+
+/* Spinner inside submit button */
+.btn-spinner {
+    display: none;
+    width: 16px;
+    height: 16px;
+    border: 2.5px solid rgba(255, 255, 255, .4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin .6s linear infinite;
+}
+
+.btn-submit.is-loading .btn-label {
+    display: none;
+}
+
+.btn-submit.is-loading .btn-spinner {
+    display: inline-block;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+    .budget-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 860px) {
+    .budget-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .budget-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .budget-page-content {
+        padding: 16px;
+    }
+
+    .budget-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
 }
