@@ -119,6 +119,26 @@ public class TransactionService {
         return transactionRepo.sumByUserIdAndType(contextUserId, TransactionType.EXPENSE);
     }
 
+    public Double getMonthlyIncome(Long contextUserId, LocalDate startDate, LocalDate endDate) {
+        return transactionRepo.sumByUserIdAndTypeAndDateBetween(
+                contextUserId,
+                TransactionType.INCOME,
+                startDate,
+                endDate);
+    }
+
+    public Double getMonthlyExpense(Long contextUserId, LocalDate startDate, LocalDate endDate) {
+        return transactionRepo.sumByUserIdAndTypeAndDateBetween(
+                contextUserId,
+                TransactionType.EXPENSE,
+                startDate,
+                endDate);
+    }
+
+    public Integer getNumberOfTransactions(Long contextUserId) {
+        return transactionRepo.countByUserId(contextUserId);
+    }
+
     public List<Transaction> filterHistory(
             Long userId,
             @NonNull TransactionFilterRequest request) {

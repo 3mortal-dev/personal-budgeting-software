@@ -1,5 +1,7 @@
 package com.example.personal_budget.service;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.personal_budget.dto.request.CreateBudgetRequest;
@@ -13,6 +15,7 @@ import com.example.personal_budget.enums.BudgetStatus;
 
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -150,5 +153,14 @@ public class BudgetService {
         }
 
         return budgetRepository.save(budget);
+    }
+
+    public Collection<Budget> getActiveBudgets(Long userId, int limit) {
+
+        return budgetRepository.findByUserIdAndEndDateAfter(
+                userId,
+                LocalDate.now(),
+                PageRequest.of(0, limit, Sort.by("endDate").ascending())
+        );
     }
 }

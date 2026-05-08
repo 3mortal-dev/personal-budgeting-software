@@ -1,59 +1,64 @@
-// package com.example.personal_budget.controller;
+package com.example.personal_budget.controller;
 
-// import java.math.BigDecimal;
-// import java.time.LocalTime;
-// import java.util.List;
+import com.example.personal_budget.dto.response.BudgetResponse;
+import com.example.personal_budget.dto.response.DashboardResponse;
+import com.example.personal_budget.dto.response.TransactionResponse;
+import com.example.personal_budget.service.BudgetService;
+import com.example.personal_budget.service.GoalService;
+import com.example.personal_budget.service.TransactionService;
+import com.example.personal_budget.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.http.ResponseEntity;
-// import org.springframework.security.core.annotation.AuthenticationPrincipal;
-// import org.springframework.security.core.userdetails.UserDetails;
-// import org.springframework.stereotype.Controller;
-// import org.springframework.web.bind.annotation.GetMapping;
-// import org.springframework.web.bind.annotation.RestController;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
 
-// import com.example.personal_budget.dto.response.DashboardResponse;
-// import com.example.personal_budget.service.BudgetService;
-// import com.example.personal_budget.service.GoalService;
-// import com.example.personal_budget.service.TransactionService;
-// import com.example.personal_budget.service.UserService;
-// import com.example.personal_budget.entity.Transaction;
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/dashboard")
+public class DashboardController {
 
-// @RestController("/dashboard")
-// public class DashboardController {
+    private final TransactionService transactionService;
+    private final UserService userService;
+    private final BudgetService budgetService;
+    private final GoalService goalService;
 
-//     @Autowired
-//     private TransactionService transactionService;
+    @GetMapping
+    public ResponseEntity<DashboardResponse> getDashboard(@AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = userService.getUserId(userDetails);
+        LocalDate today = LocalDate.now();
+        LocalDate monthStart = today.withDayOfMonth(1);
 
-//     @Autowired
-//     private UserService userService;
+        double totalIncome = transactionService.getTotalIncome(userId);
+        double totalExpense = transactionService.getTotalExpense(userId);
+        double monthlyIncome = transactionService.getMonthlyIncome(userId, monthStart, today);
+        double monthlyExpense = transactionService.getMonthlyExpense(userId, monthStart, today);
 
-//     @Autowired
-//     private BudgetService budgetService;
+        List<TransactionResponse> recentTransactions = transactionService.getRecentTransactions(userId)
+                .stream()
+                .map(TransactionResponse::new)
+                .toList();
+        List<BudgetResponse> activeBudgetItems = budgetService.getActiveBudgets(userId, 2)
+                .stream()
+                .map(BudgetResponse::new)
+                .toList();
 
-//     @Autowired
-//     private GoalService goalService;
+        DashboardResponse response = new DashboardResponse();
+        response.setTotalBalance(BigDecimal.valueOf(totalIncome).subtract(BigDecimal.valueOf(totalExpense)));
+        response.setMonthlyIncome(BigDecimal.valueOf(monthlyIncome));
+        response.setMonthlyExpense(BigDecimal.valueOf(monthlyExpense));
+        response.setRecentTransactions(recentTransactions);
+        response.setActiveBudgets(Math.toIntExact(budgetService.countActiveBudgets(userId)));
+        response.setActiveBudgetItems(activeBudgetItems);
+        response.setActiveGoals(goalService.getActiveGoalsCount(userId));
+        response.setNumberOfTransactions(transactionService.getNumberOfTransactions(userId));
 
-//     @GetMapping
-//     public ResponseEntity<DashboardResponse> getDashboard(@AuthenticationPrincipal UserDetails userDetails) {
-//         long userId = userService.getUserId(userDetails);
-//         // Fetch necessary data for the dashboard
-//         double totalIncome = transactionService.getTotalIncome(userId);
-//         double totalExpenses = transactionService.getTotalExpense(userId);
-//         BigDecimal totalBalance = BigDecimal.valueOf(totalIncome).subtract(BigDecimal.valueOf(totalExpenses));
-
-//         // double monthlyIncome = transactionService.getMonthIncome(userId, LocalTime.now().getMonth());
-//         // double monthlyExpenses = transactionService.getMonthexpense(userId, LocalTime.now().getMonth());
-
-//         List<Transaction> recentTransactions = transactionService.getRecentTransactions(userId);
-
-//         // Integer numberofTransactions = transactionService.getNumberOfTransactions(userId);
-//         Integer ActiveGoals = goalService.getActiveGoalsCount(userId);
-//         // List<Budget> = userService.getBudgetAlertCount(userId);
-        
-//         // DashboardResponse response = new DashboardResponse(totalBalance, monthlyIncome, monthlyExpenses, recentTransactions, ActiveGoals,);
-
-//         return ResponseEntity.ok(response);
-//     }
-    
-// }
+        return ResponseEntity.ok(response);
+    }
+}
