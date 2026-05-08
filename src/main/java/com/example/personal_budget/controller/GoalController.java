@@ -4,6 +4,8 @@ import com.example.personal_budget.dto.request.GoalRequest;
 import com.example.personal_budget.dto.response.GoalResponse;
 import com.example.personal_budget.service.GoalService;
 import com.example.personal_budget.service.UserService;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,7 +25,7 @@ public class GoalController {
 
     @PostMapping
     public ResponseEntity<GoalResponse> addGoal(
-            @RequestBody GoalRequest goalRequest,
+          @Valid @RequestBody GoalRequest goalRequest,
             @AuthenticationPrincipal UserDetails userDetails) {
         long userId = userService.getUserId(userDetails);
         return ResponseEntity.ok(new GoalResponse(goalService.addGoal(goalRequest, userId)));
@@ -32,7 +34,7 @@ public class GoalController {
     @PutMapping("/{id}")
     public ResponseEntity<GoalResponse> editGoal(
             @PathVariable Long id,
-            @RequestBody GoalRequest goalRequest,
+            @Valid @RequestBody GoalRequest goalRequest,
             @AuthenticationPrincipal UserDetails userDetails) {
         long userId = userService.getUserId(userDetails);
         return ResponseEntity.ok(new GoalResponse(goalService.editGoal(id, goalRequest, userId)));
