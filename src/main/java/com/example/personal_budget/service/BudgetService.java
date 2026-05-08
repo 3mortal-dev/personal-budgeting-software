@@ -1,5 +1,6 @@
 package com.example.personal_budget.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -8,7 +9,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.example.personal_budget.dto.request.BudgetExceededLimitEvent;
+import com.example.personal_budget.dto.request.BudgetNearLimitEvent;
 import com.example.personal_budget.dto.request.CreateBudgetRequest;
+import com.example.personal_budget.dto.request.NotificationEvent;
 import com.example.personal_budget.entity.Budget;
 import com.example.personal_budget.entity.Category;
 import com.example.personal_budget.entity.User;
@@ -28,6 +32,7 @@ public class BudgetService {
     private final BudgetRepository budgetRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public List<Budget> getAllBudgets(Long userID) {
         return budgetRepository.findByUserId(userID);
@@ -213,9 +218,25 @@ public class BudgetService {
         Double thresholdAmount = limit * (budget.getThreshold() / 100);
 
         if (newSpentAmount >= limit) {
+
             budget.setStatus(BudgetStatus.EXCEEDED_LIMIT);
+            NotificationEvent event = new BudgetExceededLimitEvent(
+                    budget.getUser().getId(),
+                    budget.getCategory().getName(),
+                    BigDecimal.valueOf(newSpentAmount - limit)
+            );
+            notificationService.createNotification(event);
+
         } else if (newSpentAmount >= thresholdAmount) {
+
             budget.setStatus(BudgetStatus.NEAR_LIMIT);
+            NotificationEvent event = new BudgetNearLimitEvent(
+                    budget.getUser().getId(),
+                    budget.getCategory().getName(),
+                    BigDecimal.valueOf(newSpentAmount - limit)
+            );
+            notificationService.createNotification(event);
+
         } else {
             budget.setStatus(BudgetStatus.ON_TRACK);
         }
