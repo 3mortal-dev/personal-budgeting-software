@@ -141,10 +141,21 @@ const searchInput = document.getElementById('searchInput');
 document.addEventListener('DOMContentLoaded', () => {
     applyUsername();
     initIconPicker();
+    applyDeadlineMin();
     attachEventListeners();
     initNotifications();
     loadGoals(false);
 });
+
+function getCurrentMonthValue() {
+    const today = new Date();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    return `${today.getFullYear()}-${month}`;
+}
+
+function applyDeadlineMin() {
+    if (deadlineInput) deadlineInput.min = getCurrentMonthValue();
+}
 
 /* ═══════════════════════════════════════════════════
    EVENT LISTENERS
@@ -637,6 +648,7 @@ function openAddModal() {
     modalTitle.textContent = 'Add New Goal';
     goalForm.reset();
     goalIdInput.value = '';
+    applyDeadlineMin();
     resetIconPicker();
     openModal();
 }
@@ -722,6 +734,8 @@ async function handleFormSubmit(e) {
 function validateForm() {
 
   const target = parseFloat(targetAmountInput.value) || 0;
+  const deadline = deadlineInput.value;
+  const currentMonth = getCurrentMonthValue();
 
     const nameErr = document.getElementById('nameErr');
 
@@ -736,6 +750,18 @@ function validateForm() {
   if (target <= 0) {
     showToast('Target amount must be greater than 0.', 'error');
     targetAmountInput.focus();
+    return false;
+  }
+
+  if (!deadline) {
+    showToast('Deadline is required.', 'error');
+    deadlineInput.focus();
+    return false;
+  }
+
+  if (deadline < currentMonth) {
+    showToast('Deadline must be this month or a future month.', 'error');
+    deadlineInput.focus();
     return false;
   }
 

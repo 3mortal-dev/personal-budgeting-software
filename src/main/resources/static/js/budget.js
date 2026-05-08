@@ -1,34 +1,33 @@
-/* ═══════════════════════════════════════════════════
-   BudgetWise – Budget Page JavaScript
-   budget.js
-═══════════════════════════════════════════════════ */
-
-
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  API CONFIGURATION                                           ║
-// ╚══════════════════════════════════════════════════════════════╝
-
 const API = {
-    BASE_URL: "http://localhost:8080/api",
-    ALL: "/budgets",
-    ACTIVE: "/budgets/active",
-    NEAR_LIMIT: "/budgets/near-limit",
-    OVER_LIMIT: "/budgets/Exeeded-limit",
-    EXPIRED: "/budgets/expired",
-    BY_ID: (id) => `/budgets/${id}`,
-    CATEGORIES: "/categories",            // GET → [{ id, name }, ...]
+    PROFILE: "/api/profile",
+    ALL: "/api/budgets",
+    ACTIVE: "/api/budgets/active",
+    NEAR_LIMIT: "/api/budgets/near-limit",
+    OVER_LIMIT: "/api/budgets/Exeeded-limit",
+    EXPIRED: "/api/budgets/expired",
+    BY_ID: (id) => `/api/budgets/${id}`,
+    CATEGORIES: "/api/categories",            // GET → [{ id, name }, ...]
+    NOTIFICATIONS_UNREAD: "/api/notifications/unread",
 };
 
 // ── Shared fetch helper (mirrors dashboard.js pattern) ────────────────────────
+let lastApiError = "";
+
 async function apiFetch(endpoint, options = {}) {
+    lastApiError = "";
+    const {headers = {}, ...fetchOptions} = options;
     try {
-        const response = await fetch(`${API.BASE_URL}${endpoint}`, {
-            headers: {"Content-Type": "application/json"},
+        const response = await fetch(endpoint, {
+            headers: {"Content-Type": "application/json", ...headers},
             credentials: "include",
-            ...options,
+            ...fetchOptions,
         });
         if (response.status === 204) return null;
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        if (!response.ok) {
+            const msg = await response.text().catch(() => "");
+            lastApiError = msg || `HTTP ${response.status}`;
+            throw new Error(lastApiError);
+        }
         return await response.json();
     } catch (err) {
         console.error(`[API ERROR] ${options.method || "GET"} ${endpoint}:`, err.message);
@@ -36,22 +35,13 @@ async function apiFetch(endpoint, options = {}) {
     }
 }
 
-
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  📦 STATE                                                    ║
-// ╚══════════════════════════════════════════════════════════════╝
-
 const state = {
     budgets: [],   // Budget[] from server
     categories: [],   // Category[] from server — { id, name }
+    profile: null,
     activeFilter: "all",
     pendingDelete: null, // id of budget pending confirmation
 };
-
-
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  📡 DATA LOADERS                                             ║
-// ╚══════════════════════════════════════════════════════════════╝
 
 /**
  * GET /api/budgets
@@ -70,6 +60,14 @@ async function loadBudgets() {
         showError("Failed to load budgets. Please refresh the page.");
         renderGrid([]); // clear skeletons
     }
+}
+
+async function loadProfile() {
+    const data = await apiFetch(API.PROFILE, {headers: {Accept: "application/json"}});
+    if (!data) return;
+
+    state.profile = data;
+    renderProfile(data);
 }
 
 /**
@@ -91,23 +89,28 @@ async function loadCategories() {
 }
 
 
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  🎨 RENDER HELPERS                                           ║
-// ╚══════════════════════════════════════════════════════════════╝
-
 /** Derive a BudgetStatus string from the entity if the server doesn't include it */
 function deriveStatus(b) {
-    if (b.status) return b.status;
+    if (isExpired(b.endDate)) return "EXPIRED";
 
-    const now = new Date();
-    const end = new Date(b.endDate);
-    if (end < now) return "EXPIRED";
-    const pct = b.spendingLimit > 0
-        ? (b.spentAmount / b.spendingLimit) * 100
-        : 0;
+    const status = String(b.status || "").toUpperCase();
+    if (status === "ON_TRACK") return "ACTIVE";
+    if (status === "EXCEEDED_LIMIT") return "EXCEEDED";
+    if (status === "NEAR_LIMIT") return "NEAR_LIMIT";
+
+    const pct = b.spendingLimit > 0 ? (b.spentAmount / b.spendingLimit) * 100 : 0;
     if (pct >= 100) return "EXCEEDED";
     if (pct >= (b.threshold ?? 80)) return "NEAR_LIMIT";
     return "ACTIVE";
+}
+
+function isExpired(dateValue) {
+    if (!dateValue) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const end = new Date(dateValue);
+    end.setHours(0, 0, 0, 0);
+    return end < today;
 }
 
 /** Category icon and colour keyed by category name (case-insensitive prefix match) */
@@ -234,7 +237,7 @@ function renderSkeletons() {
 function buildCard(b) {
     const status = deriveStatus(b);
     const cat = state.categories.find(c => c.id === b.categoryId);
-    const catName = cat.name;
+    const catName = b.categoryName || cat?.name || "Uncategorized";
     const meta = categoryMeta(catName);
     const pct = spentPct(b);
     const fClass = fillClass(pct, b.threshold);
@@ -288,7 +291,7 @@ function buildCard(b) {
           <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           Edit
         </button>
-        <button class="bc-btn danger" onclick="askDelete(${b.id}, '${escapeHtml(catName)}')">
+        <button class="bc-btn danger" onclick="askDelete(${b.id})">
           <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
           Delete
         </button>
@@ -373,10 +376,6 @@ function applyFilter() {
     renderGrid(filtered);
 }
 
-
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  ✏️  ADD / EDIT MODAL                                        ║
-// ╚══════════════════════════════════════════════════════════════╝
 
 function openAddModal() {
     document.getElementById("budgetModalTitle").textContent = "Create Budget";
@@ -519,17 +518,16 @@ async function submitBudget() {
         closeAddModal();
         showToast(isEdit ? "Budget updated successfully." : "Budget created successfully.");
     } else {
-        showBanner("budgetFormError", "Failed to save budget. Please check your connection and try again.");
+        showBanner("budgetFormError", lastApiError || "Failed to save budget. Please check your connection and try again.");
     }
 }
 
 
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  🗑️  DELETE                                                  ║
-// ╚══════════════════════════════════════════════════════════════╝
-
-function askDelete(id, name) {
+function askDelete(id) {
     state.pendingDelete = id;
+    const budget = state.budgets.find(b => b.id === id);
+    const category = state.categories.find(c => c.id === budget?.categoryId);
+    const name = budget?.categoryName || category?.name || "this";
     const nameEl = document.getElementById("confirmBudgetName");
     if (nameEl) nameEl.textContent = name;
     openModal("confirmModal");
@@ -569,12 +567,8 @@ function closeConfirmModal() {
 }
 
 
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  🔔 TOP-NAV NOTIFICATION DROPDOWN (lightweight)              ║
-// ╚══════════════════════════════════════════════════════════════╝
-
 async function loadNotifBadge() {
-    const data = await apiFetch("/notifications/unread");
+    const data = await apiFetch(API.NOTIFICATIONS_UNREAD);
     if (!data) return;
 
     const badge = document.getElementById("notifBadge");
@@ -629,10 +623,6 @@ function formatRelativeTime(isoStr) {
     }
 }
 
-
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  🔧 MODAL HELPERS (same pattern as dashboard.js)             ║
-// ╚══════════════════════════════════════════════════════════════╝
 
 function openModal(id) {
     const modal = document.getElementById(id);
@@ -727,36 +717,48 @@ function setText(id, val) {
     if (el) el.textContent = val;
 }
 
-function setGreeting() {
+function getGreetingText() {
     const hour = new Date().getHours();
-    const salutation =
-        hour >= 5 && hour < 12 ? "Good morning" :
-            hour >= 12 && hour < 17 ? "Good afternoon" :
-                hour >= 17 && hour < 21 ? "Good evening" : "Good night";
+    return hour >= 5 && hour < 12 ? "Good morning" :
+        hour >= 12 && hour < 17 ? "Good afternoon" :
+            hour >= 17 && hour < 21 ? "Good evening" : "Good night";
+}
+
+function getInitials(name = "") {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length >= 2) return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+    return name.trim().slice(0, 2).toUpperCase() || "U";
+}
+
+function renderProfile(profile = {}) {
+    const name = profile.name || profile.username || "User";
     const el = document.getElementById("greeting");
-    if (el) el.innerHTML = `${salutation}, Ahmed <span>👋</span>`;
+    if (el) el.innerHTML = `${escapeHtml(getGreetingText())}, <span id="topbarUsername">${escapeHtml(name)}</span> <span>👋</span>`;
+
+    const avatar = document.getElementById("topbarAvatar");
+    if (avatar) avatar.textContent = getInitials(name);
+}
+
+function setGreeting() {
+    renderProfile(state.profile || {});
 }
 
 function setActiveNav() {
-    const current = window.location.pathname.split("/").pop() || "budget.html";
+    const current = window.location.pathname;
     document.querySelectorAll(".nav-item").forEach(link => {
         const href = link.getAttribute("href");
-        link.classList.toggle("active", href === current);
+        link.classList.toggle("active", href === current || href === `${current}.html`);
     });
 }
 
 
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  🚀 INIT                                                     ║
-// ╚══════════════════════════════════════════════════════════════╝
-
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     setGreeting();
     setActiveNav();
 
-    // 📡 Load budgets, categories, and notification badge
-    loadBudgets();
-    loadCategories();
+    // Load profile and categories before rendering budget cards so names are API-backed.
+    await Promise.all([loadProfile(), loadCategories()]);
+    await loadBudgets();
     loadNotifBadge();
 
     // ── Modal: close on overlay click ────────────────────────────
