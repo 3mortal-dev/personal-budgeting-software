@@ -1,5 +1,6 @@
 package com.example.personal_budget.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,23 +24,21 @@ public class NotificationService {
 
     private final UserService userService;
 
-
     public void createNotification(NotificationEvent event) {
 
         User user = userService.getUserById(event.getUserId());
 
         String message = buildMessage(event);
 
-        Notification notification = new Notification();
-
-        notification.setUser(user);
-        notification.setType(event.getType());
-        notification.setMessage(message);
-        notification.setCreatedAt(LocalDateTime.now());
+        Notification notification = Notification.builder()
+                .user(user)
+                .type(event.getType())
+                .message(message)
+                .createdAt(LocalDateTime.now())
+                .build();
 
         notificationRepository.save(notification);
     }
-
 
     public void markAsRead(Long notificationId) {
 
@@ -83,7 +82,7 @@ public class NotificationService {
                 .limit(limit)
                 .toList();
     }
-    
+
     // helper function to build notification message based on event type
     private String buildMessage(NotificationEvent event) {
 

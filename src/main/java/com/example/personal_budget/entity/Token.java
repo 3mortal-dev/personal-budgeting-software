@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.Builder.Default;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
@@ -29,6 +30,7 @@ public class Token {
     public String token;
 
     @Enumerated(EnumType.STRING)
+	@Default
     public TokenType tokenType = TokenType.BEARER;
 
     private boolean revoked;

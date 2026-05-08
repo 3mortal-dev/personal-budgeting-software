@@ -7,10 +7,11 @@ import java.time.LocalDate;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import lombok.*;
+import lombok.Builder.Default;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import lombok.*;
 
 @Getter
 @Setter
@@ -41,6 +42,7 @@ public class Budget {
     private Double spendingLimit;
 
     @Column(nullable = false)
+	@Default
     private Double spentAmount = 0.0;
 
     @Column(nullable = false)

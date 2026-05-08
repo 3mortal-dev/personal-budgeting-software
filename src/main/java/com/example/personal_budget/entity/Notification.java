@@ -2,9 +2,11 @@ package com.example.personal_budget.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.Builder.Default;
 
 import java.time.LocalDateTime;
 
@@ -16,6 +18,7 @@ import com.example.personal_budget.enums.NotificationEventType;
 @Entity
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "notifications")
@@ -37,6 +40,7 @@ public class Notification {
     private NotificationEventType type;
 
     @Column(nullable = false)
+	@Default
     private boolean isRead = false;
 
     @Column(nullable = false)

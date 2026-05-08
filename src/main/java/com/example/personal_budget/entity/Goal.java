@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.Builder.Default;
 
 import java.time.LocalDate;
 
@@ -41,6 +42,7 @@ public class Goal {
     private LocalDate deadline;
 
     @Column(nullable = false)
+	@Default
     private Double currentAmount = 0.0;
 
     @Enumerated(EnumType.STRING)
