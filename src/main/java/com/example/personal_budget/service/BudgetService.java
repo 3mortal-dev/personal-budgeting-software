@@ -3,7 +3,6 @@ package com.example.personal_budget.service;
 import org.springframework.stereotype.Service;
 
 import com.example.personal_budget.dto.request.CreateBudgetRequest;
-import com.example.personal_budget.dto.response.BudgetResponse;
 import com.example.personal_budget.entity.User;
 import com.example.personal_budget.entity.Budget;
 import com.example.personal_budget.entity.Category;
@@ -27,34 +26,24 @@ public class BudgetService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
 
-    private BudgetResponse toResponse(Budget budget) {
-        return new BudgetResponse(budget);
+    public List<Budget> getAllBudgets(Long userID) {
+        return budgetRepository.findByUserId(userID);
     }
 
-    private List<BudgetResponse> toResponseList(List<Budget> budgets) {
-        return budgets.stream()
-                .map(this::toResponse)
-                .toList();
+    public List<Budget> getActiveBudgets(Long userID) {
+        return budgetRepository.findByUserIdAndEndDateGreaterThanEqual(userID, LocalDate.now());
     }
 
-    public List<BudgetResponse> getAllBudgets(Long userID) {
-        return toResponseList(budgetRepository.findByUserId(userID));
+    public List<Budget> getNearLimitBudgets(Long userID) {
+        return budgetRepository.findByUserIdAndStatus(userID, BudgetStatus.NEAR_LIMIT);
     }
 
-    public List<BudgetResponse> getActiveBudgets(Long userID) {
-        return toResponseList(budgetRepository.findByUserIdAndEndDateGreaterThanEqual(userID, LocalDate.now()));
+    public List<Budget> getExeededLimitBudgets(Long userID) {
+        return budgetRepository.findByUserIdAndStatus(userID, BudgetStatus.EXCEEDED_LIMIT);
     }
 
-    public List<BudgetResponse> getNearLimitBudgets(Long userID) {
-        return toResponseList(budgetRepository.findByUserIdAndStatus(userID, BudgetStatus.NEAR_LIMIT));
-    }
-
-    public List<BudgetResponse> getExeededLimitBudgets(Long userID) {
-        return toResponseList(budgetRepository.findByUserIdAndStatus(userID, BudgetStatus.EXCEEDED_LIMIT));
-    }
-
-    public List<BudgetResponse> getExpiredBudgets(Long userID) {
-        return toResponseList(budgetRepository.findByUserIdAndEndDateSmallerThan(userID, LocalDate.now()));
+    public List<Budget> getExpiredBudgets(Long userID) {
+        return budgetRepository.findByUserIdAndEndDateSmallerThan(userID, LocalDate.now());
     }
 
     public Long countActiveBudgets(Long userID) {
@@ -65,12 +54,12 @@ public class BudgetService {
         return budgetRepository.countByUserIdAndEndDateSmallerThan(userID, LocalDate.now());
     }
 
-    public BudgetResponse getBudgetById(Long userID, Long budgetID) {
-        return toResponse(budgetRepository.findByIdAndUserId(budgetID, userID)
-                .orElseThrow(() -> new RuntimeException("Budget not found")));
+    public Budget getBudgetById(Long userID, Long budgetID) {
+        return budgetRepository.findByIdAndUserId(budgetID, userID)
+                .orElseThrow(() -> new RuntimeException("Budget not found"));
     }
 
-    public BudgetResponse addBudget(Long userID, CreateBudgetRequest request) {
+    public Budget addBudget(Long userID, CreateBudgetRequest request) {
 
         User user = userRepository.findById(userID)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -101,10 +90,10 @@ public class BudgetService {
                 .status(BudgetStatus.ON_TRACK)
                 .build();
 
-        return toResponse(budgetRepository.save(budget));
+        return budgetRepository.save(budget);
     }
 
-    public BudgetResponse editBudget(Long userID, Long budgetID, CreateBudgetRequest request) {
+    public Budget editBudget(Long userID, Long budgetID, CreateBudgetRequest request) {
 
         Budget budget = budgetRepository.findByIdAndUserId(budgetID, userID)
                 .orElseThrow(() -> new RuntimeException("Budget not found"));
@@ -121,7 +110,7 @@ public class BudgetService {
                 .status(budget.getStatus())
                 .build();
 
-        return toResponse(budgetRepository.save(updatedBudget));
+        return budgetRepository.save(updatedBudget);
     }
 
     public void deleteAllBudgets(Long userID) {
@@ -142,7 +131,7 @@ public class BudgetService {
         budgetRepository.delete(budget);
     }
 
-    public BudgetResponse applyExpensesToBudget(Long userID, Long CategoryID, Double expenseAmount) {
+    public Budget applyExpensesToBudget(Long userID, Long CategoryID, Double expenseAmount) {
 
         Budget budget = budgetRepository.findByUserIdAndCategoryId(userID, CategoryID)
                 .orElseThrow(() -> new RuntimeException("Budget not found"));
@@ -161,6 +150,6 @@ public class BudgetService {
             budget.setStatus(BudgetStatus.ON_TRACK);
         }
 
-        return toResponse(budgetRepository.save(budget));
+        return budgetRepository.save(budget);
     }
 }
