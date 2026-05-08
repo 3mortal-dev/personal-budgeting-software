@@ -617,7 +617,11 @@ async function saveProgress() {
         });
 
         closeProgressModal();
-
+        if (saveProgressBtn) {
+            saveProgressBtn.textContent = 'Add';
+            saveProgressBtn.disabled = false;
+            cancelProgressBtn.disabled = false;
+        }
         showToast('Progress updated!', 'success');
 
         await loadGoals(false);
