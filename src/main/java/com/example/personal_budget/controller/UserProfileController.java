@@ -42,7 +42,7 @@ public class UserProfileController {
         return ResponseEntity.ok(userProfileService.editUserProfile(userDetails, request));
     }
 
-      @PatchMapping("/notifications")
+    @PatchMapping("/notifications")
     public ResponseEntity<Void> updateNotifications(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody UpdateNotificationSettings request) {
