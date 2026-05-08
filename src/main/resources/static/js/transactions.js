@@ -115,9 +115,12 @@ function setupEventListeners() {
 
 // Show/hide category and source based on transaction type
 function updateFormFieldsVisibility(type, formType) {
-    const prefix = formType === "add" ? "" : "edit";
-    const categoryInput = document.getElementById(`${prefix}transactionCategory`);
-    const sourceInput = document.getElementById(`${prefix}transactionSource`);
+    // Construct IDs with proper camelCase
+    const categoryId = formType === "add" ? "transactionCategory" : "editTransactionCategory";
+    const sourceId = formType === "add" ? "transactionSource" : "editTransactionSource";
+
+    const categoryInput = document.getElementById(categoryId);
+    const sourceInput = document.getElementById(sourceId);
 
     // Check if elements exist before proceeding
     if (!categoryInput || !sourceInput) {
