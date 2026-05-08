@@ -581,18 +581,38 @@ async function handleFormSubmit(e) {
 }
 
 function validateForm() {
+
+  const saved  = parseFloat(savedAmountInput.value) || 0;
+  const target = parseFloat(targetAmountInput.value) || 0;
+
   const nameErr = document.getElementById('nameErr');
+
   if (nameErr) nameErr.textContent = '';
+
   if (!goalNameInput.value.trim()) {
     if (nameErr) nameErr.textContent = 'Goal name is required.';
     goalNameInput.focus();
     return false;
   }
-  if (!targetAmountInput?.value || parseFloat(targetAmountInput.value) <= 0) {
-    showToast('Target amount must be greater than 0.', 'error');
-    targetAmountInput?.focus();
+
+  if (saved < 0) {
+    showToast('Saved amount cannot be negative.', 'error');
+    savedAmountInput.focus();
     return false;
   }
+
+  if (target <= 0) {
+    showToast('Target amount must be greater than 0.', 'error');
+    targetAmountInput.focus();
+    return false;
+  }
+
+  if (saved > target) {
+    showToast('Saved amount cannot exceed target amount.', 'error');
+    savedAmountInput.focus();
+    return false;
+  }
+
   return true;
 }
 
