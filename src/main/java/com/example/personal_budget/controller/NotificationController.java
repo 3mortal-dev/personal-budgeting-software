@@ -3,7 +3,6 @@ package com.example.personal_budget.controller;
 
 import java.util.List;
 
-import org.apache.commons.collections4.Get;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,9 +20,7 @@ import com.example.personal_budget.service.NotificationService;
 import com.example.personal_budget.service.UserService;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 
 @RestController

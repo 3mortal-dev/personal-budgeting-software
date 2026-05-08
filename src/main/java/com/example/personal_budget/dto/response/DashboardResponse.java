@@ -1,6 +1,5 @@
 package com.example.personal_budget.dto.response;
 
-import com.example.personal_budget.entity.Transaction;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -11,9 +10,9 @@ public class DashboardResponse {
     private BigDecimal totalBalance;
     private BigDecimal monthlyIncome;
     private BigDecimal monthlyExpense;
-    private List<Transaction> recentTransactions;
-    private Integer ActiveBudgets;
-    private Integer ActiveGoals;
+    private List<TransactionResponse> recentTransactions;
+    private Integer activeBudgets;
+    private List<BudgetResponse> activeBudgetItems;
+    private Integer activeGoals;
     private Integer numberOfTransactions;
-    // private List<Budget> budgets;
 }

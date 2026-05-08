@@ -24,6 +24,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     // Dashboard — last 5
     List<Transaction> findTop5ByUserIdOrderByDateDescIdDesc (Long userId);
 
+    Integer countByUserId(Long userId);
+
     // Sum income or expense
     @Query ("""
             SELECT COALESCE(SUM(t.amount), 0)
@@ -32,6 +34,18 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             AND t.type = :type
             """)
     Double sumByUserIdAndType (@Param ("userId") Long userId, @Param ("type") TransactionType type);
+
+    @Query ("""
+            SELECT COALESCE(SUM(t.amount), 0)
+            FROM Transaction t
+            WHERE t.user.id = :userId
+            AND t.type = :type
+            AND t.date BETWEEN :startDate AND :endDate
+            """)
+    Double sumByUserIdAndTypeAndDateBetween(@Param ("userId") Long userId,
+                                            @Param ("type") TransactionType type,
+                                            @Param ("startDate") LocalDate startDate,
+                                            @Param ("endDate") LocalDate endDate);
 
     // Monthly totals — for reports
     @Query ("""
