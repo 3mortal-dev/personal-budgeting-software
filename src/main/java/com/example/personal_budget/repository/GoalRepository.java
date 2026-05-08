@@ -11,11 +11,15 @@ import java.util.List;
 
 @Repository
 public interface GoalRepository extends JpaRepository<Goal, Long> {
-    List<Goal> findByUserId(Long userId);
+List<Goal> findByUserId(long userId);
 
     Integer countByUserIdAndStatus(
             Long userId,
             GoalStatus ontrack);
 
     List<Goal> findByDeadline(LocalDate reminderDate);
+    Integer countByUserIdAndStatus(long userId, GoalStatus status);
+
+    // ADD THIS:
+    Integer countByUserIdAndStatusIn(long userId, List<GoalStatus> statuses);
 }   

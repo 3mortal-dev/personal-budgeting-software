@@ -12,14 +12,33 @@ import java.time.LocalDate;
 @Getter
 @Table(name = "goals")
 public class Goal {
+
     @Id
     @GeneratedValue
     private Long id;
-    private Long userId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     private String goalName;
+
     private double targetAmount;
+
     private LocalDate deadline;
+
     private Double currentAmount;
+
     @Enumerated(EnumType.STRING)
     private GoalStatus status;
+
+    @Column(name = "icon_class")
+    private String iconClass;
+
+    @Column(name = "icon_color")
+    private String iconColor;
+
+    public double getCurrentAmount() {
+        return this.currentAmount != null ? this.currentAmount : 0.0;
+    }
 }
