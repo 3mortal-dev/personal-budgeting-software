@@ -1340,6 +1340,103 @@ button {
 }
 
 /* ═══════════════════════════════════════════
+   TOAST NOTIFICATIONS
+═══════════════════════════════════════════ */
+
+.toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 260px;
+    max-width: 380px;
+    background: var(--text); /* --text = #0f1a2e  (matches goal.css --navy) */
+    color: #fff;
+    padding: 13px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    transform: translateY(16px) scale(0.95);
+    transition: opacity .3s ease, transform .3s cubic-bezier(0.22, 1, 0.36, 1);
+    pointer-events: none;
+    z-index: 2000;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+/* Left accent border — mirrors goal.css */
+.toast--success {
+    border-left: 4px solid var(--green);
+}
+
+.toast--error {
+    border-left: 4px solid var(--red);
+}
+
+.toast--warning {
+    border-left: 4px solid var(--orange);
+}
+
+.toast--info {
+    border-left: 4px solid #60a5fa;
+}
+
+/* Icon wrapper */
+.toast__icon {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toast__icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.toast--success .toast__icon {
+    color: var(--green);
+}
+
+.toast--error .toast__icon {
+    color: var(--red);
+}
+
+.toast--warning .toast__icon {
+    color: var(--orange);
+}
+
+.toast--info .toast__icon {
+    color: #60a5fa;
+}
+
+/* Message text */
+.toast__msg {
+    flex: 1;
+}
+
+/* Mobile: hug the bottom edge */
+@media (max-width: 906px) {
+    .toast {
+        bottom: 16px;
+        right: 16px;
+        left: 16px;
+        max-width: unset;
+        min-width: unset;
+    }
+}
+
+/* ═══════════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════════ */
 @media (max-width: 1100px) {

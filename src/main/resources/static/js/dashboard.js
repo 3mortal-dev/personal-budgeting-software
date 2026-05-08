@@ -56,15 +56,45 @@ function escapeHtml(str) {
         .replace(/'/g, "&#039;");
 }
 
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  TOAST NOTIFICATIONS                                         ║
+// ╚══════════════════════════════════════════════════════════════╝
+
 let toastTimer;
 
-function showToast(message, type = "success") {
+/**
+ * Core toast engine
+ * @param {string} msg   - Message text
+ * @param {'success'|'error'|'info'|'warning'} type
+ * @param {number}  [duration=3200]
+ */
+function showToast(msg, type = "success", duration = 3200) {
     const toast = document.getElementById("toast");
     if (!toast) return;
-    toast.textContent = message;
-    toast.className = `toast toast--${type} show`;
+
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.remove("show"), 3200);
+    toast.classList.remove("show");
+
+    requestAnimationFrame(() => {
+        toast.innerHTML = `<span class="toast__icon">${TOAST_ICONS[type] ?? TOAST_ICONS.info}</span>
+                           <span class="toast__msg">${escapeToast(msg)}</span>`;
+        toast.className = `toast toast--${type} show`;
+        toastTimer = setTimeout(() => toast.classList.remove("show"), duration);
+    });
+}
+
+const TOAST_ICONS = {
+    success: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8.5"/><polyline points="6.5,10.5 9,13 13.5,7.5"/></svg>`,
+    error: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8.5"/><line x1="7" y1="7" x2="13" y2="13"/><line x1="13" y1="7" x2="7" y2="13"/></svg>`,
+    warning: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5L18 17H2L10 2.5Z"/><line x1="10" y1="8" x2="10" y2="12"/><circle cx="10" cy="15" r="0.8" fill="currentColor"/></svg>`,
+    info: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8.5"/><line x1="10" y1="9" x2="10" y2="14"/><circle cx="10" cy="6.5" r="0.8" fill="currentColor"/></svg>`,
+};
+
+function escapeToast(str) {
+    return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
 }
 
 function showSuccess(message) {
@@ -73,6 +103,22 @@ function showSuccess(message) {
 
 function showError(message) {
     showToast(message, "error");
+}
+
+function toastTransactionAdded(type, amount, label) {
+    const sign = type === "INCOME" ? "+" : "−";
+    const money = formatCurrency(amount);
+    const detail = label ? ` · ${label}` : "";
+    const verb = type === "INCOME" ? "Income recorded" : "Expense logged";
+    showToast(`${verb}: ${sign}${money}${detail}`, "success");
+}
+
+function toastBudgetAdded(categoryName, limit) {
+    showToast(`Budget set for ${categoryName}: ${formatCurrency(limit)}`, "success");
+}
+
+function toastSaveFailed(action = "save") {
+    showToast(`Couldn't ${action}. Check your connection and try again.`, "error");
 }
 
 function setCurrentMonth() {
@@ -449,9 +495,13 @@ async function addTransaction(event) {
     if (result) {
         closeAddTransactionModal();
         await loadDashboardData();
-        showSuccess("Transaction added successfully!");
+        
+        const label = type === "INCOME"
+            ? (formData.source || "")
+            : (state.categories.find(c => c.id === formData.categoryId)?.name || "");
+        toastTransactionAdded(type, formData.amount, label);
     } else {
-        showError("Failed to add transaction. Please try again.");
+        toastSaveFailed("add transaction");
     }
 }
 
@@ -461,9 +511,16 @@ async function addBudget() {
     const threshold = Number(document.getElementById("budgetThreshold")?.value || 0);
     const endDate = document.getElementById("budgetEnd")?.value || null;
     const payload = {categoryId, spendingLimit, threshold, endDate};
-    await apiFetch(API.BUDGETS, {method: "POST", body: JSON.stringify(payload)});
-    closeBudgetModal();
-    await loadDashboardData();
+    const result = await apiFetch(API.BUDGETS, {method: "POST", body: JSON.stringify(payload)});
+    if (result) {
+        closeBudgetModal();
+        await loadDashboardData();
+        const cat = state.categories.find(c => c.id === categoryId);
+        const catName = cat ? cat.name : "Category";
+        toastBudgetAdded(catName, spendingLimit);
+    } else {
+        toastSaveFailed("add budget");
+    }
 }
 
 // INIT
