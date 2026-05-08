@@ -8,7 +8,6 @@ import com.example.personal_budget.entity.Category;
 import com.example.personal_budget.entity.User;
 import com.example.personal_budget.enums.CategoryType;
 import com.example.personal_budget.dto.request.CreateCategoryRequest;
-import com.example.personal_budget.dto.response.CategoryResponse;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,34 +21,24 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
 
-    private CategoryResponse toResponse(Category category) {
-        return new CategoryResponse(category);
+    public List<Category> getAllCategories(Long userID) {
+        return categoryRepository.findByUserIdOrType(userID, CategoryType.BUILT_IN);
     }
 
-    private List<CategoryResponse> toResponseList(List<Category> categories) {
-        return categories.stream()
-                .map(this::toResponse)
-                .toList();
+    public List<Category> getBuiltInCategories() {
+        return categoryRepository.findByType(CategoryType.BUILT_IN);
     }
 
-    public List<CategoryResponse> getAllCategories(Long userID) {
-        return toResponseList(categoryRepository.findByUserIdOrType(userID, CategoryType.BUILT_IN));
+    public List<Category> getCustomCategories(Long userID) {
+        return categoryRepository.findByUserId(userID);
     }
 
-    public List<CategoryResponse> getBuiltInCategories() {
-        return toResponseList(categoryRepository.findByType(CategoryType.BUILT_IN));
+    public Category getCategoryById(Long userID, Long categoryID) {
+        return categoryRepository.findByIdAndUserId(categoryID, userID)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
     }
 
-    public List<CategoryResponse> getCustomCategories(Long userID) {
-        return toResponseList(categoryRepository.findByUserId(userID));
-    }
-
-    public CategoryResponse getCategoryById(Long userID, Long categoryID) {
-        return toResponse(categoryRepository.findByIdAndUserId(categoryID, userID)
-                .orElseThrow(() -> new RuntimeException("Category not found")));
-    }
-
-    public CategoryResponse addCustomCategory(Long userID, CreateCategoryRequest request) {
+    public Category addCustomCategory(Long userID, CreateCategoryRequest request) {
 
         User user = userRepository.findById(userID)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -60,10 +49,10 @@ public class CategoryService {
                 .type(request.getType())
                 .build();
 
-        return toResponse(categoryRepository.save(category));
+        return categoryRepository.save(category);
     }
 
-    public CategoryResponse editCustomCategory(Long userID, Long categoryID, CreateCategoryRequest request) {
+    public Category editCustomCategory(Long userID, Long categoryID, CreateCategoryRequest request) {
 
         Category category = categoryRepository.findByIdAndUserId(categoryID, userID)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
@@ -71,7 +60,7 @@ public class CategoryService {
         category.setName(request.getName());
         category.setType(request.getType());
 
-        return toResponse(categoryRepository.save(category));
+        return categoryRepository.save(category);
     }
 
     public void deleteCustomCategory(Long userID, Long categoryID) {
