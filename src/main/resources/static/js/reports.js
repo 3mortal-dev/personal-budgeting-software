@@ -3,7 +3,6 @@
    ReportController Frontend Integration
 ═══════════════════════════════════════════════════ */
 
-
 /* ═══════════════════════════════════════════════════
    API CONFIGURATION
 ═══════════════════════════════════════════════════ */
@@ -13,14 +12,12 @@ const API = {
   DOWNLOAD: "/api/reports/download",
 };
 
-
 /* ═══════════════════════════════════════════════════
    CHART INSTANCES
 ═══════════════════════════════════════════════════ */
 
 let monthlyChart = null;
 let categoryChart = null;
-
 
 /* ═══════════════════════════════════════════════════
    MONTH HELPERS
@@ -56,23 +53,21 @@ const MONTH_SHORT = [
   "Dec",
 ];
 
-
 /* ═══════════════════════════════════════════════════
    FETCH HELPER
    Uses httpOnly JWT cookie automatically
 ═══════════════════════════════════════════════════ */
 
 async function apiFetch(url, options = {}) {
+  const token = localStorage.getItem("token"); // ← add this
 
   try {
-
     const response = await fetch(url, {
       credentials: "include",
-
       ...options,
-
       headers: {
         "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}), // ← add this
         ...(options.headers || {}),
       },
     });
@@ -80,7 +75,6 @@ async function apiFetch(url, options = {}) {
     /* ───── Unauthorized ───── */
 
     if (response.status === 401) {
-
       window.location.href = "/login";
       return null;
     }
@@ -88,31 +82,21 @@ async function apiFetch(url, options = {}) {
     /* ───── Generic Error ───── */
 
     if (!response.ok) {
-
       const errorText = await response.text();
 
-      throw new Error(
-        errorText || `HTTP ${response.status}`
-      );
+      throw new Error(errorText || `HTTP ${response.status}`);
     }
 
     /* ───── Content Type ───── */
 
-    const contentType =
-      response.headers.get("content-type");
+    const contentType = response.headers.get("content-type");
 
-    if (
-      contentType &&
-      contentType.includes("application/json")
-    ) {
-
+    if (contentType && contentType.includes("application/json")) {
       return await response.json();
     }
 
     return null;
-
   } catch (error) {
-
     console.error("API ERROR:", error);
 
     return {
@@ -122,19 +106,15 @@ async function apiFetch(url, options = {}) {
   }
 }
 
-
 /* ═══════════════════════════════════════════════════
    BASIC HELPERS
 ═══════════════════════════════════════════════════ */
 
 function $(id) {
-
   return document.getElementById(id);
 }
 
-
 function setText(id, value) {
-
   const el = $(id);
 
   if (el) {
@@ -142,9 +122,7 @@ function setText(id, value) {
   }
 }
 
-
 function showEl(id, show = true) {
-
   const el = $(id);
 
   if (el) {
@@ -152,9 +130,7 @@ function showEl(id, show = true) {
   }
 }
 
-
 function disableBtn(id, disabled = true) {
-
   const btn = $(id);
 
   if (btn) {
@@ -162,23 +138,17 @@ function disableBtn(id, disabled = true) {
   }
 }
 
-
 function todayISO() {
-
   return new Date().toISOString().slice(0, 10);
 }
 
-
 function yearStartISO() {
-
   const d = new Date();
 
   return `${d.getFullYear()}-01-01`;
 }
 
-
 function formatMoney(value) {
-
   if (value == null || Number.isNaN(value)) {
     return "—";
   }
@@ -189,25 +159,19 @@ function formatMoney(value) {
   }).format(value);
 }
 
-
 function sumMap(obj) {
-
   if (!obj || typeof obj !== "object") {
     return 0;
   }
 
   return Object.values(obj).reduce((sum, value) => {
-
     const num = Number(value);
 
     return sum + (Number.isNaN(num) ? 0 : num);
-
   }, 0);
 }
 
-
 function normalizeMonthMap(raw) {
-
   if (!raw || typeof raw !== "object") {
     return {};
   }
@@ -215,28 +179,21 @@ function normalizeMonthMap(raw) {
   const out = {};
 
   Object.keys(raw).forEach((k) => {
-
-    out[String(k).toUpperCase()] =
-      Number(raw[k]) || 0;
+    out[String(k).toUpperCase()] = Number(raw[k]) || 0;
   });
 
   return out;
 }
 
-
 function sortMonthKeys(obj) {
-
   if (!obj || typeof obj !== "object") {
     return [];
   }
 
   return Object.keys(obj).sort((a, b) => {
+    let ia = MONTH_ORDER.indexOf(String(a).toUpperCase());
 
-    let ia =
-      MONTH_ORDER.indexOf(String(a).toUpperCase());
-
-    let ib =
-      MONTH_ORDER.indexOf(String(b).toUpperCase());
+    let ib = MONTH_ORDER.indexOf(String(b).toUpperCase());
 
     if (ia === -1) ia = 999;
     if (ib === -1) ib = 999;
@@ -245,11 +202,8 @@ function sortMonthKeys(obj) {
   });
 }
 
-
 function shortMonthLabel(key) {
-
-  const idx =
-    MONTH_ORDER.indexOf(String(key).toUpperCase());
+  const idx = MONTH_ORDER.indexOf(String(key).toUpperCase());
 
   if (idx === -1) {
     return String(key);
@@ -258,112 +212,89 @@ function shortMonthLabel(key) {
   return MONTH_SHORT[idx];
 }
 
-
 /* ═══════════════════════════════════════════════════
    CHART DESTROYERS
 ═══════════════════════════════════════════════════ */
 
 function destroyMonthlyChart() {
-
   if (monthlyChart) {
-
     monthlyChart.destroy();
     monthlyChart = null;
   }
 }
 
-
 function destroyCategoryChart() {
-
   if (categoryChart) {
-
     categoryChart.destroy();
     categoryChart = null;
   }
 }
 
-
 /* ═══════════════════════════════════════════════════
    CHARTS
 ═══════════════════════════════════════════════════ */
 
-function renderMonthlyChart(
-  labels,
-  expenseSeries,
-  incomeSeries
-) {
-
+function renderMonthlyChart(labels, expenseSeries, incomeSeries) {
   const canvas = $("monthlyBarChart");
 
-  if (
-    !canvas ||
-    typeof Chart === "undefined"
-  ) {
+  if (!canvas || typeof Chart === "undefined") {
     return;
   }
 
   destroyMonthlyChart();
 
-  monthlyChart = new Chart(
-    canvas.getContext("2d"),
-    {
-      type: "bar",
+  monthlyChart = new Chart(canvas.getContext("2d"), {
+    type: "bar",
 
-      data: {
-        labels,
+    data: {
+      labels,
 
-        datasets: [
-          {
-            label: "Expenses",
-            data: expenseSeries,
-            backgroundColor: "rgba(232, 64, 64, 0.75)",
-            borderRadius: 6,
-          },
+      datasets: [
+        {
+          label: "Expenses",
+          data: expenseSeries,
+          backgroundColor: "rgba(232, 64, 64, 0.75)",
+          borderRadius: 6,
+        },
 
-          {
-            label: "Income",
-            data: incomeSeries,
-            backgroundColor: "rgba(42, 169, 107, 0.75)",
-            borderRadius: 6,
-          },
-        ],
+        {
+          label: "Income",
+          data: incomeSeries,
+          backgroundColor: "rgba(42, 169, 107, 0.75)",
+          borderRadius: 6,
+        },
+      ],
+    },
+
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+
+      plugins: {
+        legend: {
+          position: "bottom",
+        },
       },
 
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-
-        plugins: {
-          legend: {
-            position: "bottom",
+      scales: {
+        x: {
+          grid: {
+            display: false,
           },
         },
 
-        scales: {
-          x: {
-            grid: {
-              display: false,
-            },
-          },
-
-          y: {
-            beginAtZero: true,
-          },
+        y: {
+          beginAtZero: true,
         },
       },
-    }
-  );
+    },
+  });
 }
 
-
 function renderCategoryChart(categoryMap) {
-
   const canvas = $("categoryDoughnutChart");
 
-  if (
-    !canvas ||
-    typeof Chart === "undefined"
-  ) {
+  if (!canvas || typeof Chart === "undefined") {
     return;
   }
 
@@ -371,9 +302,7 @@ function renderCategoryChart(categoryMap) {
 
   let labels = Object.keys(categoryMap || {});
 
-  let data = labels.map((k) =>
-    Number(categoryMap[k]) || 0
-  );
+  let data = labels.map((k) => Number(categoryMap[k]) || 0);
 
   const palette = [
     "#2aa96b",
@@ -386,180 +315,128 @@ function renderCategoryChart(categoryMap) {
     "#64748b",
   ];
 
-  let colors =
-    labels.map((_, i) =>
-      palette[i % palette.length]
-    );
+  let colors = labels.map((_, i) => palette[i % palette.length]);
 
   if (labels.length === 0) {
-
     labels = ["No data"];
     data = [1];
     colors = ["#e2e8f0"];
   }
 
-  categoryChart = new Chart(
-    canvas.getContext("2d"),
-    {
-      type: "doughnut",
+  categoryChart = new Chart(canvas.getContext("2d"), {
+    type: "doughnut",
 
-      data: {
-        labels,
+    data: {
+      labels,
 
-        datasets: [
-          {
-            data,
-            backgroundColor: colors,
-            borderColor: "#fff",
-            borderWidth: 2,
-          },
-        ],
-      },
+      datasets: [
+        {
+          data,
+          backgroundColor: colors,
+          borderColor: "#fff",
+          borderWidth: 2,
+        },
+      ],
+    },
 
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
 
-        plugins: {
-          legend: {
-            position: "bottom",
-          },
+      plugins: {
+        legend: {
+          position: "bottom",
         },
       },
-    }
-  );
+    },
+  });
 }
-
 
 /* ═══════════════════════════════════════════════════
    REPORT DATA
 ═══════════════════════════════════════════════════ */
 
 function applyReportData(data) {
-
   if (!data) {
     return;
   }
 
-  const expenseRaw =
-    data.monthlyExpense || {};
+  const expenseRaw = data.monthlyExpense || {};
 
-  const incomeRaw =
-    data.monthlyIncome || {};
+  const incomeRaw = data.monthlyIncome || {};
 
-  const expenseByCategory =
-    data.expenseByCategory || {};
+  const expenseByCategory = data.expenseByCategory || {};
 
-  const expenseMap =
-    normalizeMonthMap(expenseRaw);
+  const expenseMap = normalizeMonthMap(expenseRaw);
 
-  const incomeMap =
-    normalizeMonthMap(incomeRaw);
+  const incomeMap = normalizeMonthMap(incomeRaw);
 
-  const keys = [...new Set([
-    ...sortMonthKeys(expenseMap),
-    ...sortMonthKeys(incomeMap),
-  ])];
+  const keys = [
+    ...new Set([...sortMonthKeys(expenseMap), ...sortMonthKeys(incomeMap)]),
+  ];
 
-  const labels =
-    keys.map(shortMonthLabel);
+  const labels = keys.map(shortMonthLabel);
 
-  const expenseSeries =
-    keys.map(
-      (k) =>
-        expenseMap[String(k).toUpperCase()] || 0
-    );
-
-  const incomeSeries =
-    keys.map(
-      (k) =>
-        incomeMap[String(k).toUpperCase()] || 0
-    );
-
-  renderMonthlyChart(
-    labels,
-    expenseSeries,
-    incomeSeries
+  const expenseSeries = keys.map(
+    (k) => expenseMap[String(k).toUpperCase()] || 0,
   );
+
+  const incomeSeries = keys.map((k) => incomeMap[String(k).toUpperCase()] || 0);
+
+  renderMonthlyChart(labels, expenseSeries, incomeSeries);
 
   renderCategoryChart(expenseByCategory);
 
-  const totalExpense =
-    sumMap(expenseMap);
+  const totalExpense = sumMap(expenseMap);
 
-  const totalIncome =
-    sumMap(incomeMap);
+  const totalIncome = sumMap(incomeMap);
 
-  const net =
-    totalIncome - totalExpense;
+  const net = totalIncome - totalExpense;
 
-  setText(
-    "sumExpense",
-    formatMoney(totalExpense)
-  );
+  setText("sumExpense", formatMoney(totalExpense));
 
-  setText(
-    "sumIncome",
-    formatMoney(totalIncome)
-  );
+  setText("sumIncome", formatMoney(totalIncome));
 
-  setText(
-    "sumNet",
-    formatMoney(net)
-  );
+  setText("sumNet", formatMoney(net));
 
   const netEl = $("sumNet");
 
   if (netEl) {
-
-    netEl.style.color =
-      net >= 0
-        ? "var(--green-dark)"
-        : "var(--red)";
+    netEl.style.color = net >= 0 ? "var(--green-dark)" : "var(--red)";
   }
 
   showEl("summaryCards", true);
 }
-
 
 /* ═══════════════════════════════════════════════════
    DOWNLOAD HELPERS
 ═══════════════════════════════════════════════════ */
 
 function parseFilename(disposition) {
-
   if (!disposition) {
     return null;
   }
 
-  const utf =
-    disposition.match(/filename\*=UTF-8''(.+)/);
+  const utf = disposition.match(/filename\*=UTF-8''(.+)/);
 
   if (utf && utf[1]) {
-
-    return decodeURIComponent(
-      utf[1].split(";")[0]
-    );
+    return decodeURIComponent(utf[1].split(";")[0]);
   }
 
-  const normal =
-    disposition.match(/filename="?([^"]+)"?/);
+  const normal = disposition.match(/filename="?([^"]+)"?/);
 
   if (normal && normal[1]) {
-
     return normal[1];
   }
 
   return null;
 }
 
-
 /* ═══════════════════════════════════════════════════
    LOAD REPORT
 ═══════════════════════════════════════════════════ */
 
 async function loadMonthlyReport() {
-
   const errEl = $("reportError");
 
   if (errEl) {
@@ -568,18 +445,12 @@ async function loadMonthlyReport() {
 
   showEl("reportError", false);
 
-  const start =
-    $("rangeStart")?.value;
+  const start = $("rangeStart")?.value;
 
-  const end =
-    $("rangeEnd")?.value;
+  const end = $("rangeEnd")?.value;
 
   if (!start || !end) {
-
-    setText(
-      "reportError",
-      "Choose start and end dates."
-    );
+    setText("reportError", "Choose start and end dates.");
 
     showEl("reportError", true);
 
@@ -587,11 +458,7 @@ async function loadMonthlyReport() {
   }
 
   if (start > end) {
-
-    setText(
-      "reportError",
-      "Start date must be before end date."
-    );
+    setText("reportError", "Start date must be before end date.");
 
     showEl("reportError", true);
 
@@ -602,29 +469,21 @@ async function loadMonthlyReport() {
 
   showEl("reportLoading", true);
 
-  const result = await apiFetch(
-    API.MONTHLY,
-    {
-      method: "POST",
+  const result = await apiFetch(API.MONTHLY, {
+    method: "POST",
 
-      body: JSON.stringify({
-        startDate: start,
-        endDate: end,
-      }),
-    }
-  );
+    body: JSON.stringify({
+      startDate: start,
+      endDate: end,
+    }),
+  });
 
   disableBtn("loadReportBtn", false);
 
   showEl("reportLoading", false);
 
   if (!result || result.error) {
-
-    setText(
-      "reportError",
-      result?.message ||
-      "Could not load report."
-    );
+    setText("reportError", result?.message || "Could not load report.");
 
     showEl("reportError", true);
 
@@ -634,13 +493,11 @@ async function loadMonthlyReport() {
   applyReportData(result);
 }
 
-
 /* ═══════════════════════════════════════════════════
    DOWNLOAD REPORT
 ═══════════════════════════════════════════════════ */
 
 async function downloadReport() {
-
   const errEl = $("downloadError");
 
   if (errEl) {
@@ -649,21 +506,14 @@ async function downloadReport() {
 
   showEl("downloadError", false);
 
-  const format =
-    $("downloadFormat")?.value;
+  const format = $("downloadFormat")?.value;
 
-  const start =
-    $("downloadStart")?.value;
+  const start = $("downloadStart")?.value;
 
-  const end =
-    $("downloadEnd")?.value;
+  const end = $("downloadEnd")?.value;
 
   if (!start || !end) {
-
-    setText(
-      "downloadError",
-      "Choose start and end dates."
-    );
+    setText("downloadError", "Choose start and end dates.");
 
     showEl("downloadError", true);
 
@@ -671,11 +521,7 @@ async function downloadReport() {
   }
 
   if (start > end) {
-
-    setText(
-      "downloadError",
-      "Start date must be before end date."
-    );
+    setText("downloadError", "Start date must be before end date.");
 
     showEl("downloadError", true);
 
@@ -685,57 +531,37 @@ async function downloadReport() {
   disableBtn("downloadBtn", true);
 
   try {
+    const token = localStorage.getItem("token");
 
-    const response = await fetch(
-      API.DOWNLOAD,
-      {
-        method: "POST",
-
-        credentials: "include",
-
-        headers: {
-          "Content-Type": "application/json",
-        },
-
-        body: JSON.stringify({
-          format,
-          startDate: start,
-          endDate: end,
-        }),
-      }
-    );
+    const response = await fetch(API.DOWNLOAD, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}), // ← missing here
+      },
+      body: JSON.stringify({ format, startDate: start, endDate: end }),
+    });
 
     if (response.status === 401) {
-
       window.location.href = "/login";
       return;
     }
 
     if (!response.ok) {
+      const txt = await response.text();
 
-      const txt =
-        await response.text();
-
-      throw new Error(
-        txt || `HTTP ${response.status}`
-      );
+      throw new Error(txt || `HTTP ${response.status}`);
     }
 
-    const blob =
-      await response.blob();
+    const blob = await response.blob();
 
     const filename =
-      parseFilename(
-        response.headers.get(
-          "Content-Disposition"
-        )
-      ) || "report";
+      parseFilename(response.headers.get("Content-Disposition")) || "report";
 
-    const url =
-      URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob);
 
-    const a =
-      document.createElement("a");
+    const a = document.createElement("a");
 
     a.href = url;
     a.download = filename;
@@ -747,67 +573,43 @@ async function downloadReport() {
     a.remove();
 
     setTimeout(() => {
-
       URL.revokeObjectURL(url);
-
     }, 1000);
-
   } catch (error) {
-
     console.error(error);
 
-    setText(
-      "downloadError",
-      error.message || "Download failed."
-    );
+    setText("downloadError", error.message || "Download failed.");
 
     showEl("downloadError", true);
-
   } finally {
-
     disableBtn("downloadBtn", false);
   }
 }
-
 
 /* ═══════════════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════════════ */
 
-document.addEventListener(
-  "DOMContentLoaded",
-  () => {
-
-    if ($("rangeStart")) {
-      $("rangeStart").value =
-        yearStartISO();
-    }
-
-    if ($("rangeEnd")) {
-      $("rangeEnd").value =
-        todayISO();
-    }
-
-    if ($("downloadStart")) {
-      $("downloadStart").value =
-        yearStartISO();
-    }
-
-    if ($("downloadEnd")) {
-      $("downloadEnd").value =
-        todayISO();
-    }
-
-    $("loadReportBtn")
-      ?.addEventListener(
-        "click",
-        loadMonthlyReport
-      );
-
-    $("downloadBtn")
-      ?.addEventListener(
-        "click",
-        downloadReport
-      );
+document.addEventListener("DOMContentLoaded", () => {
+  if ($("rangeStart")) {
+    $("rangeStart").value = yearStartISO();
   }
-);
+
+  if ($("rangeEnd")) {
+    $("rangeEnd").value = todayISO();
+  }
+
+  if ($("downloadStart")) {
+    $("downloadStart").value = yearStartISO();
+  }
+
+  if ($("downloadEnd")) {
+    $("downloadEnd").value = todayISO();
+  }
+
+  $("loadReportBtn")?.addEventListener("click", loadMonthlyReport);
+
+  $("downloadBtn")?.addEventListener("click", downloadReport);
+
+  loadMonthlyReport();
+});

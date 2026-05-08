@@ -111,7 +111,9 @@
   border-radius: var(--radius-sm);
   border: none;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
   background: var(--green);
   color: #fff;
 }
@@ -235,4 +237,11 @@
   .logout .nav-item {
     justify-content: center;
   }
+}
+
+.chart-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 18px;
 }

@@ -166,9 +166,9 @@ public class TransactionService {
             @NonNull MonthlyReportRequest request,
             TransactionType type) {
 
-        return transactionRepo.getMonthlyTotal(userId, type, request.getStartDate(),
+        return transactionRepo.getMonthlyTotal(userId, type.name(), request.getStartDate(),
                 request.getEndDate()).stream().collect(
-                Collectors.toMap(row -> Month.of((Integer) row[0]), row -> ((Number) row[1]).doubleValue(), (a, b) -> a,
+                Collectors.toMap(row -> Month.of(((Number) row[0]).intValue()), row -> ((Number) row[1]).doubleValue(), (a, b) -> a,
                         LinkedHashMap::new));
     }
 
