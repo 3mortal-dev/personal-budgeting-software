@@ -11,6 +11,7 @@ const API = {
 const state = {
     dashboard: null,
     notifications: [],
+    categories: [],
 };
 
 async function apiFetch(endpoint, options = {}) {
@@ -55,14 +56,23 @@ function escapeHtml(str) {
         .replace(/'/g, "&#039;");
 }
 
+let toastTimer;
+
+function showToast(message, type = "success") {
+    const toast = document.getElementById("toast");
+    if (!toast) return;
+    toast.textContent = message;
+    toast.className = `toast toast--${type} show`;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove("show"), 3200);
+}
+
 function showSuccess(message) {
-    console.log("✓ " + message);
-    // TODO: Implement toast notification
+    showToast(message, "success");
 }
 
 function showError(message) {
-    console.error("✗ " + message);
-    // TODO: Implement toast notification
+    showToast(message, "error");
 }
 
 function setCurrentMonth() {
@@ -162,10 +172,12 @@ function renderBudgets(budgets) {
         const limit = Number(budget.spendingLimit || 0);
         const pct = limit > 0 ? Math.min((spent / limit) * 100, 100) : 0;
         const color = pct >= 90 ? "#e84040" : pct >= 70 ? "#f59e0b" : "#2aa96b";
+        const cat = state.categories.find(c => c.id === budget.categoryId);
+        const catName = cat?.name ?? `Category #${budget.categoryId ?? "N/A"}`;
         return `
       <div class="budget-item">
         <div class="budget-row">
-          <span class="budget-name">Category #${budget.categoryId ?? "N/A"}</span>
+          <span class="budget-name">${escapeHtml(catName)}</span>
           <span class="budget-amounts">${formatCurrency(spent)} / ${formatCurrency(limit)}</span>
         </div>
         <div class="budget-track">
@@ -239,12 +251,19 @@ async function loadNotifications() {
 
 async function loadCategories() {
     const data = await apiFetch(API.CATEGORIES);
-    if (!data || !Array.isArray(data)) return;
+    if (!data) return;
+    state.categories = data;
 
-    const categorySelect = document.getElementById("transactionCategory");
-    if (!categorySelect) return;
+    const categorySelectTrans = document.getElementById("transactionCategory");
+    const categorySelectBudget = document.getElementById("budgetCategory");
+    if (!categorySelectTrans) return;
+    if (!categorySelectBudget) return;
 
-    categorySelect.innerHTML = data.map(cat =>
+    categorySelectTrans.innerHTML = data.map(cat =>
+        `<option value="${cat.id}">${cat.name}</option>`
+    ).join("");
+
+    categorySelectBudget.innerHTML = data.map(cat =>
         `<option value="${cat.id}">${cat.name}</option>`
     ).join("");
 }
@@ -437,10 +456,11 @@ async function addTransaction(event) {
 }
 
 async function addBudget() {
+    const categoryId = parseInt(document.getElementById("budgetCategory").value);
     const spendingLimit = Number(document.getElementById("budgetAmount")?.value || 0);
-    const startDate = document.getElementById("budgetStart")?.value || null;
+    const threshold = Number(document.getElementById("budgetThreshold")?.value || 0);
     const endDate = document.getElementById("budgetEnd")?.value || null;
-    const payload = {spendingLimit, startDate, endDate};
+    const payload = {categoryId, spendingLimit, threshold, endDate};
     await apiFetch(API.BUDGETS, {method: "POST", body: JSON.stringify(payload)});
     closeBudgetModal();
     await loadDashboardData();
@@ -490,4 +510,5 @@ document.addEventListener("DOMContentLoaded", async () => {
         const wrapper = document.getElementById("notifWrapper");
         if (wrapper && !wrapper.contains(event.target)) closeNotifications();
     });
+    console.log(state.budgets);
 });
