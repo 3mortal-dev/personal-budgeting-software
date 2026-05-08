@@ -39,12 +39,12 @@ const CURRENCIES = {
 ───────────────────────────────────────────── */
 async function init() {
   try {
-    const response = await fetch('/api/profile', {
-      method:  'GET',
+      const response = await fetch('/api/profile', {
+      method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      // Cookie sent automatically (HTTP-only)
+      body: JSON.stringify({ name }),
     });
-
+    
     if (response.status === 401 || response.status === 403) {
       window.location.href = '/index';
       return;
@@ -63,8 +63,8 @@ async function init() {
     state.stats.budgets      = data.budgetsCount      ?? 0;
 
     // Load notification preferences from API response if available
-    state.prefs.notifGoals        = data.prefs?.notifGoals        ?? true;
-    state.prefs.notifTransactions = data.prefs?.notifTransactions ?? true;
+    state.prefs.notifGoals        = data.goalProgressAlertEnabled ?? true;
+    state.prefs.notifTransactions = data.budgetAlertEnabled       ?? true;
     state.prefs.currency          = data.prefs?.currency          ?? 'USD';
 
     renderAll();
@@ -322,11 +322,24 @@ function previewAvatar(event) {
  *     console.error('Notification (goals) update failed:', err);
  *   });
  */
-function onNotifGoalsChange(enabled) {
+async function onNotifGoalsChange(enabled) {
   state.prefs.notifGoals = enabled;
-  console.log('Goals notifications:', enabled);
 
-  // TODO: persist — see comment above
+  try {
+    const response = await fetch('/api/profile/notifications', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        budgetAlerts:  state.prefs.notifTransactions,  
+        goalReminders: enabled,                         
+      }),
+    });
+    if (!response.ok) throw new Error('Failed');
+  } catch (err) {
+    state.prefs.notifGoals = !enabled;
+    document.getElementById('notif-goals-toggle').checked = !enabled;
+    console.error('Goals notification update failed:', err);
+  }
 }
 
 function toggleNotifGoals() {
@@ -353,13 +366,26 @@ function toggleNotifGoals() {
  *     console.error('Notification (transactions) update failed:', err);
  *   });
  */
-function onNotifTransactionsChange(enabled) {
+async function onNotifTransactionsChange(enabled) {
   state.prefs.notifTransactions = enabled;
-  console.log('Transactions notifications:', enabled);
 
-  // TODO: persist — see comment above
+  try {
+    const response = await fetch('/api/profile/notifications', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        budgetAlerts:  enabled,                        // updated value
+        goalReminders: state.prefs.notifGoals,         // keep current value
+      }),
+    });
+    if (!response.ok) throw new Error('Failed');
+  } catch (err) {
+    // Revert UI on failure
+    state.prefs.notifTransactions = !enabled;
+    document.getElementById('notif-transactions-toggle').checked = !enabled;
+    console.error('Transactions notification update failed:', err);
+  }
 }
-
 function toggleNotifTransactions() {
   const checkbox = document.getElementById('notif-transactions-toggle');
   checkbox.checked = !checkbox.checked;
@@ -387,36 +413,6 @@ function closeCurrencyDropdown() {
   document.getElementById('currency-chevron').classList.remove('open');
 }
 
-/**
- * Selects a currency and optionally persists it to the backend.
- *
- * TODO (Backend Integration):
- * After updating local state, uncomment the fetch below:
- *
- *   await fetch('/api/users/me/preferences', {
- *     method: 'PATCH',
- *     headers: { 'Content-Type': 'application/json' },
- *     // Cookie sent automatically (HTTP-only)
- *     body: JSON.stringify({ currency: value }),
- *   }).catch(err => {
- *     // Revert on failure
- *     const prev = state.prefs.currency;
- *     state.prefs.currency = prev;
- *     setCurrencyDisplay(prev);
- *     console.error('Currency update failed:', err);
- *   });
- *
- * After saving, you also need to re-render any monetary values shown
- * across the dashboard using the new currency symbol / conversion rate.
- * Example:
- *   renderDashboardAmounts(value); // your own function that re-formats amounts
- *
- * If you need live exchange rates, call a rates API first:
- *   const ratesResp = await fetch('/api/exchange-rates?base=USD');
- *   const { rates } = await ratesResp.json();
- *   // rates = { EGP: 48.7, EUR: 0.92, ... }
- *   // Then convert amounts: amount * rates[value]
- */
 function selectCurrency(optionEl) {
   const value = optionEl.dataset.value;
 
