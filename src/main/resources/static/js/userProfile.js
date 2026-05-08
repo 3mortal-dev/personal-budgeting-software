@@ -3,6 +3,20 @@
 ═══════════════════════════════════════════════════════════════ */
 
 /* ─────────────────────────────────────────────
+   API FETCH WRAPPER  –  always sends cookies
+───────────────────────────────────────────── */
+function apiFetch(url, options = {}) {
+  return fetch(url, {
+    ...options,
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+}
+
+/* ─────────────────────────────────────────────
    IN-MEMORY STATE
 ───────────────────────────────────────────── */
 const state = {
@@ -39,12 +53,10 @@ const CURRENCIES = {
 ───────────────────────────────────────────── */
 async function init() {
   try {
-      const response = await fetch('/api/profile', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name }),
+    const response = await apiFetch('/api/profile', {
+      method: 'GET',
     });
-    
+
     if (response.status === 401 || response.status === 403) {
       window.location.href = '/index';
       return;
@@ -62,10 +74,10 @@ async function init() {
     state.stats.transactions = data.transactionsCount ?? 0;
     state.stats.budgets      = data.budgetsCount      ?? 0;
 
-    // Load notification preferences from API response if available
+    // Load notification preferences from API response
     state.prefs.notifGoals        = data.goalProgressAlertEnabled ?? true;
     state.prefs.notifTransactions = data.budgetAlertEnabled       ?? true;
-    state.prefs.currency          = data.prefs?.currency          ?? 'USD';
+    state.prefs.currency          = data.currency                 ?? 'USD';
 
     renderAll();
     setGreeting();
@@ -85,9 +97,9 @@ async function init() {
     }
   });
 
-  // Close notification dropdown on outside click
+  // Close notification panel on outside click
   document.addEventListener('click', (e) => {
-    const panel   = document.getElementById('notif-panel');
+    const panel    = document.getElementById('notif-panel');
     const notifBtn = document.getElementById('notif-icon-btn');
     if (panel && notifBtn &&
         !panel.contains(e.target) && !notifBtn.contains(e.target)) {
@@ -131,27 +143,10 @@ function setGreeting() {
 /* ═══════════════════════════════════════════
    NOTIFICATIONS PANEL
 ═══════════════════════════════════════════ */
-
-/**
- * Loads notifications from the backend and renders them.
- *
- * TODO (Backend Integration):
- * Replace the mock data below with a real API call:
- *
- *   const response = await fetch('/api/notifications', {
- *     method: 'GET',
- *     headers: { 'Content-Type': 'application/json' },
- *     // Cookie sent automatically (HTTP-only)
- *   });
- *   const data = await response.json();
- *   // data should be an array of notification objects:
- *   // [{ id, type ('goal'|'transaction'|'alert'), title, message, time, read: bool }]
- *   state.notifications = data;
- *
- * For now, we use mock data to demonstrate the UI.
- */
 async function loadNotifications() {
-  // MOCK DATA — replace with real fetch above
+  // MOCK DATA — replace with real fetch when backend is ready:
+  //   const response = await apiFetch('/api/notifications', { method: 'GET' });
+  //   state.notifications = await response.json();
   state.notifications = [
     {
       id: 1,
@@ -251,35 +246,19 @@ function renderNotifList() {
   }).join('');
 }
 
-/**
- * Marks a single notification as read.
- *
- * TODO (Backend Integration):
- *   await fetch(`/api/notifications/${id}/read`, {
- *     method: 'PATCH',
- *     // Cookie sent automatically (HTTP-only)
- *   });
- */
 function markNotifRead(id) {
   const notif = state.notifications.find(n => n.id === id);
   if (notif) notif.read = true;
   renderNotifList();
   renderNotifBadge();
+  // TODO: await apiFetch(`/api/notifications/${id}/read`, { method: 'PATCH' });
 }
 
-/**
- * Marks all notifications as read.
- *
- * TODO (Backend Integration):
- *   await fetch('/api/notifications/read-all', {
- *     method: 'PATCH',
- *     // Cookie sent automatically (HTTP-only)
- *   });
- */
 function markAllRead() {
   state.notifications.forEach(n => n.read = true);
   renderNotifList();
   renderNotifBadge();
+  // TODO: await apiFetch('/api/notifications/read-all', { method: 'PATCH' });
 }
 
 /* ═══════════════════════════════════════════
@@ -301,41 +280,22 @@ function previewAvatar(event) {
 }
 
 /* ═══════════════════════════════════════════
-   NOTIFICATIONS PREFERENCES
+   NOTIFICATION PREFERENCES
 ═══════════════════════════════════════════ */
-
-/**
- * Toggles the "Goals" notification preference.
- *
- * TODO (Backend Integration):
- * Uncomment the fetch below to persist this preference:
- *
- *   await fetch('/api/users/me/preferences', {
- *     method: 'PATCH',
- *     headers: { 'Content-Type': 'application/json' },
- *     // Cookie sent automatically (HTTP-only)
- *     body: JSON.stringify({ notifGoals: enabled }),
- *   }).catch(err => {
- *     // Revert UI on failure
- *     document.getElementById('notif-goals-toggle').checked = !enabled;
- *     state.prefs.notifGoals = !enabled;
- *     console.error('Notification (goals) update failed:', err);
- *   });
- */
 async function onNotifGoalsChange(enabled) {
   state.prefs.notifGoals = enabled;
 
   try {
-    const response = await fetch('/api/profile/notifications', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+    const response = await apiFetch('/api/profile/notifications', {
+      method: 'PUT',
       body: JSON.stringify({
-        budgetAlerts:  state.prefs.notifTransactions,  
-        goalReminders: enabled,                         
+        budgetAlerts:  state.prefs.notifTransactions,
+        goalReminders: enabled,
       }),
     });
     if (!response.ok) throw new Error('Failed');
   } catch (err) {
+    // Revert UI on failure
     state.prefs.notifGoals = !enabled;
     document.getElementById('notif-goals-toggle').checked = !enabled;
     console.error('Goals notification update failed:', err);
@@ -348,34 +308,15 @@ function toggleNotifGoals() {
   onNotifGoalsChange(checkbox.checked);
 }
 
-/**
- * Toggles the "Transactions" notification preference.
- *
- * TODO (Backend Integration):
- * Uncomment the fetch below to persist this preference:
- *
- *   await fetch('/api/users/me/preferences', {
- *     method: 'PATCH',
- *     headers: { 'Content-Type': 'application/json' },
- *     // Cookie sent automatically (HTTP-only)
- *     body: JSON.stringify({ notifTransactions: enabled }),
- *   }).catch(err => {
- *     // Revert UI on failure
- *     document.getElementById('notif-transactions-toggle').checked = !enabled;
- *     state.prefs.notifTransactions = !enabled;
- *     console.error('Notification (transactions) update failed:', err);
- *   });
- */
 async function onNotifTransactionsChange(enabled) {
   state.prefs.notifTransactions = enabled;
 
   try {
-    const response = await fetch('/api/profile/notifications', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+    const response = await apiFetch('/api/profile/notifications', {
+      method: 'PUT',
       body: JSON.stringify({
-        budgetAlerts:  enabled,                        // updated value
-        goalReminders: state.prefs.notifGoals,         // keep current value
+        budgetAlerts:  enabled,
+        goalReminders: state.prefs.notifGoals,
       }),
     });
     if (!response.ok) throw new Error('Failed');
@@ -386,6 +327,7 @@ async function onNotifTransactionsChange(enabled) {
     console.error('Transactions notification update failed:', err);
   }
 }
+
 function toggleNotifTransactions() {
   const checkbox = document.getElementById('notif-transactions-toggle');
   checkbox.checked = !checkbox.checked;
@@ -423,7 +365,8 @@ function selectCurrency(optionEl) {
   state.prefs.currency = value;
   closeCurrencyDropdown();
 
-  // TODO: persist to backend — see detailed comment above
+  // TODO: persist to backend
+  // await apiFetch('/api/profile/preferences', { method: 'PATCH', body: JSON.stringify({ currency: value }) });
 }
 
 function setCurrencyDisplay(value) {
@@ -434,13 +377,9 @@ function setCurrencyDisplay(value) {
 
 /* ═══════════════════════════════════════════
    EDIT MODAL  –  name only
-   BUG FIX: Modal now uses the correct CSS classes ('open' not 'is-open')
-   and state update only runs after confirmed API success.
 ═══════════════════════════════════════════ */
 function openEditModal() {
   document.getElementById('edit-name').value = state.user.name;
-
-  // FIX: use 'open' class consistently (matching .modal-overlay.open and .modal.open in CSS)
   document.getElementById('modal-overlay').classList.add('open');
   document.getElementById('edit-modal').classList.add('open');
   document.getElementById('edit-name').focus();
@@ -466,10 +405,8 @@ async function saveProfile() {
   if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Saving…'; }
 
   try {
-    const response = await fetch('/api/userProfile', {
-      method:  'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      // Cookie sent automatically (HTTP-only)
+    const response = await apiFetch('/api/profile', {
+      method: 'PUT',
       body: JSON.stringify({ name }),
     });
 
@@ -477,7 +414,7 @@ async function saveProfile() {
 
     await response.json();
 
-    // FIX: state is only updated after confirmed API success
+    // State only updated after confirmed API success
     state.user.name     = name;
     state.user.initials = getInitials(name);
     renderAll();
@@ -509,9 +446,8 @@ function getInitials(fullName) {
 ═══════════════════════════════════════════ */
 async function handleLogout() {
   try {
-    await fetch('/api/auth/logout', {
+    await apiFetch('/api/auth/logout', {
       method: 'POST',
-      // Cookie sent automatically (HTTP-only)
     });
   } catch (err) {
     console.error('Logout error:', err);
