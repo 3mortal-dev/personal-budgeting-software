@@ -1,11 +1,11 @@
 package com.example.personal_budget.service;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.example.personal_budget.dto.request.CreateBudgetRequest;
@@ -18,10 +18,6 @@ import com.example.personal_budget.repository.CategoryRepository;
 import com.example.personal_budget.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -227,9 +223,9 @@ public class BudgetService {
         budgetRepository.save(budget);
     }
 
-    public Collection<Budget> getActiveBudgets(Long userId, int limit) {
+    public List<Budget> getActiveBudgets(Long userId, int limit) {
 
-        return budgetRepository.findByUserIdAndEndDateAfter(
+        return budgetRepository.findByUserIdAndEndDateGreaterThanEqual(
                 userId,
                 LocalDate.now(),
                 PageRequest.of(0, limit, Sort.by("endDate").ascending())
