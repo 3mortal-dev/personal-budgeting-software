@@ -1,13 +1,12 @@
 package com.example.personal_budget.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
-
 import com.example.personal_budget.dto.request.UpdateNotificationSettings;
 import com.example.personal_budget.entity.User;
 import com.example.personal_budget.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -42,8 +41,7 @@ public class UserService {
     }
 
     public User getUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found with id: " + id));
     }
 
     public Iterable<User> getAllUsers() {
@@ -58,7 +56,10 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-    public void updateNotificationSettings(UpdateNotificationSettings request, long userId) {
+    @Transactional
+    public void updateNotificationSettings(
+            UpdateNotificationSettings request,
+            long userId) {
         if (!userRepository.existsById(userId)) {
             throw new RuntimeException("User not found with id: " + userId);
         }
