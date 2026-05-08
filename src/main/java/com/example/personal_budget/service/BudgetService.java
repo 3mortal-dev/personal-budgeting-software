@@ -138,7 +138,7 @@ public class BudgetService {
         budgetRepository.delete(budget);
     }
 
-    public void onTransactionAdded(Long userID, Long categoryID, Double amount) {
+    public void onTransactionAdded(Long userID, Long categoryID, Double amount, LocalDate transactionDate) {
 
         if (categoryID == null) {
             return;
@@ -151,7 +151,7 @@ public class BudgetService {
 
         Budget budget = budgetOpt.get();
 
-        if (budget.getEndDate().isBefore(LocalDate.now())) {
+        if (budget.getEndDate().isBefore(LocalDate.now()) || (transactionDate.isBefore(budget.getStartDate()) || transactionDate.isAfter(budget.getEndDate()))) {
             return;
         }
 
@@ -179,36 +179,6 @@ public class BudgetService {
         Double newSpentAmount = Math.max(0.0, budget.getSpentAmount() - amount);
         updateBudgetSpending(budget, newSpentAmount);
     }
-
-    // ---------------------------------------------------------------------------------------
-    public void onTransactionEdited(Long userID,
-            Long oldCategoryID, Long newCategoryID,
-            Double oldAmount, Double newAmount,
-            LocalDate oldTransactionDate, LocalDate newTransactionDate) {
-
-        if (oldCategoryID != null) {
-            Optional<Budget> oldBudgetOpt = budgetRepository.findByUserIdAndCategoryId(userID, oldCategoryID);
-            if (oldBudgetOpt.isPresent()) {
-                Budget oldBudget = oldBudgetOpt.get();
-                if (!(oldBudget.getEndDate().isBefore(LocalDate.now()) || oldTransactionDate.isBefore(oldBudget.getStartDate()))) {
-                    Double newSpentAmount = Math.max(0.0, oldBudget.getSpentAmount() - oldAmount);
-                    updateBudgetSpending(oldBudget, newSpentAmount);
-                }
-            }
-        }
-
-        if (newCategoryID != null) {
-            Optional<Budget> newBudgetOpt = budgetRepository.findByUserIdAndCategoryId(userID, newCategoryID);
-            if (newBudgetOpt.isPresent()) {
-                Budget newBudget = newBudgetOpt.get();
-                if (!(newBudget.getEndDate().isBefore(LocalDate.now()) || newTransactionDate.isBefore(newBudget.getStartDate()))) {
-                    Double newSpentAmount = newBudget.getSpentAmount() + newAmount;
-                    updateBudgetSpending(newBudget, newSpentAmount);
-                }
-            }
-        }
-    }
-    // ---------------------------------------------------------------------------------------
 
     private void updateBudgetSpending(Budget budget, Double newSpentAmount) {
 
