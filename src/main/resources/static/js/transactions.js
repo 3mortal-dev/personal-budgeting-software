@@ -167,6 +167,8 @@ async function loadTransactions() {
     if (data) {
         state.transactions = data;
         renderTransactions();
+    } else {
+        toastLoadFailed();
     }
 }
 
@@ -290,9 +292,14 @@ async function addTransaction(event) {
         renderTransactions();
         closeAddTransactionModal();
         resetAddTransactionForm();
-        showSuccess("Transaction added successfully!");
+
+        // Contextual message: use source for INCOME, category name for EXPENSE
+        const label = type === "INCOME"
+            ? (formData.source || "")
+            : (state.categories.find(c => c.id === formData.categoryId)?.name || "");
+        toastTransactionAdded(type, formData.amount, label);
     } else {
-        console.error("Failed to add transaction");
+        toastSaveFailed("add");
     }
 }
 
@@ -325,9 +332,9 @@ async function updateTransaction(event) {
         }
         renderTransactions();
         closeEditTransactionModal();
-        showSuccess("Transaction updated successfully!");
+        toastTransactionUpdated(type, formData.amount);
     } else {
-        console.error("Failed to update transaction");
+        toastSaveFailed("update");
     }
 }
 
@@ -346,7 +353,7 @@ async function deleteTransaction(transactionId) {
             (t) => t.id !== transactionId,
         );
         renderTransactions();
-        showSuccess("Transaction deleted successfully!");
+        toastTransactionDeleted();
     }
 }
 
@@ -523,13 +530,108 @@ function formatDate(dateString) {
     });
 }
 
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  TOAST NOTIFICATIONS                                         ║
+// ╚══════════════════════════════════════════════════════════════╝
+
+let toastTimer;
+
+/**
+ * Core toast engine — matches goal.js pattern.
+ * @param {string} msg   - Message text
+ * @param {'success'|'error'|'info'|'warning'} type
+ * @param {number}  [duration=3200]
+ */
+function showToast(msg, type = "success", duration = 3200) {
+    const toast = document.getElementById("toast");
+    if (!toast) return;
+
+    // Swap content and class atomically so re-triggers feel snappy
+    clearTimeout(toastTimer);
+    toast.classList.remove("show");
+
+    // Allow the browser to repaint the hidden state before re-showing
+    requestAnimationFrame(() => {
+        toast.innerHTML = `<span class="toast__icon">${TOAST_ICONS[type] ?? TOAST_ICONS.info}</span>
+                           <span class="toast__msg">${escapeToast(msg)}</span>`;
+        toast.className = `toast toast--${type} show`;
+        toastTimer = setTimeout(() => toast.classList.remove("show"), duration);
+    });
+}
+
+/** Icon set for each toast type (inline SVG — no extra network request) */
+const TOAST_ICONS = {
+    success: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8.5"/><polyline points="6.5,10.5 9,13 13.5,7.5"/></svg>`,
+    error: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8.5"/><line x1="7" y1="7" x2="13" y2="13"/><line x1="13" y1="7" x2="7" y2="13"/></svg>`,
+    warning: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5L18 17H2L10 2.5Z"/><line x1="10" y1="8" x2="10" y2="12"/><circle cx="10" cy="15" r="0.8" fill="currentColor"/></svg>`,
+    info: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="8.5"/><line x1="10" y1="9" x2="10" y2="14"/><circle cx="10" cy="6.5" r="0.8" fill="currentColor"/></svg>`,
+};
+
+/** Minimal HTML-escape for toast content */
+function escapeToast(str) {
+    return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+}
+
+// ── Contextual wrappers used throughout the file ──────────────────────────────
+
 function showSuccess(message) {
-    // Simple success notification - you could enhance this
-    console.log("Success:", message);
+    showToast(message, "success");
 }
 
 function showError(message) {
-    // Simple error notification
-    console.error("Error:", message);
-    alert(message);
+    showToast(message, "error");
+}
+
+// ── Per-action contextual messages ───────────────────────────────────────────
+
+/**
+ * Called after a transaction is successfully created.
+ * Gives a tailored message based on type, amount, and category/source.
+ */
+function toastTransactionAdded(type, amount, label) {
+    const sign = type === "INCOME" ? "+" : "−";
+    const money = formatCurrency(amount);
+    const detail = label ? ` · ${label}` : "";
+    const verb = type === "INCOME" ? "Income recorded" : "Expense logged";
+    showToast(`${verb}: ${sign}${money}${detail}`, "success");
+}
+
+/**
+ * Called after a transaction is successfully updated.
+ */
+function toastTransactionUpdated(type, amount) {
+    const sign = type === "INCOME" ? "+" : "−";
+    const money = formatCurrency(amount);
+    showToast(`Transaction updated — ${sign}${money}`, "success");
+}
+
+/**
+ * Called after a transaction is deleted.
+ */
+function toastTransactionDeleted() {
+    showToast("Transaction deleted.", "info");
+}
+
+/**
+ * Called when an API write fails (add / update).
+ */
+function toastSaveFailed(action = "save") {
+    showToast(`Couldn't ${action} transaction. Check your connection and try again.`, "error");
+}
+
+/**
+ * Called when the transaction list fails to load.
+ */
+function toastLoadFailed() {
+    showToast("Failed to load transactions. Please refresh the page.", "error");
+}
+
+/** Format currency without the Intl overhead for toast strings */
+function formatCurrency(amount) {
+    return new Intl.NumberFormat("en-US", {
+        style: "currency", currency: "USD", minimumFractionDigits: 2,
+    }).format(amount ?? 0);
 }
