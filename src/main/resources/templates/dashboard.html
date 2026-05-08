@@ -1,371 +1,435 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BudgetWise – Dashboard</title>
-  <link rel="stylesheet" th:href="@{/css/dashboard.css}" href="../static/css/dashboard.css"/>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>BudgetWise – Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}" href="../static/css/dashboard.css"/>
 </head>
 <body>
 
-  <div class="layout">
+<div class="layout">
 
     <!-- ══ SIDEBAR ══ -->
     <aside class="sidebar">
-      <div class="logo">
-        <div class="logo-icon">
-          <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2" stroke-width="2"/><path d="M2 10h20" stroke-width="2"/></svg>
+        <div class="logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24">
+                    <rect x="2" y="5" width="20" height="14" rx="2" stroke-width="2"/>
+                    <path d="M2 10h20" stroke-width="2"/>
+                </svg>
+            </div>
+            <span class="logo-text">BudgetWise</span>
         </div>
-        <span class="logo-text">BudgetWise</span>
-      </div>
 
-      <nav class="nav">
-        <a class="nav-item" th:href="@{/dashboard}" href="/dashboard">
-          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          Dashboard
-        </a>
-        <a class="nav-item" th:href="@{/transactions}" href="/transactions">
-          <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-          Transactions
-        </a>
-        <a class="nav-item" th:href="@{/budget}" href="/budget">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          Budgets
-        </a>
-        <a class="nav-item" th:href="@{/goals}" href="/goals">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
-          Goals
-        </a>
-        <a class="nav-item" th:href="@{/reports}" href="/reports">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-          Reports
-        </a>
-        <a class="nav-item" th:href="@{/notifications}" href="/notifications">
-          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          Notifications
-        </a>
-        <a class="nav-item" th:href="@{/userProfile}" href="/userProfile">
-          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Profile
-        </a>
-      </nav>
+        <nav class="nav">
+            <a class="nav-item" th:href="@{/dashboard}" href="/dashboard">
+                <svg viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="7" height="7"/>
+                    <rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/>
+                    <rect x="3" y="14" width="7" height="7"/>
+                </svg>
+                Dashboard
+            </a>
+            <a class="nav-item" th:href="@{/transactions}" href="/transactions">
+                <svg viewBox="0 0 24 24">
+                    <line x1="8" y1="6" x2="21" y2="6"/>
+                    <line x1="8" y1="12" x2="21" y2="12"/>
+                    <line x1="8" y1="18" x2="21" y2="18"/>
+                    <line x1="3" y1="6" x2="3.01" y2="6"/>
+                    <line x1="3" y1="12" x2="3.01" y2="12"/>
+                    <line x1="3" y1="18" x2="3.01" y2="18"/>
+                </svg>
+                Transactions
+            </a>
+            <a class="nav-item" th:href="@{/budget}" href="/budget">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                Budgets
+            </a>
+            <a class="nav-item" th:href="@{/goals}" href="/goals">
+                <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                Goals
+            </a>
+            <a class="nav-item" th:href="@{/reports}" href="/reports">
+                <svg viewBox="0 0 24 24">
+                    <line x1="18" y1="20" x2="18" y2="10"/>
+                    <line x1="12" y1="20" x2="12" y2="4"/>
+                    <line x1="6" y1="20" x2="6" y2="14"/>
+                </svg>
+                Reports
+            </a>
+            <a class="nav-item" th:href="@{/notifications}" href="/notifications">
+                <svg viewBox="0 0 24 24">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                Notifications
+            </a>
+            <a class="nav-item" th:href="@{/userProfile}" href="/userProfile">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                Profile
+            </a>
+        </nav>
 
-      <div class="logout">
-        <a class="nav-item" th:href="@{/index}" href="/index">
-          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Logout
-        </a>
-      </div>
+        <div class="logout">
+            <a class="nav-item" th:href="@{/index}" href="/index">
+                <svg viewBox="0 0 24 24">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Logout
+            </a>
+        </div>
     </aside>
 
     <!-- ══ MAIN ══ -->
     <div class="main">
 
-      <!-- TOP NAV -->
-      <div class="topnav">
-        <div class="topnav-greeting" id="greeting">Good morning, there <span>👋</span></div>
-        <div class="topnav-actions">
-          <div class="notif-wrapper" id="notifWrapper">
-            <button class="btn-icon notif-btn" id="notifBtn" onclick="toggleNotifications()" aria-label="Notifications">
-              <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-              <span class="notif-badge" id="notifBadge"></span>
-            </button>
+        <!-- TOP NAV -->
+        <div class="topnav">
+            <div class="topnav-greeting" id="greeting">Good morning, there <span>👋</span></div>
+            <div class="topnav-actions">
+                <div class="notif-wrapper" id="notifWrapper">
+                    <button class="btn-icon notif-btn" id="notifBtn" onclick="toggleNotifications()"
+                            aria-label="Notifications">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                        <span class="notif-badge" id="notifBadge"></span>
+                    </button>
 
-            <!-- Notification Dropdown -->
-            <div class="notif-dropdown" id="notifDropdown">
-              <div class="notif-dropdown-header">
-                <span class="notif-dropdown-title">Notifications</span>
-                <button class="notif-mark-all" onclick="markAllRead()">Mark all read</button>
-              </div>
-              <div class="notif-list" id="notifList"></div>
-              <div class="notif-dropdown-footer">
-                <a class="notif-view-all" th:href="@{/notifications}" href="/notifications">View all notifications</a>
-              </div>
+                    <!-- Notification Dropdown -->
+                    <div class="notif-dropdown" id="notifDropdown">
+                        <div class="notif-dropdown-header">
+                            <span class="notif-dropdown-title">Notifications</span>
+                            <button class="notif-mark-all" onclick="markAllRead()">Mark all read</button>
+                        </div>
+                        <div class="notif-list" id="notifList"></div>
+                        <div class="notif-dropdown-footer">
+                            <a class="notif-view-all" th:href="@{/notifications}" href="/notifications">View all
+                                notifications</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="avatar">AS</div>
             </div>
-          </div>
-          <div class="avatar">AS</div>
         </div>
-      </div>
 
-      <!-- CONTENT GRID -->
-      <div class="content">
+        <!-- CONTENT GRID -->
+        <div class="content">
 
-        <!-- ── LEFT COLUMN ── -->
-        <div class="content-left">
+            <!-- ── LEFT COLUMN ── -->
+            <div class="content-left">
 
-          <!-- Page Header -->
-          <div class="page-header">
-            <div>
-              <h1>Dashboard</h1>
-              <p>Manage your finances and track your progress.</p>
-            </div>
-            <div class="header-actions">
-              <button class="btn-month">
-                <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                <span id="currentMonth">January 2026</span>
-              </button>
-              <button class="btn-add" onclick="openAddModal()">
-                Add New Transaction
-                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              </button>
-            </div>
-          </div>
-
-          <!-- Balance Card -->
-          <div class="balance-card" id="balanceCard">
-            <div class="balance-icon">
-              <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2" stroke-width="2"/><path d="M2 10h20" stroke-width="2"/></svg>
-            </div>
-            <div class="balance-label">TOTAL BALANCE</div>
-            <div class="balance-amount skeleton" id="balAmt">&nbsp;</div>
-            <div class="balance-metrics">
-              <div class="metric">
-                <div class="metric-label">
-                  <span class="dot-indicator dot-green"></span>
-                  MONTHLY INCOME
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div>
+                        <h1>Dashboard</h1>
+                        <p>Manage your finances and track your progress.</p>
+                    </div>
+                    <div class="header-actions">
+                        <button class="btn-month">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                                <line x1="16" y1="2" x2="16" y2="6"/>
+                                <line x1="8" y1="2" x2="8" y2="6"/>
+                                <line x1="3" y1="10" x2="21" y2="10"/>
+                            </svg>
+                            <span id="currentMonth">January 2026</span>
+                        </button>
+                        <button class="btn-add" onclick="showAddTransactionModal()">
+                            Add New Transaction
+                            <svg viewBox="0 0 24 24">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
-                <div class="metric-val skeleton" id="metIncome">&nbsp;</div>
-                <div class="metric-bar">
-                  <div class="metric-fill metric-fill--income" id="incomeBar"></div>
+
+                <!-- Balance Card -->
+                <div class="balance-card" id="balanceCard">
+                    <div class="balance-icon">
+                        <svg viewBox="0 0 24 24">
+                            <rect x="2" y="5" width="20" height="14" rx="2" stroke-width="2"/>
+                            <path d="M2 10h20" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <div class="balance-label">TOTAL BALANCE</div>
+                    <div class="balance-amount skeleton" id="balAmt">&nbsp;</div>
+                    <div class="balance-metrics">
+                        <div class="metric">
+                            <div class="metric-label">
+                                <span class="dot-indicator dot-green"></span>
+                                MONTHLY INCOME
+                            </div>
+                            <div class="metric-val skeleton" id="metIncome">&nbsp;</div>
+                            <div class="metric-bar">
+                                <div class="metric-fill metric-fill--income" id="incomeBar"></div>
+                            </div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-label">
+                                <span class="dot-indicator dot-red"></span>
+                                MONTHLY EXPENSES
+                            </div>
+                            <div class="metric-val skeleton" id="metExpense">&nbsp;</div>
+                            <div class="metric-bar">
+                                <div class="metric-fill metric-fill--expense" id="expenseBar"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="balance-footer">
+                        <div class="avatars" id="avatarsEl"></div>
+                        <div class="account-details">
+                            Account Details
+                            <svg viewBox="0 0 24 24">
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                <polyline points="12 5 19 12 12 19"/>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
-              </div>
-              <div class="metric">
-                <div class="metric-label">
-                  <span class="dot-indicator dot-red"></span>
-                  MONTHLY EXPENSES
+
+                <!-- Error Message -->
+                <div class="error-msg" id="errorMsg">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="12" y1="8" x2="12" y2="12"/>
+                        <line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                    <span id="errorText"></span>
                 </div>
-                <div class="metric-val skeleton" id="metExpense">&nbsp;</div>
-                <div class="metric-bar">
-                  <div class="metric-fill metric-fill--expense" id="expenseBar"></div>
+
+                <!-- Recent Transactions -->
+                <div class="section-card">
+                    <div class="section-header">
+                        <span class="section-title">Recent Transactions</span>
+                        <a class="section-link" th:href="@{/transactions}" href="/transactions">
+                            View All
+                            <svg viewBox="0 0 24 24">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </a>
+                    </div>
+                    <div class="tx-list" id="txList">
+                        <div class="loading-pulse"><span></span><span></span><span></span> Loading transactions…</div>
+                    </div>
                 </div>
-              </div>
-            </div>
-            <div class="balance-footer">
-              <div class="avatars" id="avatarsEl"></div>
-              <div class="account-details">
-                Account Details
-                <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-              </div>
-            </div>
-          </div>
 
-          <!-- Error Message -->
-          <div class="error-msg" id="errorMsg">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-            <span id="errorText"></span>
-          </div>
+            </div><!-- /content-left -->
 
-          <!-- Recent Transactions -->
-          <div class="section-card">
-            <div class="section-header">
-              <span class="section-title">Recent Transactions</span>
-              <a class="section-link" th:href="@{/transactions}" href="/transactions">
-                View All
-                <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-              </a>
-            </div>
-            <div class="tx-list" id="txList">
-              <div class="loading-pulse"><span></span><span></span><span></span> Loading transactions…</div>
-            </div>
-          </div>
+            <!-- ── RIGHT COLUMN ── -->
+            <div class="content-right">
 
-        </div><!-- /content-left -->
+                <!-- Budgets -->
+                <div class="budgets-card">
+                    <div class="budgets-header">
+                        <span class="budgets-title">Budgets</span>
+                        <a class="view-all" th:href="@{/budget}" href="/budget">View All</a>
+                    </div>
+                    <div id="budgetsList">
+                        <div class="loading-pulse"><span></span><span></span><span></span> Loading…</div>
+                    </div>
+                    <button class="create-budget" onclick="openBudgetModal()">
+                        + Create New Budget
+                    </button>
+                </div>
 
-        <!-- ── RIGHT COLUMN ── -->
-        <div class="content-right">
+                <!-- Stat: Transactions -->
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon--blue">
+                        <svg viewBox="0 0 24 24" stroke="#2251a3">
+                            <rect x="2" y="7" width="20" height="14" rx="2"/>
+                            <path d="M16 7V5a2 2 0 0 0-4 0v2M8 7V5a2 2 0 0 0-4 0v2"/>
+                        </svg>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">
+                            <a style="color:inherit;text-decoration:none;" th:href="@{/transactions}"
+                               href="/transactions">Transactions</a>
+                        </div>
+                        <div>
+                            <span class="stat-val" id="statTx">—</span>
+                            <span class="stat-badge badge-green" id="statTxBadge" style="display:none;"></span>
+                        </div>
+                    </div>
+                </div>
 
-          <!-- Budgets -->
-          <div class="budgets-card">
-            <div class="budgets-header">
-              <span class="budgets-title">Budgets</span>
-              <a class="view-all" th:href="@{/budget}" href="/budget">View All</a>
-            </div>
-            <div id="budgetsList">
-              <div class="loading-pulse"><span></span><span></span><span></span> Loading…</div>
-            </div>
-            <button class="create-budget" onclick="openBudgetModal()">
-              + Create New Budget
-            </button>
-          </div>
+                <!-- Stat: Active Budgets -->
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon--yellow">
+                        <svg viewBox="0 0 24 24" stroke="#d97706">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">Active Budgets</div>
+                        <div>
+                            <span class="stat-val" id="statBudgets">—</span>
+                        </div>
+                        <div class="stat-sub" id="statBudgetsSub"></div>
+                    </div>
+                </div>
 
-          <!-- Stat: Transactions -->
-          <div class="stat-card">
-            <div class="stat-icon stat-icon--blue">
-              <svg viewBox="0 0 24 24" stroke="#2251a3">
-                <rect x="2" y="7" width="20" height="14" rx="2"/>
-                <path d="M16 7V5a2 2 0 0 0-4 0v2M8 7V5a2 2 0 0 0-4 0v2"/>
-              </svg>
-            </div>
-            <div class="stat-body">
-              <div class="stat-label">
-                <a style="color:inherit;text-decoration:none;" th:href="@{/transactions}" href="/transactions">Transactions</a>
-              </div>
-              <div>
-                <span class="stat-val" id="statTx">—</span>
-                <span class="stat-badge badge-green" id="statTxBadge" style="display:none;"></span>
-              </div>
-            </div>
-          </div>
+                <!-- Stat: Goals -->
+                <div class="stat-card">
+                    <div class="stat-icon stat-icon--green">
+                        <svg viewBox="0 0 24 24" stroke="#059669">
+                            <circle cx="12" cy="12" r="10"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">Goals in Progress</div>
+                        <div>
+                            <span class="stat-val" id="statGoals">—</span>
+                            <span class="stat-badge badge-green" id="statGoalsBadge"></span>
+                        </div>
+                    </div>
+                </div>
 
-          <!-- Stat: Active Budgets -->
-          <div class="stat-card">
-            <div class="stat-icon stat-icon--yellow">
-              <svg viewBox="0 0 24 24" stroke="#d97706">
-                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-              </svg>
-            </div>
-            <div class="stat-body">
-              <div class="stat-label">Active Budgets</div>
-              <div>
-                <span class="stat-val" id="statBudgets">—</span>
-              </div>
-              <div class="stat-sub" id="statBudgetsSub"></div>
-            </div>
-          </div>
+                <!-- Spending Alert -->
+                <div class="alert-card" id="alertCard" hidden>
+                    <div class="alert-icon">
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="alert-title">Spending Alert</div>
+                        <div class="alert-msg" id="alertMsg"></div>
+                    </div>
+                </div>
 
-          <!-- Stat: Goals -->
-          <div class="stat-card">
-            <div class="stat-icon stat-icon--green">
-              <svg viewBox="0 0 24 24" stroke="#059669">
-                <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
-              </svg>
-            </div>
-            <div class="stat-body">
-              <div class="stat-label">Goals in Progress</div>
-              <div>
-                <span class="stat-val" id="statGoals">—</span>
-                <span class="stat-badge badge-green" id="statGoalsBadge"></span>
-              </div>
-            </div>
-          </div>
+            </div><!-- /content-right -->
 
-          <!-- Spending Alert -->
-          <div class="alert-card" id="alertCard" hidden>
-            <div class="alert-icon">
-              <svg viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="12"/>
-                <line x1="12" y1="16" x2="12.01" y2="16"/>
-              </svg>
-            </div>
-            <div>
-              <div class="alert-title">Spending Alert</div>
-              <div class="alert-msg" id="alertMsg"></div>
-            </div>
-          </div>
-
-        </div><!-- /content-right -->
-
-      </div><!-- /content -->
+        </div><!-- /content -->
     </div><!-- /main -->
-  </div><!-- /layout -->
+</div><!-- /layout -->
 
-  <!-- ══ ADD TRANSACTION MODAL ══ -->
-  <!--
-    FIX: Removed the `hidden` attribute entirely.
-    Visibility is now controlled exclusively by .is-open via CSS (display:none → display:flex).
-    This eliminates the browser-native `hidden` attribute conflicting with the CSS display rule.
-  -->
-  <div id="addModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="addModalTitle">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h3 class="modal-title" id="addModalTitle">Add Transaction</h3>
-        <button class="modal-close" onclick="closeAddModal()" aria-label="Close">×</button>
-      </div>
-      <div class="modal-body">
-        <!-- FIX: Inline form-level error banner (replaces alert()) -->
-        <div class="form-error-banner" id="addFormError" aria-live="polite"></div>
-
-        <div class="form-group">
-          <label class="form-label" for="txType">Type</label>
-          <select id="txType" class="form-control">
-            <option value="expense">Expense</option>
-            <option value="income">Income</option>
-          </select>
+<!-- ══ ADD TRANSACTION MODAL ══ -->
+<!-- Add Transaction Modal -->
+<div id="addTransactionModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+    <div class="modal-content" style="background: white; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-header">
+            <h2>Add Transaction</h2>
+            <button class="modal-close"
+                    onclick="closeAddTransactionModal()">&times;
+            </button>
         </div>
-        <div class="form-group">
-          <label class="form-label" for="txName">Description</label>
-          <input id="txName" type="text" class="form-control" placeholder="e.g. Grocery Store" autocomplete="off"/>
-          <!-- FIX: Per-field inline error message -->
-          <span class="field-error" id="txNameErr"></span>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="txCat">Category</label>
-          <input id="txCat" type="text" class="form-control" placeholder="e.g. Food, Transport, Income" autocomplete="off"/>
-          <span class="field-error" id="txCatErr"></span>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="txAmt">Amount ($)</label>
-          <input id="txAmt" type="number" class="form-control" placeholder="0.00" min="0" step="0.01"/>
-          <span class="field-error" id="txAmtErr"></span>
-        </div>
-        <button class="btn-submit" id="addTxBtn" onclick="addTransaction()">
-          <span class="btn-label">Add Transaction</span>
-          <span class="btn-spinner" aria-hidden="true"></span>
-        </button>
-      </div>
+        <form id="addTransactionForm" onsubmit="addTransaction(event)">
+            <div class="form-group">
+                <label for="transactionType">Type *</label>
+                <select id="transactionType" required>
+                    <option value="INCOME">Income</option>
+                    <option value="EXPENSE">Expense</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="transactionAmount">Amount *</label>
+                <input type="number" id="transactionAmount" step="0.01" min="0.01"
+                       required>
+            </div>
+            <div class="form-group">
+                <label for="transactionDate">Date *</label>
+                <input type="date" id="transactionDate" required>
+            </div>
+            <div class="form-group">
+                <label for="transactionCategory">Category *</label>
+                <select id="transactionCategory" required>
+                    <!-- Categories will be loaded here -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="transactionSource">Source</label>
+                <input type="text" id="transactionSource">
+            </div>
+            <div class="form-group">
+                <label for="transactionDescription">Description</label>
+                <textarea id="transactionDescription" rows="3"></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-secondary"
+                        onclick="closeAddTransactionModal()">Cancel
+                </button>
+                <button type="submit" class="btn-primary">Add Transaction</button>
+            </div>
+        </form>
     </div>
-  </div>
+</div>
 
-  <!-- ══ ADD BUDGET MODAL ══ -->
-  <!--
-    FIX: Same as above — removed `hidden` attribute; visibility via .is-open only.
-    FIX: Added aria roles and an inline error banner.
-  -->
-  <div id="budgetModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="budgetModalTitle">
+<!-- ══ ADD BUDGET MODAL ══ -->
+<!--
+  FIX: Same as above — removed `hidden` attribute; visibility via .is-open only.
+  FIX: Added aria roles and an inline error banner.
+-->
+<div id="budgetModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="budgetModalTitle">
     <div class="modal-box">
-      <div class="modal-header">
-        <h3 class="modal-title" id="budgetModalTitle">Create Budget</h3>
-        <button class="modal-close" onclick="closeBudgetModal()" aria-label="Close">×</button>
-      </div>
-
-      <div class="modal-body">
-        <!-- FIX: Inline form-level error banner (replaces alert()) -->
-        <div class="form-error-banner" id="budgetFormError" aria-live="polite"></div>
-
-        <div class="form-group">
-          <label class="form-label" for="budgetCategory">Category</label>
-          <input id="budgetCategory" type="text" class="form-control" placeholder="Food & Dining" autocomplete="off"/>
-          <span class="field-error" id="budgetCategoryErr"></span>
+        <div class="modal-header">
+            <h3 class="modal-title" id="budgetModalTitle">Create Budget</h3>
+            <button class="modal-close" onclick="closeBudgetModal()" aria-label="Close">×</button>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="budgetAmount">Budget Amount</label>
-          <input id="budgetAmount" type="number" class="form-control" placeholder="0.00" min="0" step="0.01"/>
-          <span class="field-error" id="budgetAmountErr"></span>
-        </div>
+        <div class="modal-body">
+            <!-- FIX: Inline form-level error banner (replaces alert()) -->
+            <div class="form-error-banner" id="budgetFormError" aria-live="polite"></div>
 
-        <div class="form-group">
-          <label class="form-label" for="budgetStart">Start Date</label>
-          <input id="budgetStart" type="date" class="form-control"/>
-          <span class="field-error" id="budgetStartErr"></span>
-        </div>
+            <div class="form-group">
+                <label class="form-label" for="budgetCategory">Category</label>
+                <input id="budgetCategory" type="text" class="form-control" placeholder="Food & Dining"
+                       autocomplete="off"/>
+                <span class="field-error" id="budgetCategoryErr"></span>
+            </div>
 
-        <div class="form-group">
-          <label class="form-label" for="budgetEnd">End Date</label>
-          <input id="budgetEnd" type="date" class="form-control"/>
-          <span class="field-error" id="budgetEndErr"></span>
-        </div>
+            <div class="form-group">
+                <label class="form-label" for="budgetAmount">Budget Amount</label>
+                <input id="budgetAmount" type="number" class="form-control" placeholder="0.00" min="0" step="0.01"/>
+                <span class="field-error" id="budgetAmountErr"></span>
+            </div>
 
-        <div class="form-group">
-          <label class="form-label" for="budgetAlert">Spending Alert Threshold</label>
-          <select id="budgetAlert" class="form-control">
-            <option value="80">80% of budget</option>
-            <option value="100">100% of budget</option>
-          </select>
-        </div>
+            <div class="form-group">
+                <label class="form-label" for="budgetStart">Start Date</label>
+                <input id="budgetStart" type="date" class="form-control"/>
+                <span class="field-error" id="budgetStartErr"></span>
+            </div>
 
-        <button class="btn-submit" id="addBudgetBtn" onclick="addBudget()">
-          <span class="btn-label">Create Budget</span>
-          <span class="btn-spinner" aria-hidden="true"></span>
-        </button>
-      </div>
+            <div class="form-group">
+                <label class="form-label" for="budgetEnd">End Date</label>
+                <input id="budgetEnd" type="date" class="form-control"/>
+                <span class="field-error" id="budgetEndErr"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="budgetAlert">Spending Alert Threshold</label>
+                <select id="budgetAlert" class="form-control">
+                    <option value="80">80% of budget</option>
+                    <option value="100">100% of budget</option>
+                </select>
+            </div>
+
+            <button class="btn-submit" id="addBudgetBtn" onclick="addBudget()">
+                <span class="btn-label">Create Budget</span>
+                <span class="btn-spinner" aria-hidden="true"></span>
+            </button>
+        </div>
     </div>
-  </div>
+</div>
 
 <script th:src="@{/js/dashboard.js}" src="../static/js/dashboard.js"></script>
 <script th:src="@{/js/navbar-notifications.js}" src="../static/js/navbar-notifications.js"></script>
