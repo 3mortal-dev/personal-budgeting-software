@@ -361,21 +361,21 @@ function updateFormFieldsVisibility(type, formType) {
     }
 
     // Find the parent form-group containers
-    const categoryGroup = categoryInput.closest(".form-group");
-    const sourceGroup = sourceInput.closest(".form-group");
+    const categoryGroup = categoryInput.closest(".tx-form-group");
+    const sourceGroup = sourceInput.closest(".tx-form-group");
 
     if (!categoryGroup || !sourceGroup) {
         return;
     }
 
     if (type === "INCOME") {
-        // For income: hide category, show source (required)
+        // For income: hide category, show source
         categoryGroup.style.display = "none";
         categoryInput.required = false;
         categoryInput.value = "";
 
         sourceGroup.style.display = "block";
-        sourceInput.required = true;
+        sourceInput.required = false;
         sourceInput.placeholder = "e.g., Salary, Freelance Work, Investment";
     } else {
         // For expense: show category (required), hide source
