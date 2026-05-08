@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -63,6 +64,13 @@ public class CategoryController {
     @PostMapping
     public ResponseEntity<CategoryResponse> addCustomCategory(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody CreateCategoryRequest request) {
         CategoryResponse category = toResponse(categoryService.addCustomCategory(userService.getUserId(userDetails), request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(category);
+    }
+
+    @PostMapping("/built-in")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<CategoryResponse> addBuiltInCategory(@Valid @RequestBody CreateCategoryRequest request) {
+        CategoryResponse category = toResponse(categoryService.addBuiltInCategory(request));
         return ResponseEntity.status(HttpStatus.CREATED).body(category);
     }
 
