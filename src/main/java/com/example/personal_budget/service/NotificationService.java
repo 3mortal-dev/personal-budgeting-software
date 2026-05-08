@@ -6,7 +6,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.example.personal_budget.dto.request.BudgetExceededEvent;
+import com.example.personal_budget.dto.request.BudgetExceededLimitEvent;
+import com.example.personal_budget.dto.request.BudgetNearLimitEvent;
 import com.example.personal_budget.dto.request.GoalReminderEvent;
 import com.example.personal_budget.dto.request.NotificationEvent;
 import com.example.personal_budget.entity.Notification;
@@ -86,7 +87,15 @@ public class NotificationService {
     // helper function to build notification message based on event type
     private String buildMessage(NotificationEvent event) {
 
-        if (event instanceof BudgetExceededEvent budgetEvent) {
+        if (event instanceof BudgetNearLimitEvent budgetEvent) {
+			return String.format(
+					"Your %s budget threshold is exceeded by %s",
+					budgetEvent.getCategoryName(),
+					budgetEvent.getExceededAmount()
+			);
+        }
+
+        if (event instanceof BudgetExceededLimitEvent budgetEvent) {
 
             return String.format(
                     "Your %s budget exceeded by %s",
