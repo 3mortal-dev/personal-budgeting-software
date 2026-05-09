@@ -249,6 +249,37 @@
         </div>
       </div>
 
+      <div class="settings-label" style="margin-top: 20px;">Bank & E-Wallets</div>
+
+      <!-- Bank Integration -->
+      <div class="setting-row">
+        <div class="setting-icon">
+          <svg width="17" height="17" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M3 21h18M3 10h18M5 10V21M19 10V21M9 10V21M15 10V21M12 3L2 10h20L12 3z" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="setting-text">
+          <div class="setting-name">Connected Accounts</div>
+          <div class="setting-desc" id="bank-status-text">No bank accounts linked yet</div>
+        </div>
+        <div id="bank-actions">
+          <button class="category-add-btn" onclick="openBankModal()">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M10.172 13.828a4 4 0 005.656 0l4-4a4 4 0 10-5.656-5.656l-1.102 1.101" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Link Bank
+          </button>
+        </div>
+      </div>
+
+      <!-- Dev Tool: Bank Simulator -->
+      <div class="setting-row" style="background: #f8fafc; border-radius: 12px; margin-top: 10px; border: 1px dashed var(--border);">
+        <div class="setting-text">
+          <div class="setting-desc"><strong>Developer Tool:</strong> Open the <a href="/bank-simulator" target="_blank" style="color:var(--brand); text-decoration: underline;">Mock Bank Simulator</a> to add pending transactions.</div>
+        </div>
+      </div>
+
       <div class="settings-label" style="margin-top: 20px;">Categories</div>
 
       <!-- Custom Categories -->
@@ -302,6 +333,39 @@
   <div class="modal-footer">
     <button class="btn-cancel" onclick="closeCategoryModal()">Cancel</button>
     <button class="btn-save" id="save-cat-btn" onclick="submitCustomCategory()">Create Category</button>
+  </div>
+</div>
+
+<!-- ═══════════ BANK LINK MODAL ═══════════ -->
+<div class="modal-overlay" id="bank-modal-overlay" onclick="closeBankModal()"></div>
+<div class="modal" id="bank-modal">
+  <div class="modal-header">
+    <h2 class="modal-title">Link Bank / E-Wallet</h2>
+    <button class="modal-close" onclick="closeBankModal()">&times;</button>
+  </div>
+  <div class="modal-body">
+    <p class="setting-desc" style="margin-bottom: 15px;">Choose a provider to automatically import your transactions.</p>
+    <div class="bank-grid">
+      <div class="bank-option" onclick="simulateBankLink('CIB Bank', '🇪🇬')">
+        <span class="cur-flag">🇪🇬</span>
+        <span>CIB Bank</span>
+      </div>
+      <div class="bank-option" onclick="simulateBankLink('PayPal', '🌐')">
+        <span class="cur-flag">🌐</span>
+        <span>PayPal</span>
+      </div>
+      <div class="bank-option" onclick="simulateBankLink('QNB AL AHLI', '🇶🇦')">
+        <span class="cur-flag">🇶🇦</span>
+        <span>QNB AL AHLI</span>
+      </div>
+      <div class="bank-option" onclick="simulateBankLink('InstaPay', '📱')">
+        <span class="cur-flag">📱</span>
+        <span>InstaPay Mock</span>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button class="btn-cancel" onclick="closeBankModal()">Cancel</button>
   </div>
 </div>
 
