@@ -342,6 +342,12 @@ function renderStats() {
     const statuses = all.map(deriveStatus);
     const count = (s) => statuses.filter(x => x === s).length;
 
+    // Write values and strip skeleton shimmer
+    ["statTotal", "statActive", "statNear", "statExceeded"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove("skeleton-light");
+    });
+
     setText("statTotal", all.length);
     setText("statActive", count("ACTIVE"));
     setText("statNear", count("NEAR_LIMIT"));
@@ -540,11 +546,7 @@ async function confirmDelete() {
     const id = state.pendingDelete;
     if (!id) return;
 
-    const btn = document.getElementById("confirmDelBtn");
-    if (btn) {
-        btn.textContent = "Deleting…";
-        btn.disabled = true;
-    }
+    btnStartLoading("confirmDelBtn");
 
     await apiFetch(API.BY_ID(id), {method: "DELETE"});
 
@@ -555,10 +557,7 @@ async function confirmDelete() {
     closeModal("confirmModal");
     showToast("Budget deleted.");
 
-    if (btn) {
-        btn.textContent = "Delete";
-        btn.disabled = false;
-    }
+    btnStopLoading("confirmDelBtn");
 }
 
 function closeConfirmModal() {
@@ -753,13 +752,30 @@ function setActiveNav() {
 
 
 document.addEventListener("DOMContentLoaded", async () => {
-    setGreeting();
+    // ── Page loader ───────────────────────────────────────────────
+    loaderInit([
+        {pct: 25, label: "Loading your profile…"},
+        {pct: 55, label: "Loading categories…"},
+        {pct: 80, label: "Fetching your budgets…"},
+        {pct: 100, label: "Almost ready…"},
+    ]);
+
+    // Skeleton greeting while profile loads
+    const greetingEl = document.getElementById("greeting");
+    if (greetingEl) greetingEl.innerHTML = '<span class="skeleton-greeting"></span>';
+
     setActiveNav();
 
-    // Load profile and categories before rendering budget cards so names are API-backed.
+    loaderAdvance(); // → profile + categories
     await Promise.all([loadProfile(), loadCategories()]);
+
+    loaderAdvance(); // → budgets
     await loadBudgets();
-    loadNotifBadge();
+
+    loaderAdvance(); // → 100 %
+    loaderHide();
+
+    loadNotifBadge(); // non-blocking — badge loads after overlay is gone
 
     // ── Modal: close on overlay click ────────────────────────────
     ["budgetModal", "confirmModal"].forEach(id => {
