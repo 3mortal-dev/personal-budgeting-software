@@ -1,14 +1,33 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BudgetWise – Notifications</title>
 
+  <link rel="stylesheet" th:href="@{/css/loading.css}" href="../static/css/loading.css"/>
   <link rel="stylesheet" th:href="@{/css/dashboard.css}" href="../static/css/dashboard.css"/>
   <link rel="stylesheet" th:href="@{/css/notification.css}" href="../static/css/notification.css"/>
 </head>
 <body>
+
+  <!-- ══ PAGE LOADER ══ -->
+  <div class="page-loader" id="pageLoader">
+    <div class="page-loader__logo">
+      <div class="page-loader__icon">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="2"/>
+          <path d="M2 10h20"/>
+        </svg>
+      </div>
+      BudgetWise
+    </div>
+    <div class="page-loader__bar-track">
+      <div class="page-loader__bar-fill" id="loaderBar"></div>
+    </div>
+    <div class="page-loader__label" id="loaderLabel">Loading your dashboard…</div>
+  </div>
 
   <div class="layout">
 
@@ -219,8 +238,9 @@
         <div class="confirm-actions">
           <button class="btn-cancel" onclick="closeConfirmModal()">Cancel</button>
 
-          <button class="btn-confirm-del" id="confirmDelBtn" onclick="deleteAllNotifications()">
-            Yes, clear all
+          <button class="btn-confirm-del btn-loadable" id="confirmDelBtn" onclick="deleteAllNotifications()">
+            <span class="btn-label">Yes, clear all</span>
+            <span class="btn-spinner" aria-hidden="true"></span>
           </button>
         </div>
       </div>
@@ -230,6 +250,7 @@
   <!-- TOAST -->
   <div id="toast"></div>
 
+  <script th:src="@{/js/loading.js}" src="../static/js/loading.js"></script>
   <script th:src="@{/js/notification.js}" src="../static/js/notification.js"></script>
 </body>
 </html>

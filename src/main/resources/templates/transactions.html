@@ -1,15 +1,34 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>BudgetWise – Transactions</title>
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link rel="stylesheet" th:href="@{/css/loading.css}" href="../static/css/loading.css"/>
     <link rel="stylesheet" th:href="@{/css/transactions.css}"
           href="../static/css/transactions.css"/>
 </head>
 <body>
+
+<!-- ══ PAGE LOADER ══ -->
+<div class="page-loader" id="pageLoader">
+    <div class="page-loader__logo">
+        <div class="page-loader__icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                <path d="M2 10h20"/>
+            </svg>
+        </div>
+        BudgetWise
+    </div>
+    <div class="page-loader__bar-track">
+        <div class="page-loader__bar-fill" id="loaderBar"></div>
+    </div>
+    <div class="page-loader__label" id="loaderLabel">Loading your transactions…</div>
+</div>
 
 <div class="layout">
 
@@ -217,7 +236,10 @@
                 <button type="button" class="btn-secondary"
                         onclick="closeAddTransactionModal()">Cancel
                 </button>
-                <button type="submit" class="btn-primary">Add Transaction</button>
+                <button type="submit" class="btn-primary btn-loadable" id="addTransactionBtn">
+                    <span class="btn-label">Add Transaction</span>
+                    <span class="btn-spinner" aria-hidden="true"></span>
+                </button>
             </div>
         </form>
     </div>
@@ -268,8 +290,9 @@
                 <button type="button" class="btn-secondary"
                         onclick="closeEditTransactionModal()">Cancel
                 </button>
-                <button type="submit" class="btn-primary">Update
-                    Transaction
+                <button type="submit" class="btn-primary btn-loadable" id="editTransactionBtn">
+                    <span class="btn-label">Update Transaction</span>
+                    <span class="btn-spinner" aria-hidden="true"></span>
                 </button>
             </div>
         </form>
@@ -302,6 +325,7 @@
 <!-- Toast notification -->
 <div class="toast" id="toast" role="alert" aria-live="polite"></div>
 
+<script th:src="@{/js/loading.js}" src="../static/js/loading.js"></script>
 <script th:src="@{/js/transactions.js}" src="../static/js/transactions.js"></script>
 <script th:src="@{/js/navbar-notifications.js}" src="../static/js/navbar-notifications.js"></script>
 </body>

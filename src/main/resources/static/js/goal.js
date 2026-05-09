@@ -138,13 +138,31 @@ const searchInput = document.getElementById('searchInput');
 /* ═══════════════════════════════════════════════════
    INIT
    ═══════════════════════════════════════════════════ */
-document.addEventListener('DOMContentLoaded', () => {
-    applyUsername();
+document.addEventListener('DOMContentLoaded', async () => {
+    loaderInit([
+        {pct: 20, label: "Loading your profile…"},
+        {pct: 60, label: "Loading notifications…"},
+        {pct: 100, label: "Fetching goals…"},
+    ]);
+
+    showGoalSkeletons('goalsGrid', 3);
+
+    loaderAdvance();  // step 0
+    const profilePromise = applyUsername();
+
+    loaderAdvance();  // step 1
+    const notifPromise = loadNotifications();
+
+    loaderAdvance();  // step 2
+    const goalsPromise = loadGoals(false);
+
+    await Promise.all([profilePromise, notifPromise, goalsPromise]);
+
+    loaderHide();
+
     initIconPicker();
     applyDeadlineMin();
     attachEventListeners();
-    initNotifications();
-    loadGoals(false);
 });
 
 function getCurrentMonthValue() {
@@ -310,9 +328,6 @@ function loadIconPickerForEdit(iconClass, iconColor) {
 /* ═══════════════════════════════════════════════════
    NOTIFICATIONS
    ═══════════════════════════════════════════════════ */
-function initNotifications() {
-    loadNotifications();
-}
 
 async function loadNotifications() {
     try {
@@ -615,8 +630,7 @@ async function saveProgress() {
     }
 
     if (saveProgressBtn) {
-        saveProgressBtn.textContent = 'Adding…';
-        saveProgressBtn.disabled = true;
+        btnStartLoading('saveProgressBtn');
         cancelProgressBtn.disabled = true;
     }
     try {
@@ -624,11 +638,6 @@ async function saveProgress() {
         await updateGoalProgress(goal.id, updatedSaved);
 
         closeProgressModal();
-        if (saveProgressBtn) {
-            saveProgressBtn.textContent = 'Add';
-            saveProgressBtn.disabled = false;
-            cancelProgressBtn.disabled = false;
-        }
         showToast('Progress updated!', 'success');
 
         await loadGoals(false);
@@ -638,6 +647,11 @@ async function saveProgress() {
         console.error(err);
 
         showToast('Failed to update progress.', 'error');
+    } finally {
+        if (saveProgressBtn) {
+            btnStopLoading('saveProgressBtn');
+            cancelProgressBtn.disabled = false;
+        }
     }
 }
 
@@ -711,8 +725,7 @@ async function handleFormSubmit(e) {
 
     const saveBtn = document.getElementById('saveGoalBtn');
     if (saveBtn) {
-        saveBtn.textContent = 'Saving…';
-        saveBtn.disabled = true;
+        btnStartLoading('saveGoalBtn');
     }
 
     try {
@@ -725,8 +738,7 @@ async function handleFormSubmit(e) {
         showToast('Failed to save goal. Please try again.', 'error');
     } finally {
         if (saveBtn) {
-            saveBtn.textContent = 'Save Goal';
-            saveBtn.disabled = false;
+            btnStopLoading('saveGoalBtn');
         }
     }
 }
@@ -778,6 +790,10 @@ function openDeleteModal(id) {
 
 async function confirmDelete() {
     if (!deleteTargetId) return;
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    if (confirmBtn) {
+        btnStartLoading('confirmDeleteBtn');
+    }
     try {
         await deleteGoalById(deleteTargetId);
         closeDeleteModal();
@@ -786,6 +802,10 @@ async function confirmDelete() {
     } catch (err) {
         console.error('Delete failed:', err);
         showToast('Failed to delete goal.', 'error');
+    } finally {
+        if (confirmBtn) {
+            btnStopLoading('confirmDeleteBtn');
+        }
     }
 }
 

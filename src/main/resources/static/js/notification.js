@@ -465,6 +465,8 @@ async function deleteNotification(id) {
 
 async function deleteAllNotifications() {
 
+  btnStartLoading('confirmDelBtn');
+
   const result =
     await apiFetch(
       API.DELETE_ALL,
@@ -472,6 +474,8 @@ async function deleteAllNotifications() {
         method: "DELETE",
       }
     );
+
+  btnStopLoading('confirmDelBtn');
 
   if (!result) return;
 
@@ -627,9 +631,21 @@ function renderErrorState() {
 
 document.addEventListener(
   "DOMContentLoaded",
-  () => {
+  async () => {
 
-    loadNotifications();
+    loaderInit([
+        {pct: 40, label: "Loading notifications…"},
+        {pct: 100, label: "Almost ready…"},
+    ]);
+
+    showNotifSkeletons(3);
+
+    loaderAdvance();
+
+    await loadNotifications();
+
+    loaderAdvance();
+    loaderHide();
 
     document.addEventListener(
       "click",

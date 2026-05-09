@@ -5,9 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>BudgetWise – Goals</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <link rel="stylesheet" th:href="@{/css/loading.css}" href="../static/css/loading.css"/>
     <link rel="stylesheet" th:href="@{/css/goal.css}" href="../static/css/goal.css"/>
 </head>
 <body>
+
+<!-- ══ PAGE LOADER ══ -->
+<div class="page-loader" id="pageLoader">
+    <div class="page-loader__logo">
+        <div class="page-loader__icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                <path d="M2 10h20"/>
+            </svg>
+        </div>
+        BudgetWise
+    </div>
+    <div class="page-loader__bar-track">
+        <div class="page-loader__bar-fill" id="loaderBar"></div>
+    </div>
+    <div class="page-loader__label" id="loaderLabel">Loading your goals…</div>
+</div>
 
 <!-- Floating background particles -->
 <div class="bg-particles" aria-hidden="true">
@@ -168,14 +187,14 @@
 
                 <!-- Color swatches -->
                 <div id="colorSwatches" class="color-swatches-row">
-                    <button type="button" class="color-swatch" data-color="green"  style="background:#16a34a;"></button>
-                    <button type="button" class="color-swatch" data-color="blue"   style="background:#2563eb;"></button>
-                    <button type="button" class="color-swatch" data-color="red"    style="background:#dc2626;"></button>
+                    <button type="button" class="color-swatch" data-color="green" style="background:#16a34a;"></button>
+                    <button type="button" class="color-swatch" data-color="blue" style="background:#2563eb;"></button>
+                    <button type="button" class="color-swatch" data-color="red" style="background:#dc2626;"></button>
                     <button type="button" class="color-swatch" data-color="yellow" style="background:#ca8a04;"></button>
                     <button type="button" class="color-swatch" data-color="purple" style="background:#7c3aed;"></button>
-                    <button type="button" class="color-swatch" data-color="pink"   style="background:#db2777;"></button>
+                    <button type="button" class="color-swatch" data-color="pink" style="background:#db2777;"></button>
                     <button type="button" class="color-swatch" data-color="orange" style="background:#ea580c;"></button>
-                    <button type="button" class="color-swatch" data-color="gray"   style="background:#4b5563;"></button>
+                    <button type="button" class="color-swatch" data-color="gray" style="background:#4b5563;"></button>
                 </div>
 
                 <!-- Icon grid — populated by JS buildIconGrid() -->
@@ -201,7 +220,10 @@
 
             <div class="modal__footer">
                 <button type="button" class="btn-cancel" id="cancelModalBtn">Cancel</button>
-                <button type="submit" class="btn-save" id="saveGoalBtn">Save Goal</button>
+                <button type="submit" class="btn-save btn-loadable" id="saveGoalBtn">
+                    <span class="btn-label">Save Goal</span>
+                    <span class="btn-spinner" aria-hidden="true"></span>
+                </button>
             </div>
         </form>
     </div>
@@ -238,9 +260,10 @@
                 Cancel
             </button>
 
-            <button class="btn-save"
+            <button class="btn-save btn-loadable"
                     id="saveProgressBtn">
-                Add
+                <span class="btn-label">Add</span>
+                <span class="btn-spinner" aria-hidden="true"></span>
             </button>
         </div>
 
@@ -253,7 +276,10 @@
         <p class="modal__confirm-text">Are you sure you want to delete this goal?</p>
         <div class="modal__footer modal__footer--center">
             <button class="btn-cancel" id="cancelDeleteBtn">Cancel</button>
-            <button class="btn-danger" id="confirmDeleteBtn">Delete</button>
+            <button class="btn-danger btn-loadable" id="confirmDeleteBtn">
+                <span class="btn-label">Delete</span>
+                <span class="btn-spinner" aria-hidden="true"></span>
+            </button>
         </div>
     </div>
 </div>
@@ -261,6 +287,7 @@
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
+<script th:src="@{/js/loading.js}" src="../static/js/loading.js"></script>
 <script th:src="@{/js/goal.js}" src="../static/js/goal.js"></script>
 <script th:src="@{/js/navbar-notifications.js}" src="../static/js/navbar-notifications.js"></script>
 </body>

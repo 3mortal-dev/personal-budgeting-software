@@ -59,21 +59,38 @@ const state = {
 // Initialize UI
 document.addEventListener("DOMContentLoaded", async () => {
 
-    // Start all requests immediately in parallel
+    // ── Page loader config ──
+    loaderInit([
+        {pct: 25, label: "Loading your profile…"},
+        {pct: 60, label: "Loading categories…"},
+        {pct: 85, label: "Fetching transactions…"},
+        {pct: 100, label: "Almost ready…"},
+    ]);
+
+    // ── Skeleton greeting ──
+    const greetingEl = document.getElementById("greeting");
+    if (greetingEl) greetingEl.innerHTML = '<span class="skeleton-greeting"></span>';
+
+    // ── Skeleton table rows ──
+    showTableSkeletons("transactionsTableBody", 8);
+
+    loaderAdvance(); // → profile
+
     const profilePromise = loadUserProfile();
-    const categoriesPromise = loadCategories();
+
+    // Update greeting as soon as profile resolves
+    profilePromise.then(() => updateGreeting());
+
+    loaderAdvance(); // → transactions
     const transactionsPromise = loadTransactions();
 
-    // Update greeting as soon as profile finishes
-    profilePromise.then(() => {
-        updateGreeting();
-    });
+    loaderAdvance(); // → categories
+    const categoriesPromise = loadCategories();
 
-    // Wait for the remaining data
-    await Promise.all([
-        categoriesPromise,
-        transactionsPromise,
-    ]);
+    await Promise.all([profilePromise, transactionsPromise, categoriesPromise]);
+
+    loaderAdvance(); // → 100 %
+    loaderHide();
 
     setupEventListeners();
 });
@@ -272,6 +289,7 @@ function filterTransactions() {
 
 async function addTransaction(event) {
     event.preventDefault();
+    btnStartLoading("addTransactionBtn");
 
     const type = document.getElementById("transactionType").value;
 
@@ -284,11 +302,12 @@ async function addTransaction(event) {
         description: document.getElementById("transactionDescription").value,
     };
 
-
     const result = await apiFetch(API.TRANSACTIONS, {
         method: "POST",
         body: JSON.stringify(formData),
     });
+
+    btnStopLoading("addTransactionBtn");
 
     if (result) {
         state.transactions.unshift(result);
@@ -296,7 +315,6 @@ async function addTransaction(event) {
         closeAddTransactionModal();
         resetAddTransactionForm();
 
-        // Contextual message: use source for INCOME, category name for EXPENSE
         const label = type === "INCOME"
             ? (formData.source || "")
             : (state.categories.find(c => c.id === formData.categoryId)?.name || "");
@@ -308,6 +326,7 @@ async function addTransaction(event) {
 
 async function updateTransaction(event) {
     event.preventDefault();
+    btnStartLoading("editTransactionBtn");
 
     const transactionId = document.getElementById("editTransactionId").value;
     const type = document.getElementById("editTransactionType").value;
@@ -325,6 +344,8 @@ async function updateTransaction(event) {
         method: "PUT",
         body: JSON.stringify(formData),
     });
+
+    btnStopLoading("editTransactionBtn");
 
     if (result) {
         const index = state.transactions.findIndex(

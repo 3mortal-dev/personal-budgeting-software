@@ -4,9 +4,29 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>BudgetWise – Profile</title>
+  <link rel="stylesheet" th:href="@{/css/loading.css}" href="../static/css/loading.css"/>
   <link rel="stylesheet" th:href="@{/css/userProfile.css}" href="../static/css/userProfile.css"/>
 </head>
 <body>
+
+<!-- ══ PAGE LOADER ══ -->
+<div class="page-loader" id="pageLoader">
+    <div class="page-loader__logo">
+        <div class="page-loader__icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                <path d="M2 10h20"/>
+            </svg>
+        </div>
+        BudgetWise
+    </div>
+    <div class="page-loader__bar-track">
+        <div class="page-loader__bar-fill" id="loaderBar"></div>
+    </div>
+    <div class="page-loader__label" id="loaderLabel">Loading your dashboard…</div>
+</div>
+
 <!-- ═══════════ SIDEBAR ═══════════ -->
 <aside class="sidebar">
   <div class="logo">
@@ -96,6 +116,8 @@
 
   <!-- CONTENT -->
   <div class="content">
+
+    <div id="profileFields"></div>
 
     <!-- PROFILE CARD -->
     <div class="profile-card">
@@ -262,10 +284,14 @@
 
   <div class="modal-footer">
     <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
-    <button class="btn-save" onclick="saveProfile()">Save Changes</button>
+    <button class="btn-save btn-loadable" id="saveProfileBtn" onclick="saveProfile()">
+        <span class="btn-label">Save Changes</span>
+        <span class="btn-spinner" aria-hidden="true"></span>
+    </button>
   </div>
 </div>
 
+<script th:src="@{/js/loading.js}" src="../static/js/loading.js"></script>
 <script th:src="@{/js/userProfile.js}" src="../static/js/userProfile.js"></script>
 <script th:src="@{/js/navbar-notifications.js}" src="../static/js/navbar-notifications.js"></script>
 </body>
