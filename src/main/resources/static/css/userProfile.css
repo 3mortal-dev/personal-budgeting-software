@@ -991,6 +991,39 @@ nav {
   font-size: 1.5rem;
 }
 
+/* ═══════════ CATEGORY LIST STYLES ═══════════ */
+.categories-list-container {
+    padding: 0 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.category-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    background: var(--bg);
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+.category-item-actions {
+    display: flex;
+    gap: 8px;
+}
+.btn-cat-action {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+}
+.btn-cat-action:hover { background: var(--brand-light); color: var(--brand-dark); }
+.btn-cat-action.delete:hover { background: #fee2e2; color: var(--red); }
+
 /* ═══════════════════════════════════════════════
    CATEGORY & TOAST ADDITIONS
 ═══════════════════════════════════════════════ */

@@ -301,6 +301,9 @@
         </button>
       </div>
 
+      <!-- Container for the dynamic list of categories -->
+      <div id="custom-categories-list" class="categories-list-container"></div>
+
     </div><!-- /settings-card -->
   </div><!-- /content -->
 </div><!-- /main -->
@@ -323,6 +326,7 @@
 
   <div class="modal-body">
     <div class="field-group">
+      <input type="hidden" id="edit-cat-id" />
       <label class="field-label" for="new-cat-name">Category Name</label>
       <div class="field-input-wrap">
         <input type="text" id="new-cat-name" class="field-input" placeholder="e.g. Subscriptions, Hobbies..."/>
