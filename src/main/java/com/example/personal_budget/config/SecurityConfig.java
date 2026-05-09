@@ -32,6 +32,12 @@ public class SecurityConfig {
         "/configuration/security",
         "/swagger-ui/**",
         "/webjars/**",
+        
+        // bank simulator
+        "/bank-simulator",
+        "/api/mock-bank/add",
+        "/api/mock-bank/pending",
+
         "/swagger-ui.html",
         "/login",
         "/register"};

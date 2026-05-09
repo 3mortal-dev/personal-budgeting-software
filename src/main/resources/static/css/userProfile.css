@@ -967,6 +967,30 @@ nav {
     cursor: not-allowed;
 }
 
+/* ═══════════ BANK INTEGRATION STYLES ═══════════ */
+.bank-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.bank-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.bank-option:hover {
+  border-color: var(--brand);
+  background: var(--brand-light);
+}
+.bank-option .cur-flag {
+  font-size: 1.5rem;
+}
+
 /* ═══════════════════════════════════════════════
    CATEGORY & TOAST ADDITIONS
 ═══════════════════════════════════════════════ */

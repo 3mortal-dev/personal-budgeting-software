@@ -49,6 +49,10 @@ public class PageController {
         return "admin";
     }
     
+    @GetMapping("/bank-simulator")
+    public String bankSimulator() {
+        return "bankSimulator";
+    }
 
     
 
