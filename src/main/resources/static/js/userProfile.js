@@ -65,7 +65,7 @@ async function init() {
     });
 
     if (response.status === 401 || response.status === 403) {
-      window.location.href = '/index';
+      window.location.href = '/login';
       return;
     }
 
@@ -95,6 +95,9 @@ async function init() {
       loadNotifications(),
       loadCustomCategories(),
     ]);
+
+    // Restore bank connection UI if present in localStorage
+    if (typeof restoreBankState === 'function') restoreBankState();
 
   } catch (err) {
     console.error('Failed to load profile:', err);

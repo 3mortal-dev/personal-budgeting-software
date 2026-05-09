@@ -1,5 +1,7 @@
 @startuml budget_module
 
+package budget {
+
 skinparam linetype ortho
 
 class BudgetService {
@@ -126,5 +128,7 @@ BudgetService -[#595959,dashed]-> BudgetExceededLimitEvent
 BudgetService -[#595959,dashed]-> BudgetNearLimitEvent
 
 BudgetResponse "1" *-[#595959,plain]-> "status\n1" BudgetStatus
+
+}
 
 @enduml

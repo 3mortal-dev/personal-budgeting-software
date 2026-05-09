@@ -8,6 +8,7 @@ const API = {
     ROLE: id => `/api/admin/users/${id}/role`,
     TRANSACTIONS: id => `/api/admin/users/${id}/transactions`,
     ADD_CATEGORY: '/api/categories/built-in',
+    LOGOUT: '/api/auth/logout',
 };
 
 const state = {
@@ -279,6 +280,18 @@ function renderTransactions(transactions) {
             </div>
         `;
     }).join('');
+}
+
+async function handleLogout() {
+    try {
+        await apiFetch(API.LOGOUT, {
+            method: 'POST',
+        });
+    } catch (err) {
+        console.error('Logout error:', err);
+    } finally {
+        window.location.href = '/login';
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {

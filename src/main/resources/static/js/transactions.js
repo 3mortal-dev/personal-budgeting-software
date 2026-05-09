@@ -1,6 +1,6 @@
 // Configure API
 const API = {
-    BASE_URL: "http://localhost:8080/api",
+    BASE_URL: "/api",
 
     PROFILE: "/profile",
     TRANSACTIONS: "/transactions",
@@ -8,27 +8,29 @@ const API = {
     NOTIFICATIONS: "/notifications",
     MARK_ALL_READ: "/notifications/mark-all-read",
     MARK_READ: (id) => `/notifications/${id}/read`,
+    LOGOUT: "/auth/logout",
 };
 
 // ── Shared Fetch Helper ───────────────────────────────────────────────────────
 async function apiFetch(endpoint, options = {}) {
-    const token = localStorage.getItem("jwtToken");
     const headers = {
         "Content-Type": "application/json",
         ...options.headers,
     };
 
-    if (token) {
-        headers.Authorization = `Bearer ${token}`;
-    }
-
     try {
         const response = await fetch(`${API.BASE_URL}${endpoint}`, {
+            credentials: "include",
             headers,
             ...options,
         });
 
         if (response.status === 204) return null;
+        if (response.status === 401 || response.status === 403) {
+            window.location.href = '/login';
+            return null;
+        }
+
         if (!response.ok) {
             const errorBody = await response.text();
             console.error(`API Error [${endpoint}]: ${response.status}`, errorBody);
@@ -144,9 +146,9 @@ function updateFormFieldsVisibility(type, formType) {
         return;
     }
 
-    // Find the parent form-group containers
-    const categoryGroup = categoryInput.closest(".form-group");
-    const sourceGroup = sourceInput.closest(".form-group");
+    // Find the parent field-group containers
+    const categoryGroup = categoryInput.closest(".field-group");
+    const sourceGroup = sourceInput.closest(".field-group");
 
     if (!categoryGroup || !sourceGroup) {
         return;
@@ -398,6 +400,7 @@ function editTransaction(transactionId) {
     updateFormFieldsVisibility(transaction.type, "edit");
 
     // Show the modal
+    document.getElementById("edit-modal-overlay").style.display = "block";
     document.getElementById("editTransactionModal").style.display = "flex";
 }
 
@@ -479,8 +482,15 @@ async function markAllRead() {
 
 // Render UI
 function showAddTransactionModal() {
+    const modal = document.getElementById("addTransactionModal");
+    const overlay = document.getElementById("add-modal-overlay");
+    const form = document.getElementById("addTransactionForm");
+
+    if (overlay) overlay.style.display = "block";
+    if (modal) modal.style.display = "flex";
+
     // Reset form to default state
-    document.getElementById("addTransactionForm").reset();
+    if (form) form.reset();
 
     // Reset type to INCOME (default)
     document.getElementById("transactionType").value = "INCOME";
@@ -490,23 +500,25 @@ function showAddTransactionModal() {
 
     // Update form field visibility based on default type (INCOME)
     updateFormFieldsVisibility("INCOME", "add");
-
-    // Show the modal
-    document.getElementById("addTransactionModal").style.display = "flex";
 }
 
 function closeAddTransactionModal() {
+    document.getElementById("add-modal-overlay").style.display = "none";
     document.getElementById("addTransactionModal").style.display = "none";
-    document.getElementById("addTransactionForm").reset();
+    const form = document.getElementById("addTransactionForm");
+    if (form) form.reset();
 }
 
 function closeEditTransactionModal() {
+    document.getElementById("edit-modal-overlay").style.display = "none";
     document.getElementById("editTransactionModal").style.display = "none";
-    document.getElementById("editTransactionForm").reset();
+    const form = document.getElementById("editTransactionForm");
+    if (form) form.reset();
 }
 
 function resetAddTransactionForm() {
-    document.getElementById("addTransactionForm").reset();
+    const form = document.getElementById("addTransactionForm");
+    if (form) form.reset();
 }
 
 function updateGreeting() {
@@ -542,6 +554,18 @@ function updateGreeting() {
     // Render initials in avatar
     if (avatar) {
         avatar.textContent = initials;
+    }
+}
+
+async function handleLogout() {
+    try {
+        await apiFetch(API.LOGOUT, {
+            method: "POST",
+        });
+    } catch (err) {
+        console.error("Logout error:", err);
+    } finally {
+        window.location.href = "/login";
     }
 }
 
