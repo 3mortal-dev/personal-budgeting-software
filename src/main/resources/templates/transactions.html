@@ -1,371 +1,374 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>BudgetWise – Transactions</title>
-    <link rel="stylesheet" th:href="@{/css/loading.css}" href="../static/css/loading.css"/>
-    <link rel="stylesheet" th:href="@{/css/transactions.css}" href="../static/css/transactions.css"/>
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>BudgetWise – Transactions</title>
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+        <link rel="stylesheet" th:href="@{/css/navbar.css}"
+            href="../static/css/navbar.css" />
+        <link rel="stylesheet" th:href="@{/css/loading.css}"
+            href="../static/css/loading.css" />
+        <link rel="stylesheet" th:href="@{/css/transactions.css}"
+            href="../static/css/transactions.css" />
+    </head>
+    <body>
 
-<!-- ══ PAGE LOADER ══ -->
-<div class="page-loader" id="pageLoader">
-    <div class="page-loader__logo">
-        <div class="page-loader__icon">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
-                 stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="5" width="20" height="14" rx="2"/>
-                <path d="M2 10h20"/>
-            </svg>
-        </div>
-        BudgetWise
-    </div>
-    <div class="page-loader__bar-track">
-        <div class="page-loader__bar-fill" id="loaderBar"></div>
-    </div>
-    <div class="page-loader__label" id="loaderLabel">Loading your transactions…</div>
-</div>
+        <div id="sidebar-root"></div>
 
-<!-- ═══════════ SIDEBAR ═══════════ -->
-<aside class="sidebar" id="sidebar">
-
-    <div class="logo">
-        <div class="logo-icon">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <path d="M3 3h18v4H3zM3 10h18v4H3zM3 17h18v4H3z"/>
-            </svg>
-        </div>
-        BudgetWise
-    </div>
-
-    <nav>
-        <a class="nav-item" th:href="@{/dashboard}" href="/dashboard">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-                <polyline points="9 22 9 12 15 12 15 22"/>
-            </svg>
-            Home
-        </a>
-        <a class="nav-item active" th:href="@{/transactions}" href="/transactions">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <rect x="2" y="5" width="20" height="14" rx="2"/>
-                <line x1="2" y1="10" x2="22" y2="10"/>
-            </svg>
-            Transactions
-        </a>
-        <a class="nav-item" th:href="@{/budget}" href="/budget">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M12 8v4l3 3"/>
-            </svg>
-            Budgets
-        </a>
-        <a class="nav-item" th:href="@{/goals}" href="/goals">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10"/>
-                <circle cx="12" cy="12" r="4"/>
-            </svg>
-            Goals
-        </a>
-        <a class="nav-item" th:href="@{/reports}" href="/reports">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <line x1="18" y1="20" x2="18" y2="10"/>
-                <line x1="12" y1="20" x2="12" y2="4"/>
-                <line x1="6" y1="20" x2="6" y2="14"/>
-            </svg>
-            Reports
-        </a>
-        <a class="nav-item" th:href="@{/notifications}" href="/notifications">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                <path d="M13.73 21a2 2 0 01-3.46 0"/>
-            </svg>
-            Notifications
-        </a>
-        <a class="nav-item" th:href="@{/userProfile}" href="/userProfile">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-            </svg>
-            Profile
-        </a>
-    </nav>
-
-    <div class="logout" onclick="handleLogout()">
-        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
-        Logout
-    </div>
-</aside>
-
-<!-- ═══════════ MAIN ═══════════ -->
-<div class="main">
-
-    <!-- TOPBAR -->
-    <header class="topbar">
-        <span class="topbar-greeting" id="greeting">Good morning 👋</span>
-        <div class="topbar-right">
-
-            <div class="notif-wrapper">
-                <button class="notif-btn" id="notif-icon-btn" onclick="toggleNotifPanel(event)" aria-label="Notifications">
-                    <svg width="16" height="16" fill="none" stroke="#374151" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                        <path d="M13.73 21a2 2 0 01-3.46 0"/>
+        <!-- ══ PAGE LOADER ══ -->
+        <div class="page-loader" id="pageLoader">
+            <div class="page-loader__logo">
+                <div class="page-loader__icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none"
+                        stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="5" width="20" height="14" rx="2" />
+                        <path d="M2 10h20" />
                     </svg>
-                    <span class="notif-dot" id="notif-dot" style="display:none"></span>
-                </button>
+                </div>
+                BudgetWise
+            </div>
+            <div class="page-loader__bar-track">
+                <div class="page-loader__bar-fill" id="loaderBar"></div>
+            </div>
+            <div class="page-loader__label" id="loaderLabel">Loading your
+                transactions…</div>
+        </div>
 
-                <div class="notif-panel" id="notif-panel">
-                    <div class="notif-panel-header">
-                        <span class="notif-panel-title">Notifications</span>
-                        <button class="notif-mark-all-btn" onclick="markAllRead()">Mark all read</button>
+        <!-- ═══════════ MAIN ═══════════ -->
+        <div class="main">
+            <div id="topbar-root"></div>
+
+            <!-- CONTENT -->
+            <div class="content">
+
+                <div class="page-header">
+                    <div>
+                        <h1>Transactions</h1>
+                        <p>Track your income and expenses.</p>
                     </div>
-                    <div class="notif-list" id="notif-list"></div>
-                    <div class="notif-panel-footer">
-                        <a th:href="@{/notifications}" href="/notifications" class="notif-view-all-link">View all notifications →</a>
+                    <button class="btn-primary"
+                        onclick="showAddTransactionModal()">
+                        <svg width="16" height="16" fill="none"
+                            stroke="currentColor" stroke-width="2.5"
+                            viewBox="0 0 24 24">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        Add Transaction
+                    </button>
+                </div>
+
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="typeFilter">Type:</label>
+                        <select id="typeFilter" onchange="filterTransactions()">
+                            <option value="all">All</option>
+                            <option value="income">Income</option>
+                            <option value="expense">Expense</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="categoryFilter">Category:</label>
+                        <select id="categoryFilter"
+                            onchange="filterTransactions()">
+                            <option value="all">All Categories</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="dateFrom">From:</label>
+                        <input type="date" id="dateFrom"
+                            onchange="filterTransactions()">
+                    </div>
+                    <div class="filter-group">
+                        <label for="dateTo">To:</label>
+                        <input type="date" id="dateTo"
+                            onchange="filterTransactions()">
                     </div>
                 </div>
-            </div>
 
-            <div class="avatar-btn" id="topbar-avatar"></div>
-        </div>
-    </header>
+                <div class="transactions-container">
+                    <table class="transactions-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Category</th>
+                                <th>Description</th>
+                                <th class="col-source">Source</th>
+                                <th>Amount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionsTableBody"></tbody>
+                    </table>
+                </div>
 
-    <!-- CONTENT -->
-    <div class="content">
+            </div><!-- /content -->
+        </div><!-- /main -->
 
-        <div class="page-header">
-            <div>
-                <h1>Transactions</h1>
-                <p>Track your income and expenses.</p>
+        <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+        <!-- ═══════════ ADD TRANSACTION MODAL ═══════════ -->
+        <div class="modal-overlay" id="add-modal-overlay"
+            onclick="closeAddTransactionModal()"></div>
+        <div class="modal" id="addTransactionModal">
+            <div class="modal-header">
+                <h2 class="modal-title">Add Transaction</h2>
+                <button class="modal-close"
+                    onclick="closeAddTransactionModal()">
+                    <svg width="18" height="18" fill="none"
+                        stroke="currentColor" stroke-width="2.5"
+                        viewBox="0 0 24 24">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
             </div>
-            <button class="btn-primary" onclick="showAddTransactionModal()">
-                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <line x1="12" y1="5" x2="12" y2="19"/>
-                    <line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-                Add Transaction
-            </button>
+            <form id="addTransactionForm">
+                <div class="modal-body">
+                    <div class="field-group">
+                        <label class="field-label" for="transactionType">Type
+                            *</label>
+                        <div class="field-input-wrap">
+                            <svg width="16" height="16" fill="none"
+                                stroke="#9ca3af" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <polyline points="17 1 21 5 17 9" />
+                                <path d="M3 11V9a4 4 0 014-4h14" />
+                                <polyline points="7 23 3 19 7 15" />
+                                <path d="M21 13v2a4 4 0 01-4 4H3" />
+                            </svg>
+                            <select id="transactionType" class="field-input"
+                                required>
+                                <option value="INCOME">Income</option>
+                                <option value="EXPENSE">Expense</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label"
+                            for="transactionAmount">Amount *</label>
+                        <div class="field-input-wrap">
+                            <svg width="16" height="16" fill="none"
+                                stroke="#9ca3af" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <line x1="12" y1="1" x2="12" y2="23" />
+                                <path
+                                    d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+                            </svg>
+                            <input type="number" id="transactionAmount"
+                                class="field-input" step="0.01" min="0.01"
+                                placeholder="0.00" required />
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label" for="transactionDate">Date
+                            *</label>
+                        <div class="field-input-wrap">
+                            <svg width="16" height="16" fill="none"
+                                stroke="#9ca3af" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <rect x="3" y="4" width="18" height="18"
+                                    rx="2" />
+                                <line x1="16" y1="2" x2="16" y2="6" />
+                                <line x1="8" y1="2" x2="8" y2="6" />
+                                <line x1="3" y1="10" x2="21" y2="10" />
+                            </svg>
+                            <input type="date" id="transactionDate"
+                                class="field-input" required />
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label"
+                            for="transactionCategory">Category *</label>
+                        <div class="field-input-wrap">
+                            <svg width="16" height="16" fill="none"
+                                stroke="#9ca3af" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <path d="M7 7h10M7 12h10M7 17h10"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                            <select id="transactionCategory" class="field-input"
+                                required></select>
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label"
+                            for="transactionSource">Source</label>
+                        <div class="field-input-wrap">
+                            <svg width="16" height="16" fill="none"
+                                stroke="#9ca3af" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="2" y1="12" x2="22" y2="12" />
+                                <path
+                                    d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" />
+                            </svg>
+                            <input type="text" id="transactionSource"
+                                class="field-input"
+                                placeholder="e.g. Salary, Amazon…" />
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label"
+                            for="transactionDescription">Description</label>
+                        <div
+                            class="field-input-wrap field-input-wrap--textarea">
+                            <textarea id="transactionDescription"
+                                class="field-input" rows="3"
+                                placeholder="Optional note…"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-cancel"
+                        onclick="closeAddTransactionModal()">Cancel</button>
+                    <button class="btn-save btn-loadable" id="addTransactionBtn"
+                        onclick="addTransaction(event)">
+                        <span class="btn-label">Add Transaction</span>
+                        <span class="btn-spinner" aria-hidden="true"></span>
+                    </button>
+                </div>
+            </form>
         </div>
 
-        <div class="filters">
-            <div class="filter-group">
-                <label for="typeFilter">Type:</label>
-                <select id="typeFilter" onchange="filterTransactions()">
-                    <option value="all">All</option>
-                    <option value="income">Income</option>
-                    <option value="expense">Expense</option>
-                </select>
+        <!-- ═══════════ EDIT TRANSACTION MODAL ═══════════ -->
+        <div class="modal-overlay" id="edit-modal-overlay"
+            onclick="closeEditTransactionModal()"></div>
+        <div class="modal" id="editTransactionModal">
+            <div class="modal-header">
+                <h2 class="modal-title">Edit Transaction</h2>
+                <button class="modal-close"
+                    onclick="closeEditTransactionModal()">
+                    <svg width="18" height="18" fill="none"
+                        stroke="currentColor" stroke-width="2.5"
+                        viewBox="0 0 24 24">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
             </div>
-            <div class="filter-group">
-                <label for="categoryFilter">Category:</label>
-                <select id="categoryFilter" onchange="filterTransactions()">
-                    <option value="all">All Categories</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="dateFrom">From:</label>
-                <input type="date" id="dateFrom" onchange="filterTransactions()">
-            </div>
-            <div class="filter-group">
-                <label for="dateTo">To:</label>
-                <input type="date" id="dateTo" onchange="filterTransactions()">
-            </div>
+            <form id="editTransactionForm">
+                <div class="modal-body">
+                    <input type="hidden" id="editTransactionId" />
+                    <div class="field-group">
+                        <label class="field-label"
+                            for="editTransactionType">Type *</label>
+                        <div class="field-input-wrap">
+                            <svg width="16" height="16" fill="none"
+                                stroke="#9ca3af" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <polyline points="17 1 21 5 17 9" />
+                                <path d="M3 11V9a4 4 0 014-4h14" />
+                                <polyline points="7 23 3 19 7 15" />
+                                <path d="M21 13v2a4 4 0 01-4 4H3" />
+                            </svg>
+                            <select id="editTransactionType" class="field-input"
+                                required>
+                                <option value="INCOME">Income</option>
+                                <option value="EXPENSE">Expense</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label"
+                            for="editTransactionAmount">Amount *</label>
+                        <div class="field-input-wrap">
+                            <svg width="16" height="16" fill="none"
+                                stroke="#9ca3af" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <line x1="12" y1="1" x2="12" y2="23" />
+                                <path
+                                    d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+                            </svg>
+                            <input type="number" id="editTransactionAmount"
+                                class="field-input" step="0.01" min="0.01"
+                                placeholder="0.00" required />
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label"
+                            for="editTransactionDate">Date *</label>
+                        <div class="field-input-wrap">
+                            <svg width="16" height="16" fill="none"
+                                stroke="#9ca3af" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <rect x="3" y="4" width="18" height="18"
+                                    rx="2" />
+                                <line x1="16" y1="2" x2="16" y2="6" />
+                                <line x1="8" y1="2" x2="8" y2="6" />
+                                <line x1="3" y1="10" x2="21" y2="10" />
+                            </svg>
+                            <input type="date" id="editTransactionDate"
+                                class="field-input" required />
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label"
+                            for="editTransactionCategory">Category *</label>
+                        <div class="field-input-wrap">
+                            <svg width="16" height="16" fill="none"
+                                stroke="#9ca3af" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <path d="M7 7h10M7 12h10M7 17h10"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                            <select id="editTransactionCategory"
+                                class="field-input" required></select>
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label"
+                            for="editTransactionSource">Source</label>
+                        <div class="field-input-wrap">
+                            <svg width="16" height="16" fill="none"
+                                stroke="#9ca3af" stroke-width="2"
+                                viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="2" y1="12" x2="22" y2="12" />
+                                <path
+                                    d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" />
+                            </svg>
+                            <input type="text" id="editTransactionSource"
+                                class="field-input"
+                                placeholder="e.g. Salary, Amazon…" />
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label"
+                            for="editTransactionDescription">Description</label>
+                        <div
+                            class="field-input-wrap field-input-wrap--textarea">
+                            <textarea id="editTransactionDescription"
+                                class="field-input" rows="3"
+                                placeholder="Optional note…"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-cancel"
+                        onclick="closeEditTransactionModal()">Cancel</button>
+                    <button class="btn-save btn-loadable"
+                        id="editTransactionBtn"
+                        onclick="updateTransaction(event)">
+                        <span class="btn-label">Update Transaction</span>
+                        <span class="btn-spinner" aria-hidden="true"></span>
+                    </button>
+                </div>
+            </form>
         </div>
 
-        <div class="transactions-container">
-            <table class="transactions-table">
-                <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Type</th>
-                    <th>Category</th>
-                    <th>Description</th>
-                    <th class="col-source">Source</th>
-                    <th>Amount</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody id="transactionsTableBody"></tbody>
-            </table>
-        </div>
-
-    </div><!-- /content -->
-</div><!-- /main -->
-
-<div class="toast" id="toast" role="alert" aria-live="polite"></div>
-
-<!-- ═══════════ ADD TRANSACTION MODAL ═══════════ -->
-<div class="modal-overlay" id="add-modal-overlay" onclick="closeAddTransactionModal()"></div>
-<div class="modal" id="addTransactionModal">
-    <div class="modal-header">
-        <h2 class="modal-title">Add Transaction</h2>
-        <button class="modal-close" onclick="closeAddTransactionModal()">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-        </button>
-    </div>
-    <form id="addTransactionForm">
-    <div class="modal-body">
-        <div class="field-group">
-            <label class="field-label" for="transactionType">Type *</label>
-            <div class="field-input-wrap">
-                <svg width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
-                    <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/>
-                    <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/>
-                </svg>
-                <select id="transactionType" class="field-input" required>
-                    <option value="INCOME">Income</option>
-                    <option value="EXPENSE">Expense</option>
-                </select>
-            </div>
-        </div>
-        <div class="field-group">
-            <label class="field-label" for="transactionAmount">Amount *</label>
-            <div class="field-input-wrap">
-                <svg width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
-                    <line x1="12" y1="1" x2="12" y2="23"/>
-                    <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
-                </svg>
-                <input type="number" id="transactionAmount" class="field-input" step="0.01" min="0.01" placeholder="0.00" required/>
-            </div>
-        </div>
-        <div class="field-group">
-            <label class="field-label" for="transactionDate">Date *</label>
-            <div class="field-input-wrap">
-                <svg width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
-                    <rect x="3" y="4" width="18" height="18" rx="2"/>
-                    <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-                <input type="date" id="transactionDate" class="field-input" required/>
-            </div>
-        </div>
-        <div class="field-group">
-            <label class="field-label" for="transactionCategory">Category *</label>
-            <div class="field-input-wrap">
-                <svg width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M7 7h10M7 12h10M7 17h10" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <select id="transactionCategory" class="field-input" required></select>
-            </div>
-        </div>
-        <div class="field-group">
-            <label class="field-label" for="transactionSource">Source</label>
-            <div class="field-input-wrap">
-                <svg width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
-                    <path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/>
-                </svg>
-                <input type="text" id="transactionSource" class="field-input" placeholder="e.g. Salary, Amazon…"/>
-            </div>
-        </div>
-        <div class="field-group">
-            <label class="field-label" for="transactionDescription">Description</label>
-            <div class="field-input-wrap field-input-wrap--textarea">
-                <textarea id="transactionDescription" class="field-input" rows="3" placeholder="Optional note…"></textarea>
-            </div>
-        </div>
-    </div>
-    <div class="modal-footer">
-        <button class="btn-cancel" onclick="closeAddTransactionModal()">Cancel</button>
-        <button class="btn-save btn-loadable" id="addTransactionBtn" onclick="addTransaction(event)">
-            <span class="btn-label">Add Transaction</span>
-            <span class="btn-spinner" aria-hidden="true"></span>
-        </button>
-    </div>
-    </form>
-</div>
-
-<!-- ═══════════ EDIT TRANSACTION MODAL ═══════════ -->
-<div class="modal-overlay" id="edit-modal-overlay" onclick="closeEditTransactionModal()"></div>
-<div class="modal" id="editTransactionModal">
-    <div class="modal-header">
-        <h2 class="modal-title">Edit Transaction</h2>
-        <button class="modal-close" onclick="closeEditTransactionModal()">
-            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-            </svg>
-        </button>
-    </div>
-    <form id="editTransactionForm">
-    <div class="modal-body">
-        <input type="hidden" id="editTransactionId"/>
-        <div class="field-group">
-            <label class="field-label" for="editTransactionType">Type *</label>
-            <div class="field-input-wrap">
-                <svg width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
-                    <polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/>
-                    <polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/>
-                </svg>
-                <select id="editTransactionType" class="field-input" required>
-                    <option value="INCOME">Income</option>
-                    <option value="EXPENSE">Expense</option>
-                </select>
-            </div>
-        </div>
-        <div class="field-group">
-            <label class="field-label" for="editTransactionAmount">Amount *</label>
-            <div class="field-input-wrap">
-                <svg width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
-                    <line x1="12" y1="1" x2="12" y2="23"/>
-                    <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
-                </svg>
-                <input type="number" id="editTransactionAmount" class="field-input" step="0.01" min="0.01" placeholder="0.00" required/>
-            </div>
-        </div>
-        <div class="field-group">
-            <label class="field-label" for="editTransactionDate">Date *</label>
-            <div class="field-input-wrap">
-                <svg width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
-                    <rect x="3" y="4" width="18" height="18" rx="2"/>
-                    <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-                </svg>
-                <input type="date" id="editTransactionDate" class="field-input" required/>
-            </div>
-        </div>
-        <div class="field-group">
-            <label class="field-label" for="editTransactionCategory">Category *</label>
-            <div class="field-input-wrap">
-                <svg width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M7 7h10M7 12h10M7 17h10" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <select id="editTransactionCategory" class="field-input" required></select>
-            </div>
-        </div>
-        <div class="field-group">
-            <label class="field-label" for="editTransactionSource">Source</label>
-            <div class="field-input-wrap">
-                <svg width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
-                    <path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/>
-                </svg>
-                <input type="text" id="editTransactionSource" class="field-input" placeholder="e.g. Salary, Amazon…"/>
-            </div>
-        </div>
-        <div class="field-group">
-            <label class="field-label" for="editTransactionDescription">Description</label>
-            <div class="field-input-wrap field-input-wrap--textarea">
-                <textarea id="editTransactionDescription" class="field-input" rows="3" placeholder="Optional note…"></textarea>
-            </div>
-        </div>
-    </div>
-    <div class="modal-footer">
-        <button class="btn-cancel" onclick="closeEditTransactionModal()">Cancel</button>
-        <button class="btn-save btn-loadable" id="editTransactionBtn" onclick="updateTransaction(event)">
-            <span class="btn-label">Update Transaction</span>
-            <span class="btn-spinner" aria-hidden="true"></span>
-        </button>
-    </div>
-    </form>
-</div>
-
-<script th:src="@{/js/loading.js}" src="../static/js/loading.js"></script>
-<script th:src="@{/js/transactions.js}" src="../static/js/transactions.js"></script>
-<script th:src="@{/js/navbar-notifications.js}" src="../static/js/navbar-notifications.js"></script>
-</body>
+        <script th:src="@{/js/loading.js}"
+            src="../static/js/loading.js"></script>
+        <script th:src="@{/js/navbar.js}" src="../static/js/navbar.js"></script>
+        <script th:src="@{/js/transactions.js}"
+            src="../static/js/transactions.js"></script>
+        <!--<script th:src="@{/js/navbar-notifications.js}" src="../static/js/navbar-notifications.js"></script>-->
+    </body>
 </html>

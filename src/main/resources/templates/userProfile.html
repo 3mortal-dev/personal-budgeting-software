@@ -1,419 +1,414 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>BudgetWise – Profile</title>
-  <link rel="stylesheet" th:href="@{/css/loading.css}" href="../static/css/loading.css"/>
-  <link rel="stylesheet" th:href="@{/css/userProfile.css}" href="../static/css/userProfile.css"/>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BudgetWise – Profile</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" th:href="@{/css/navbar.css}"
+      href="../static/css/navbar.css" />
+    <link rel="stylesheet" th:href="@{/css/loading.css}"
+      href="../static/css/loading.css" />
+    <link rel="stylesheet" th:href="@{/css/userProfile.css}"
+      href="../static/css/userProfile.css" />
+  </head>
+  <body>
 
-<!-- ══ PAGE LOADER ══ -->
-<div class="page-loader" id="pageLoader">
-    <div class="page-loader__logo">
+    <!-- ══ PAGE LOADER ══ -->
+    <div class="page-loader" id="pageLoader">
+      <div class="page-loader__logo">
         <div class="page-loader__icon">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
-                 stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="5" width="20" height="14" rx="2"/>
-                <path d="M2 10h20"/>
-            </svg>
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none"
+            stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="5" width="20" height="14" rx="2" />
+            <path d="M2 10h20" />
+          </svg>
         </div>
         BudgetWise
-    </div>
-    <div class="page-loader__bar-track">
+      </div>
+      <div class="page-loader__bar-track">
         <div class="page-loader__bar-fill" id="loaderBar"></div>
-    </div>
-    <div class="page-loader__label" id="loaderLabel">Loading your dashboard…</div>
-</div>
-
-<!-- ═══════════ SIDEBAR ═══════════ -->
-<aside class="sidebar">
-  <div class="logo">
-    <div class="logo-icon">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-        <path d="M3 3h18v4H3zM3 10h18v4H3zM3 17h18v4H3z"/>
-      </svg>
-    </div>
-    BudgetWise
-  </div>
-
-  <nav>
-    <a class="nav-item" th:href="@{/dashboard}" href="/dashboard">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      Home
-    </a>
-    <a class="nav-item" th:href="@{/transactions}" href="/transactions">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-      Transactions
-    </a>
-    <a class="nav-item" th:href="@{/budget}" href="/budget">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-      Budgets
-    </a>
-    <a class="nav-item" th:href="@{/goals}" href="/goals">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
-      Goals
-    </a>
-    <a class="nav-item" th:href="@{/reports}" href="/reports">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      Reports
-    </a>
-    <a class="nav-item" th:href="@{/notifications}" href="/notifications">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-      Notifications
-    </a>
-    <a class="nav-item active" th:href="@{/userProfile}" href="/userProfile">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      Profile
-    </a>
-  </nav>
-
-  <div class="logout" onclick="handleLogout()">
-    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-    </svg>
-    Logout
-  </div>
-</aside>
-
-<!-- ═══════════ MAIN ═══════════ -->
-<div class="main">
-
-  <!-- TOPBAR -->
-  <header class="topbar">
-    <span class="topbar-greeting" id="greeting">Good morning 👋</span>
-    <div class="topbar-right">
-
-      <!-- NOTIFICATION BELL + PANEL -->
-      <div class="notif-wrapper">
-        <button class="notif-btn" id="notif-icon-btn" onclick="toggleNotifPanel(event)" aria-label="Notifications">
-          <svg width="16" height="16" fill="none" stroke="#374151" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
-          </svg>
-          <!-- Red dot for unread count -->
-          <span class="notif-dot" id="notif-dot" style="display:none"></span>
-        </button>
-
-        <!-- DROPDOWN PANEL -->
-        <div class="notif-panel" id="notif-panel">
-          <div class="notif-panel-header">
-            <span class="notif-panel-title">Notifications</span>
-            <button class="notif-mark-all-btn" onclick="markAllRead()">Mark all read</button>
-          </div>
-          <div class="notif-list" id="notif-list">
-            <!-- Rendered by JS -->
-          </div>
-          <div class="notif-panel-footer">
-            <a th:href="@{/notifications}" href="/notifications" class="notif-view-all-link">View all notifications →</a>
-          </div>
-        </div>
-      </div><!-- /notif-wrapper -->
-
-      <div class="avatar-btn" id="topbar-avatar"></div>
-    </div>
-  </header>
-
-  <!-- CONTENT -->
-  <div class="content">
-
-    <div id="profileFields"></div>
-
-    <!-- PROFILE CARD -->
-    <div class="profile-card">
-      <div class="avatar-wrap">
-        <div class="avatar-main" id="avatar-main"></div>
-        <div class="avatar-edit" title="Change photo" onclick="document.getElementById('avatar-input').click()">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-            <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-          </svg>
-        </div>
-        <input id="avatar-input" type="file" accept="image/*" style="display:none" onchange="previewAvatar(event)"/>
       </div>
-
-      <div class="profile-name" id="profile-name"></div>
-      <div class="profile-email" id="profile-email"></div>
-
-      <div class="stats">
-        <div class="stat">
-          <span class="stat-val" id="stat-tx">0</span>
-          <span class="stat-lbl">Transactions</span>
-        </div>
-        <div class="stat">
-          <span class="stat-val" id="stat-bud">0</span>
-          <span class="stat-lbl">Budgets</span>
-        </div>
-        <div class="stat">
-          <span class="stat-val" id="stat-goals">0</span>
-          <span class="stat-lbl">Goals</span>
-        </div>
-      </div>
-
-      <button class="edit-profile-btn" onclick="openEditModal()">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
-          <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-        </svg>
-        Edit Profile
-      </button>
+      <div class="page-loader__label" id="loaderLabel">Loading your
+        dashboard…</div>
     </div>
 
-    <!-- SETTINGS CARD -->
-    <div class="settings-card">
-      <div class="settings-label">Notification Preferences</div>
+    <div id="sidebar-root"></div>
 
-      <!-- Goals Notifications -->
-      <div class="setting-row" onclick="toggleNotifGoals()">
-        <div class="setting-icon">
-          <svg width="17" height="17" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/>
-          </svg>
-        </div>
-        <div class="setting-text">
-          <div class="setting-name">Goals Notifications</div>
-          <div class="setting-desc">Alerts when you hit or miss a goal</div>
-        </div>
-        <label class="toggle" onclick="event.stopPropagation()">
-          <input type="checkbox" id="notif-goals-toggle" checked onchange="onNotifGoalsChange(this.checked)"/>
-          <span class="toggle-track"></span>
-          <span class="toggle-thumb"></span>
-        </label>
-      </div>
+    <!-- ═══════════ MAIN ═══════════ -->
+    <div class="main">
 
-      <!-- Transactions Notifications -->
-      <div class="setting-row" onclick="toggleNotifTransactions()">
-        <div class="setting-icon">
-          <svg width="17" height="17" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24">
-            <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
-          </svg>
-        </div>
-        <div class="setting-text">
-          <div class="setting-name">Transaction Notifications</div>
-          <div class="setting-desc">Alerts for incoming &amp; outgoing transactions</div>
-        </div>
-        <label class="toggle" onclick="event.stopPropagation()">
-          <input type="checkbox" id="notif-transactions-toggle" checked onchange="onNotifTransactionsChange(this.checked)"/>
-          <span class="toggle-track"></span>
-          <span class="toggle-thumb"></span>
-        </label>
-      </div>
+      <div id="topbar-root"></div>
 
-      <div class="settings-label" style="margin-top: 20px;">Account</div>
+      <!-- CONTENT -->
+      <div class="content">
 
-      <!-- Currency -->
-      <div class="setting-row currency-row" onclick="toggleCurrencyDropdown(event)">
-        <div class="setting-icon">
-          <svg width="17" height="17" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24">
-            <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
-          </svg>
-        </div>
-        <div class="setting-text">
-          <div class="setting-name">Currency</div>
-          <div class="setting-desc">Display currency for all values</div>
-        </div>
-        <div class="currency-trigger" id="currency-trigger">
-          <span class="cur-flag" id="cur-flag">🇺🇸</span>
-          <span id="currency-label">USD</span>
-          <svg class="chevron" id="currency-chevron" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <polyline points="6 9 12 15 18 9"/>
-          </svg>
-        </div>
-      </div>
+        <div id="profileFields"></div>
 
-      <!-- Currency Dropdown Panel -->
-      <div class="currency-dropdown" id="currency-dropdown">
-        <div class="currency-option" data-value="EGP" onclick="selectCurrency(this)">
-          <span class="cur-flag">🇪🇬</span>
-          <div class="currency-info">
-            <span class="currency-name">Egyptian Pound</span>
-            <span class="currency-code">EGP</span>
+        <!-- PROFILE CARD -->
+        <div class="profile-card">
+          <div class="avatar-wrap">
+            <div class="avatar-main" id="avatar-main"></div>
+            <div class="avatar-edit" title="Change photo"
+              onclick="document.getElementById('avatar-input').click()">
+              <svg width="13" height="13" fill="none" stroke="currentColor"
+                stroke-width="2.5" viewBox="0 0 24 24">
+                <path
+                  d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                <path
+                  d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+            </div>
+            <input id="avatar-input" type="file" accept="image/*"
+              style="display:none" onchange="previewAvatar(event)" />
           </div>
-          <svg class="check-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="currency-option active" data-value="USD" onclick="selectCurrency(this)">
-          <span class="cur-flag">🇺🇸</span>
-          <div class="currency-info">
-            <span class="currency-name">US Dollar</span>
-            <span class="currency-code">USD</span>
-          </div>
-          <svg class="check-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <div class="currency-option" data-value="EUR" onclick="selectCurrency(this)">
-          <span class="cur-flag">🇪🇺</span>
-          <div class="currency-info">
-            <span class="currency-name">Euro</span>
-            <span class="currency-code">EUR</span>
-          </div>
-          <svg class="check-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-      </div>
 
-      <div class="settings-label" style="margin-top: 20px;">Bank & E-Wallets</div>
+          <div class="profile-name" id="profile-name"></div>
+          <div class="profile-email" id="profile-email"></div>
 
-      <!-- Bank Integration -->
-      <div class="setting-row">
-        <div class="setting-icon">
-          <svg width="17" height="17" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M3 21h18M3 10h18M5 10V21M19 10V21M9 10V21M15 10V21M12 3L2 10h20L12 3z" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-        <div class="setting-text">
-          <div class="setting-name">Connected Accounts</div>
-          <div class="setting-desc" id="bank-status-text">No bank accounts linked yet</div>
-        </div>
-        <div id="bank-actions">
-          <button class="category-add-btn" onclick="openBankModal()">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-              <path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M10.172 13.828a4 4 0 005.656 0l4-4a4 4 0 10-5.656-5.656l-1.102 1.101" stroke-linecap="round" stroke-linejoin="round"/>
+          <div class="stats">
+            <div class="stat">
+              <span class="stat-val" id="stat-tx">0</span>
+              <span class="stat-lbl">Transactions</span>
+            </div>
+            <div class="stat">
+              <span class="stat-val" id="stat-bud">0</span>
+              <span class="stat-lbl">Budgets</span>
+            </div>
+            <div class="stat">
+              <span class="stat-val" id="stat-goals">0</span>
+              <span class="stat-lbl">Goals</span>
+            </div>
+          </div>
+
+          <button class="edit-profile-btn" onclick="openEditModal()">
+            <svg width="15" height="15" fill="none" stroke="currentColor"
+              stroke-width="2.5" viewBox="0 0 24 24">
+              <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
             </svg>
-            Link Bank
+            Edit Profile
           </button>
         </div>
-      </div>
 
-      <!-- Dev Tool: Bank Simulator -->
-      <div class="setting-row" style="background: #f8fafc; border-radius: 12px; margin-top: 10px; border: 1px dashed var(--border);">
-        <div class="setting-text">
-          <div class="setting-desc"><strong>Developer Tool:</strong> Open the <a href="/bank-simulator" target="_blank" style="color:var(--brand); text-decoration: underline;">Mock Bank Simulator</a> to add pending transactions.</div>
-        </div>
-      </div>
+        <!-- SETTINGS CARD -->
+        <div class="settings-card">
+          <div class="settings-label">Notification Preferences</div>
 
-      <div class="settings-label" style="margin-top: 20px;">Categories</div>
+          <!-- Goals Notifications -->
+          <div class="setting-row" onclick="toggleNotifGoals()">
+            <div class="setting-icon">
+              <svg width="17" height="17" fill="none" stroke="#6b7280"
+                stroke-width="2" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12"
+                  r="4" />
+              </svg>
+            </div>
+            <div class="setting-text">
+              <div class="setting-name">Goals Notifications</div>
+              <div class="setting-desc">Alerts when you hit or miss a goal</div>
+            </div>
+            <label class="toggle" onclick="event.stopPropagation()">
+              <input type="checkbox" id="notif-goals-toggle" checked
+                onchange="onNotifGoalsChange(this.checked)" />
+              <span class="toggle-track"></span>
+              <span class="toggle-thumb"></span>
+            </label>
+          </div>
 
-      <!-- Custom Categories -->
-      <div class="setting-row">
-        <div class="setting-icon">
-          <svg width="17" height="17" fill="none" stroke="#6b7280" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M7 7h10M7 12h10M7 17h10" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Transactions Notifications -->
+          <div class="setting-row" onclick="toggleNotifTransactions()">
+            <div class="setting-icon">
+              <svg width="17" height="17" fill="none" stroke="#6b7280"
+                stroke-width="2" viewBox="0 0 24 24">
+                <rect x="2" y="5" width="20" height="14" rx="2" /><line x1="2"
+                  y1="10" x2="22" y2="10" />
+              </svg>
+            </div>
+            <div class="setting-text">
+              <div class="setting-name">Transaction Notifications</div>
+              <div class="setting-desc">Alerts for incoming &amp; outgoing
+                transactions</div>
+            </div>
+            <label class="toggle" onclick="event.stopPropagation()">
+              <input type="checkbox" id="notif-transactions-toggle" checked
+                onchange="onNotifTransactionsChange(this.checked)" />
+              <span class="toggle-track"></span>
+              <span class="toggle-thumb"></span>
+            </label>
+          </div>
+
+          <div class="settings-label" style="margin-top: 20px;">Account</div>
+
+          <!-- Currency -->
+          <div class="setting-row currency-row"
+            onclick="toggleCurrencyDropdown(event)">
+            <div class="setting-icon">
+              <svg width="17" height="17" fill="none" stroke="#6b7280"
+                stroke-width="2" viewBox="0 0 24 24">
+                <line x1="12" y1="1" x2="12" y2="23" /><path
+                  d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
+              </svg>
+            </div>
+            <div class="setting-text">
+              <div class="setting-name">Currency</div>
+              <div class="setting-desc">Display currency for all values</div>
+            </div>
+            <div class="currency-trigger" id="currency-trigger">
+              <span class="cur-flag" id="cur-flag">🇺🇸</span>
+              <span id="currency-label">USD</span>
+              <svg class="chevron" id="currency-chevron" width="14" height="14"
+                fill="none" stroke="currentColor" stroke-width="2.5"
+                viewBox="0 0 24 24">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </div>
+          </div>
+
+          <!-- Currency Dropdown Panel -->
+          <div class="currency-dropdown" id="currency-dropdown">
+            <div class="currency-option" data-value="EGP"
+              onclick="selectCurrency(this)">
+              <span class="cur-flag">🇪🇬</span>
+              <div class="currency-info">
+                <span class="currency-name">Egyptian Pound</span>
+                <span class="currency-code">EGP</span>
+              </div>
+              <svg class="check-icon" width="16" height="16" fill="none"
+                stroke="currentColor" stroke-width="2.5"
+                viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
+            </div>
+            <div class="currency-option active" data-value="USD"
+              onclick="selectCurrency(this)">
+              <span class="cur-flag">🇺🇸</span>
+              <div class="currency-info">
+                <span class="currency-name">US Dollar</span>
+                <span class="currency-code">USD</span>
+              </div>
+              <svg class="check-icon" width="16" height="16" fill="none"
+                stroke="currentColor" stroke-width="2.5"
+                viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
+            </div>
+            <div class="currency-option" data-value="EUR"
+              onclick="selectCurrency(this)">
+              <span class="cur-flag">🇪🇺</span>
+              <div class="currency-info">
+                <span class="currency-name">Euro</span>
+                <span class="currency-code">EUR</span>
+              </div>
+              <svg class="check-icon" width="16" height="16" fill="none"
+                stroke="currentColor" stroke-width="2.5"
+                viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
+            </div>
+          </div>
+
+          <div class="settings-label" style="margin-top: 20px;">Bank &
+            E-Wallets</div>
+
+          <!-- Bank Integration -->
+          <div class="setting-row">
+            <div class="setting-icon">
+              <svg width="17" height="17" fill="none" stroke="#6b7280"
+                stroke-width="2" viewBox="0 0 24 24">
+                <path
+                  d="M3 21h18M3 10h18M5 10V21M19 10V21M9 10V21M15 10V21M12 3L2 10h20L12 3z"
+                  stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </div>
+            <div class="setting-text">
+              <div class="setting-name">Connected Accounts</div>
+              <div class="setting-desc" id="bank-status-text">No bank accounts
+                linked yet</div>
+            </div>
+            <div id="bank-actions">
+              <button class="category-add-btn" onclick="openBankModal()">
+                <svg width="14" height="14" fill="none" stroke="currentColor"
+                  stroke-width="2.5" viewBox="0 0 24 24">
+                  <path
+                    d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                  <path
+                    d="M10.172 13.828a4 4 0 005.656 0l4-4a4 4 0 10-5.656-5.656l-1.102 1.101"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Link Bank
+              </button>
+            </div>
+          </div>
+
+          <!-- Dev Tool: Bank Simulator -->
+          <div class="setting-row"
+            style="background: #f8fafc; border-radius: 12px; margin-top: 10px; border: 1px dashed var(--border);">
+            <div class="setting-text">
+              <div class="setting-desc"><strong>Developer Tool:</strong> Open
+                the <a href="/bank-simulator" target="_blank"
+                  style="color:var(--brand); text-decoration: underline;">Mock
+                  Bank Simulator</a> to add pending transactions.</div>
+            </div>
+          </div>
+
+          <div class="settings-label" style="margin-top: 20px;">Categories</div>
+
+          <!-- Custom Categories -->
+          <div class="setting-row">
+            <div class="setting-icon">
+              <svg width="17" height="17" fill="none" stroke="#6b7280"
+                stroke-width="2" viewBox="0 0 24 24">
+                <path d="M7 7h10M7 12h10M7 17h10" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
+            </div>
+            <div class="setting-text">
+              <div class="setting-name">Custom Categories</div>
+              <div class="setting-desc">Add personal categories for your
+                transactions</div>
+            </div>
+            <button id="add-custom-category-btn" class="category-add-btn">
+              <svg width="14" height="14" fill="none" stroke="currentColor"
+                stroke-width="2.5" viewBox="0 0 24 24">
+                <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12"
+                  x2="19" y2="12" />
+              </svg>
+              Add
+            </button>
+          </div>
+
+          <!-- Container for the dynamic list of categories -->
+          <div id="custom-categories-list"
+            class="categories-list-container"></div>
+
+        </div><!-- /settings-card -->
+      </div><!-- /content -->
+    </div><!-- /main -->
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- ═══════════ CATEGORY MODAL ═══════════ -->
+    <div class="modal-overlay" id="cat-modal-overlay"
+      onclick="closeCategoryModal()"></div>
+
+    <div class="modal" id="category-modal">
+      <div class="modal-header">
+        <h2 class="modal-title">New Category</h2>
+        <button class="modal-close" onclick="closeCategoryModal()">
+          <svg width="18" height="18" fill="none" stroke="currentColor"
+            stroke-width="2.5" viewBox="0 0 24 24">
+            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18"
+              y2="18" />
           </svg>
-        </div>
-        <div class="setting-text">
-          <div class="setting-name">Custom Categories</div>
-          <div class="setting-desc">Add personal categories for your transactions</div>
-        </div>
-        <button id="add-custom-category-btn" class="category-add-btn">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          Add
         </button>
       </div>
 
-      <!-- Container for the dynamic list of categories -->
-      <div id="custom-categories-list" class="categories-list-container"></div>
-
-    </div><!-- /settings-card -->
-  </div><!-- /content -->
-</div><!-- /main -->
-
-<!-- Toast Notification -->
-<div class="toast" id="toast"></div>
-
-<!-- ═══════════ CATEGORY MODAL ═══════════ -->
-<div class="modal-overlay" id="cat-modal-overlay" onclick="closeCategoryModal()"></div>
-
-<div class="modal" id="category-modal">
-  <div class="modal-header">
-    <h2 class="modal-title">New Category</h2>
-    <button class="modal-close" onclick="closeCategoryModal()">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-      </svg>
-    </button>
-  </div>
-
-  <div class="modal-body">
-    <div class="field-group">
-      <input type="hidden" id="edit-cat-id" />
-      <label class="field-label" for="new-cat-name">Category Name</label>
-      <div class="field-input-wrap">
-        <input type="text" id="new-cat-name" class="field-input" placeholder="e.g. Subscriptions, Hobbies..."/>
+      <div class="modal-body">
+        <div class="field-group">
+          <input type="hidden" id="edit-cat-id" />
+          <label class="field-label" for="new-cat-name">Category Name</label>
+          <div class="field-input-wrap">
+            <input type="text" id="new-cat-name" class="field-input"
+              placeholder="e.g. Subscriptions, Hobbies..." />
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
 
-  <div class="modal-footer">
-    <button class="btn-cancel" onclick="closeCategoryModal()">Cancel</button>
-    <button class="btn-save" id="save-cat-btn" onclick="submitCustomCategory()">Create Category</button>
-  </div>
-</div>
-
-<!-- ═══════════ BANK LINK MODAL ═══════════ -->
-<div class="modal-overlay" id="bank-modal-overlay" onclick="closeBankModal()"></div>
-<div class="modal" id="bank-modal">
-  <div class="modal-header">
-    <h2 class="modal-title">Link Bank / E-Wallet</h2>
-    <button class="modal-close" onclick="closeBankModal()">&times;</button>
-  </div>
-  <div class="modal-body">
-    <p class="setting-desc" style="margin-bottom: 15px;">Choose a provider to automatically import your transactions.</p>
-    <div class="bank-grid">
-      <div class="bank-option" onclick="simulateBankLink('CIB Bank', '🇪🇬')">
-        <span class="cur-flag">🇪🇬</span>
-        <span>CIB Bank</span>
-      </div>
-      <div class="bank-option" onclick="simulateBankLink('PayPal', '🌐')">
-        <span class="cur-flag">🌐</span>
-        <span>PayPal</span>
-      </div>
-      <div class="bank-option" onclick="simulateBankLink('QNB AL AHLI', '🇶🇦')">
-        <span class="cur-flag">🇶🇦</span>
-        <span>QNB AL AHLI</span>
-      </div>
-      <div class="bank-option" onclick="simulateBankLink('InstaPay', '📱')">
-        <span class="cur-flag">📱</span>
-        <span>InstaPay Mock</span>
-      </div>
-    </div>
-  </div>
-  <div class="modal-footer">
-    <button class="btn-cancel" onclick="closeBankModal()">Cancel</button>
-  </div>
-</div>
-
-<!-- ═══════════ EDIT MODAL ═══════════ -->
-<!-- BUG FIX: Changed 'is-open' to 'open' so CSS and JS use the same class -->
-<div class="modal-overlay" id="modal-overlay" onclick="closeEditModal()"></div>
-
-<div class="modal" id="edit-modal">
-  <div class="modal-header">
-    <h2 class="modal-title">Edit Profile</h2>
-    <button class="modal-close" onclick="closeEditModal()">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-      </svg>
-    </button>
-  </div>
-
-  <div class="modal-body">
-
-    <!-- Full Name only -->
-    <div class="field-group">
-      <label class="field-label" for="edit-name">Full Name</label>
-      <div class="field-input-wrap">
-        <svg width="16" height="16" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24">
-          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
-        </svg>
-        <input type="text" id="edit-name" class="field-input" placeholder="Your full name"/>
+      <div class="modal-footer">
+        <button class="btn-cancel"
+          onclick="closeCategoryModal()">Cancel</button>
+        <button class="btn-save" id="save-cat-btn"
+          onclick="submitCustomCategory()">Create Category</button>
       </div>
     </div>
 
-  </div><!-- /modal-body -->
+    <!-- ═══════════ BANK LINK MODAL ═══════════ -->
+    <div class="modal-overlay" id="bank-modal-overlay"
+      onclick="closeBankModal()"></div>
+    <div class="modal" id="bank-modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Link Bank / E-Wallet</h2>
+        <button class="modal-close" onclick="closeBankModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="setting-desc" style="margin-bottom: 15px;">Choose a provider
+          to automatically import your transactions.</p>
+        <div class="bank-grid">
+          <div class="bank-option"
+            onclick="simulateBankLink('CIB Bank', '🇪🇬')">
+            <span class="cur-flag">🇪🇬</span>
+            <span>CIB Bank</span>
+          </div>
+          <div class="bank-option" onclick="simulateBankLink('PayPal', '🌐')">
+            <span class="cur-flag">🌐</span>
+            <span>PayPal</span>
+          </div>
+          <div class="bank-option"
+            onclick="simulateBankLink('QNB AL AHLI', '🇶🇦')">
+            <span class="cur-flag">🇶🇦</span>
+            <span>QNB AL AHLI</span>
+          </div>
+          <div class="bank-option" onclick="simulateBankLink('InstaPay', '📱')">
+            <span class="cur-flag">📱</span>
+            <span>InstaPay Mock</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeBankModal()">Cancel</button>
+      </div>
+    </div>
 
-  <div class="modal-footer">
-    <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
-    <button class="btn-save btn-loadable" id="saveProfileBtn" onclick="saveProfile()">
-        <span class="btn-label">Save Changes</span>
-        <span class="btn-spinner" aria-hidden="true"></span>
-    </button>
-  </div>
-</div>
+    <!-- ═══════════ EDIT MODAL ═══════════ -->
+    <!-- BUG FIX: Changed 'is-open' to 'open' so CSS and JS use the same class -->
+    <div class="modal-overlay" id="modal-overlay"
+      onclick="closeEditModal()"></div>
 
-<script th:src="@{/js/loading.js}" src="../static/js/loading.js"></script>
-<script th:src="@{/js/Bankintegration.js}" src="../static/js/Bankintegration.js"></script>
-<script th:src="@{/js/userProfile.js}" src="../static/js/userProfile.js"></script>
-<script th:src="@{/js/navbar-notifications.js}" src="../static/js/navbar-notifications.js"></script>
-</body>
+    <div class="modal" id="edit-modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Edit Profile</h2>
+        <button class="modal-close" onclick="closeEditModal()">
+          <svg width="18" height="18" fill="none" stroke="currentColor"
+            stroke-width="2.5" viewBox="0 0 24 24">
+            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18"
+              y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- Full Name only -->
+        <div class="field-group">
+          <label class="field-label" for="edit-name">Full Name</label>
+          <div class="field-input-wrap">
+            <svg width="16" height="16" fill="none" stroke="#9ca3af"
+              stroke-width="2" viewBox="0 0 24 24">
+              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle
+                cx="12" cy="7" r="4" />
+            </svg>
+            <input type="text" id="edit-name" class="field-input"
+              placeholder="Your full name" />
+          </div>
+        </div>
+
+      </div><!-- /modal-body -->
+
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+        <button class="btn-save btn-loadable" id="saveProfileBtn"
+          onclick="saveProfile()">
+          <span class="btn-label">Save Changes</span>
+          <span class="btn-spinner" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+
+    <script th:src="@{/js/loading.js}" src="../static/js/loading.js"></script>
+    <script th:src="@{/js/Bankintegration.js}"
+      src="../static/js/Bankintegration.js"></script>
+    <script th:src="@{/js/userProfile.js}"
+      src="../static/js/userProfile.js"></script>
+    <script th:src="@{/js/navbar.js}" src="../static/js/navbar.js"></script>
+  </body>
 </html>
