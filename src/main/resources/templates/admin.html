@@ -77,10 +77,16 @@
                     <h1>System Administration</h1>
                     <p>Manage users, inspect account activity, and monitor system totals.</p>
                 </div>
-                <button class="admin-refresh" id="refreshBtn" type="button">
-                    <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
-                    Refresh
-                </button>
+                <div class="admin-header-actions">
+                    <button class="admin-add-category" id="addCategoryBtn" type="button">
+                        <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Add Category
+                    </button>
+                    <button class="admin-refresh" id="refreshBtn" type="button">
+                        <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><polyline points="21 3 21 9 15 9"/></svg>
+                        Refresh
+                    </button>
+                </div>
             </div>
 
             <div class="admin-stats" id="adminStats"></div>
@@ -120,6 +126,29 @@
 </div>
 
 <div id="toast"></div>
+
+<!-- ═══════════ CATEGORY MODAL ═══════════ -->
+<div class="admin-modal-overlay" id="catModalOverlay" onclick="closeCategoryModal()"></div>
+<div class="admin-modal" id="categoryModal">
+    <div class="admin-modal-header">
+        <h3>New Built-in Category</h3>
+        <button class="admin-modal-close" onclick="closeCategoryModal()">&times;</button>
+    </div>
+    <div class="admin-modal-body">
+        <p class="admin-modal-desc">Built-in categories are global and visible to all system users.</p>
+        <div class="admin-field">
+            <label for="newCatName">Category Name</label>
+            <input type="text" id="newCatName" placeholder="e.g. Groceries, Rent, Utilities...">
+        </div>
+    </div>
+    <div class="admin-modal-footer">
+        <button class="admin-btn" onclick="closeCategoryModal()">Cancel</button>
+        <button class="admin-btn admin-btn--primary" id="confirmCatBtn" onclick="submitBuiltInCategory()">
+            Create Category
+        </button>
+    </div>
+</div>
+
 <script th:src="@{/js/admin.js}" src="../static/js/admin.js"></script>
 </body>
 </html>
