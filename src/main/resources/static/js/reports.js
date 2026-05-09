@@ -160,7 +160,7 @@ function formatMoney(value) {
 }
 
 function sumMap(obj) {
-  if (!obj || typeof obj !== "object") {
+  if (!obj || typeof obj != "object") {
     return 0;
   }
 
@@ -172,7 +172,7 @@ function sumMap(obj) {
 }
 
 function normalizeMonthMap(raw) {
-  if (!raw || typeof raw !== "object") {
+  if (!raw || typeof raw != "object") {
     return {};
   }
 
@@ -186,7 +186,7 @@ function normalizeMonthMap(raw) {
 }
 
 function sortMonthKeys(obj) {
-  if (!obj || typeof obj !== "object") {
+  if (!obj || typeof obj != "object") {
     return [];
   }
 
@@ -417,7 +417,7 @@ function parseFilename(disposition) {
     return null;
   }
 
-  const utf = disposition.match(/filename\*=UTF-8''(.+)/);
+  const utf = disposition.match(/filename\\*=UTF-8''(.+)/);
 
   if (utf && utf[1]) {
     return decodeURIComponent(utf[1].split(";")[0]);
@@ -465,8 +465,7 @@ async function loadMonthlyReport() {
     return;
   }
 
-  disableBtn("loadReportBtn", true);
-
+  btnStartLoading("loadReportBtn");
   showEl("reportLoading", true);
 
   const result = await apiFetch(API.MONTHLY, {
@@ -478,8 +477,7 @@ async function loadMonthlyReport() {
     }),
   });
 
-  disableBtn("loadReportBtn", false);
-
+  btnStopLoading("loadReportBtn");
   showEl("reportLoading", false);
 
   if (!result || result.error) {
@@ -528,7 +526,7 @@ async function downloadReport() {
     return;
   }
 
-  disableBtn("downloadBtn", true);
+  btnStartLoading("downloadBtn");
 
   try {
     const token = localStorage.getItem("token");
@@ -582,7 +580,7 @@ async function downloadReport() {
 
     showEl("downloadError", true);
   } finally {
-    disableBtn("downloadBtn", false);
+    btnStopLoading("downloadBtn");
   }
 }
 
@@ -590,26 +588,35 @@ async function downloadReport() {
    INIT
 ═══════════════════════════════════════════════════ */
 
-document.addEventListener("DOMContentLoaded", () => {
-  if ($("rangeStart")) {
-    $("rangeStart").value = yearStartISO();
-  }
+document.addEventListener("DOMContentLoaded", async () => {
 
-  if ($("rangeEnd")) {
-    $("rangeEnd").value = todayISO();
-  }
+    loaderInit([
+        {pct: 50, label: "Generating reports…"},
+        {pct: 100, label: "Finalizing…"},
+    ]);
 
-  if ($("downloadStart")) {
-    $("downloadStart").value = yearStartISO();
-  }
+    if ($("rangeStart")) {
+        $("rangeStart").value = yearStartISO();
+    }
 
-  if ($("downloadEnd")) {
-    $("downloadEnd").value = todayISO();
-  }
+    if ($("rangeEnd")) {
+        $("rangeEnd").value = todayISO();
+    }
 
-  $("loadReportBtn")?.addEventListener("click", loadMonthlyReport);
+    if ($("downloadStart")) {
+        $("downloadStart").value = yearStartISO();
+    }
 
-  $("downloadBtn")?.addEventListener("click", downloadReport);
+    if ($("downloadEnd")) {
+        $("downloadEnd").value = todayISO();
+    }
 
-  loadMonthlyReport();
+    $("loadReportBtn")?.addEventListener("click", loadMonthlyReport);
+
+    $("downloadBtn")?.addEventListener("click", downloadReport);
+
+    loaderAdvance();
+    await loadMonthlyReport();
+    loaderAdvance();
+    loaderHide();
 });

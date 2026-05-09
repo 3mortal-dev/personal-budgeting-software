@@ -1,12 +1,31 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>BudgetWise – Budgets</title>
+    <link rel="stylesheet" th:href="@{/css/loading.css}" href="../static/css/loading.css"/>
     <link rel="stylesheet" th:href="@{/css/dashboard.css}" href="../static/css/budget.css"/>
 </head>
 <body>
+
+<!-- ══ PAGE LOADER ══ -->
+<div class="page-loader" id="pageLoader">
+    <div class="page-loader__logo">
+        <div class="page-loader__icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="5" width="20" height="14" rx="2"/>
+                <path d="M2 10h20"/>
+            </svg>
+        </div>
+        BudgetWise
+    </div>
+    <div class="page-loader__bar-track">
+        <div class="page-loader__bar-fill" id="loaderBar"></div>
+    </div>
+    <div class="page-loader__label" id="loaderLabel">Loading your dashboard…</div>
+</div>
 
 <div class="layout">
 
@@ -155,7 +174,7 @@
                     </div>
                     <div>
                         <div class="budget-stat-label">Total Budgets</div>
-                        <div class="budget-stat-val" id="statTotal">—</div>
+                        <div class="budget-stat-val skeleton-light" id="statTotal">—</div>
                     </div>
                 </div>
                 <div class="budget-stat-card">
@@ -166,7 +185,7 @@
                     </div>
                     <div>
                         <div class="budget-stat-label">Active</div>
-                        <div class="budget-stat-val" id="statActive">—</div>
+                        <div class="budget-stat-val skeleton-light" id="statActive">—</div>
                     </div>
                 </div>
                 <div class="budget-stat-card">
@@ -179,7 +198,7 @@
                     </div>
                     <div>
                         <div class="budget-stat-label">Near Limit</div>
-                        <div class="budget-stat-val" id="statNear">—</div>
+                        <div class="budget-stat-val skeleton-light" id="statNear">—</div>
                     </div>
                 </div>
                 <div class="budget-stat-card">
@@ -192,7 +211,7 @@
                     </div>
                     <div>
                         <div class="budget-stat-label">Exceeded</div>
-                        <div class="budget-stat-val" id="statExceeded">—</div>
+                        <div class="budget-stat-val skeleton-light" id="statExceeded">—</div>
                     </div>
                 </div>
             </div>
@@ -277,7 +296,7 @@
                 <span class="field-error" id="budgetEndDateErr"></span>
             </div>
 
-            <button class="btn-submit" id="budgetSubmitBtn" onclick="submitBudget()">
+            <button class="btn-submit btn-loadable" id="budgetSubmitBtn" onclick="submitBudget()">
                 <span class="btn-label">Create Budget</span>
                 <span class="btn-spinner" aria-hidden="true"></span>
             </button>
@@ -297,7 +316,10 @@
                 This action cannot be undone.</p>
             <div class="confirm-actions">
                 <button class="btn-cancel" onclick="closeConfirmModal()">Cancel</button>
-                <button class="btn-confirm-del" id="confirmDelBtn" onclick="confirmDelete()">Delete</button>
+                <button class="btn-confirm-del btn-loadable" id="confirmDelBtn" onclick="confirmDelete()">
+                    <span class="btn-label">Delete</span>
+                    <span class="btn-spinner" aria-hidden="true"></span>
+                </button>
             </div>
         </div>
     </div>
@@ -306,6 +328,7 @@
 <!-- ══ TOAST ══ -->
 <div id="toast"></div>
 
+<script th:src="@{/js/loading.js}" src="../static/js/loading.js"></script>
 <script th:src="@{/js/budget.js}" src="../static/js/budget.js"></script>
 <script th:src="@{/js/navbar-notifications.js}" src="../static/js/navbar-notifications.js"></script>
 </body>

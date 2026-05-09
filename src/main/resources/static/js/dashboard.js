@@ -56,94 +56,14 @@ function escapeHtml(str) {
         .replace(/'/g, "&#039;");
 }
 
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  PAGE LOADER                                                 ║
-// ╚══════════════════════════════════════════════════════════════╝
-
-const LOADER_STEPS = [
-    {pct: 15, label: "Loading your profile…"},
-    {pct: 40, label: "Fetching dashboard data…"},
-    {pct: 65, label: "Loading categories…"},
-    {pct: 85, label: "Loading notifications…"},
-    {pct: 100, label: "Almost ready…"},
-];
-let _loaderStep = 0;
-
-function loaderAdvance() {
-    const bar = document.getElementById("loaderBar");
-    const label = document.getElementById("loaderLabel");
-    if (!bar || !label) return;
-    const step = LOADER_STEPS[Math.min(_loaderStep, LOADER_STEPS.length - 1)];
-    bar.style.width = step.pct + "%";
-    label.textContent = step.label;
-    _loaderStep++;
-}
-
-function loaderHide() {
-    const el = document.getElementById("pageLoader");
-    if (!el) return;
-    el.classList.add("hidden");
-    // remove from DOM after transition so it never blocks interaction
-    el.addEventListener("transitionend", () => el.remove(), {once: true});
-}
 
 // ╔══════════════════════════════════════════════════════════════╗
-// ║  SKELETON HELPERS                                            ║
+// ║  DASHBOARD-SPECIFIC SKELETON HELPERS                         ║
 // ╚══════════════════════════════════════════════════════════════╝
 
-/** Renders N skeleton transaction rows into #txList */
-function showTxSkeletons(count = 4) {
-    const list = document.getElementById("txList");
-    if (!list) return;
-    list.innerHTML = Array.from({length: count}, () => `
-        <div class="skeleton-row">
-            <div class="skeleton-circle skeleton-light"></div>
-            <div class="skeleton-lines">
-                <div class="skeleton-line skeleton-line--long skeleton-light"></div>
-                <div class="skeleton-line skeleton-line--medium skeleton-light"></div>
-            </div>
-            <div class="skeleton-amount skeleton-light"></div>
-        </div>
-    `).join("");
-}
-
-/** Renders N skeleton budget rows into #budgetsList */
-function showBudgetSkeletons(count = 3) {
-    const list = document.getElementById("budgetsList");
-    if (!list) return;
-    list.innerHTML = Array.from({length: count}, () => `
-        <div class="skeleton-budget-row">
-            <div class="skeleton-budget-header">
-                <div class="skeleton-line skeleton-line--medium skeleton-light"></div>
-                <div class="skeleton-line skeleton-line--short skeleton-light"></div>
-            </div>
-            <div class="skeleton-bar skeleton-light"></div>
-        </div>
-    `).join("");
-}
-
-/** Puts a button into loading state (shows spinner, disables it) */
-function btnStartLoading(btnId) {
-    const btn = document.getElementById(btnId);
-    if (!btn) return;
-    btn.classList.add("is-loading");
-    btn.disabled = true;
-}
-
-/** Removes the loading state from a button */
-function btnStopLoading(btnId) {
-    const btn = document.getElementById(btnId);
-    if (!btn) return;
-    btn.classList.remove("is-loading");
-    btn.disabled = false;
-}
-
-/** Removes skeleton class from stat value elements once data arrives */
+/** Removes skeleton class from the three stat value elements */
 function clearStatSkeletons() {
-    ["statTx", "statBudgets", "statGoals"].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.classList.remove("skeleton-light");
-    });
+    clearSkeletons("statTx", "statBudgets", "statGoals");
 }
 
 // ╔══════════════════════════════════════════════════════════════╗
@@ -818,6 +738,15 @@ async function addBudget() {
 document.addEventListener("DOMContentLoaded", async () => {
     setCurrentMonth();
     setActiveNav();
+
+    // Configure the page loader steps (shared loading.js)
+    loaderInit([
+        {pct: 15, label: "Loading your profile…"},
+        {pct: 40, label: "Fetching dashboard data…"},
+        {pct: 65, label: "Loading categories…"},
+        {pct: 85, label: "Loading notifications…"},
+        {pct: 100, label: "Almost ready…"},
+    ]);
 
     // Show skeleton placeholders immediately — before any fetch completes
     showTxSkeletons(4);

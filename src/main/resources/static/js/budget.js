@@ -60,7 +60,7 @@ const state = {
  *   spentAmount, threshold, startDate, endDate, status (BudgetStatus)
  */
 async function loadBudgets() {
-    renderSkeletons();
+    showBudgetSkeletons(4);
 
     const data = await apiFetch(API.ALL);
     if (data) {
@@ -200,33 +200,10 @@ function fmt(n) {
 }
 
 function escapeHtml(str) {
-    if (typeof str !== "string") return String(str ?? "");
+    if (typeof str != "string") return String(str ?? "");
     return str
         .replace(/&/g, "&amp;").replace(/</g, "&lt;")
         .replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-}
-
-
-// ── Skeleton loader ───────────────────────────────────────────────────────────
-function renderSkeletons() {
-    const grid = document.getElementById("budgetGrid");
-    if (!grid) return;
-    grid.innerHTML = Array.from({length: 4}, () => `
-    <div class="budget-skel">
-      <div class="skel-row">
-        <div class="skel-circ"></div>
-        <div style="flex:1;display:flex;flex-direction:column;gap:8px">
-          <div class="skel-line" style="width:55%"></div>
-          <div class="skel-line" style="width:35%"></div>
-        </div>
-      </div>
-      <div class="skel-line" style="width:40%"></div>
-      <div class="skel-bar"></div>
-      <div class="skel-row" style="gap:8px">
-        <div class="skel-line" style="flex:1;height:32px;border-radius:8px"></div>
-        <div class="skel-line" style="flex:1;height:32px;border-radius:8px"></div>
-      </div>
-    </div>`).join("");
 }
 
 
@@ -339,6 +316,7 @@ function renderStats() {
     const statuses = all.map(deriveStatus);
     const count = (s) => statuses.filter(x => x === s).length;
 
+    clearSkeletons("statTotal", "statActive", "statNear", "statExceeded");
     setText("statTotal", all.length);
     setText("statActive", count("ACTIVE"));
     setText("statNear", count("NEAR_LIMIT"));
@@ -502,11 +480,11 @@ async function submitBudget() {
     const endpoint = isEdit ? API.BY_ID(editId) : API.ALL;
     const method = isEdit ? "PUT" : "POST";
 
-    setButtonLoading(btn, true);
+    btnStartLoading("budgetSubmitBtn");
 
     const saved = await apiFetch(endpoint, {method, body: JSON.stringify(payload)});
 
-    setButtonLoading(btn, false);
+    btnStopLoading("budgetSubmitBtn");
 
     if (saved) {
         if (isEdit) {
@@ -542,11 +520,7 @@ async function confirmDelete() {
     const id = state.pendingDelete;
     if (!id) return;
 
-    const btn = document.getElementById("confirmDelBtn");
-    if (btn) {
-        btn.textContent = "Deleting…";
-        btn.disabled = true;
-    }
+    btnStartLoading("confirmDelBtn");
 
     await apiFetch(API.BY_ID(id), {method: "DELETE"});
 
@@ -557,10 +531,7 @@ async function confirmDelete() {
     closeModal("confirmModal");
     showToast("Budget deleted.");
 
-    if (btn) {
-        btn.textContent = "Delete";
-        btn.disabled = false;
-    }
+    btnStopLoading("confirmDelBtn");
 }
 
 function closeConfirmModal() {
@@ -659,15 +630,8 @@ function closeModal(id) {
         banner.textContent = "";
         banner.classList.remove("show");
     }
-    setButtonLoading(modal.querySelector(".btn-submit"), false);
+    btnStopLoading(modal.querySelector(".btn-submit"));
 }
-
-function setButtonLoading(btn, loading) {
-    if (!btn) return;
-    btn.disabled = loading;
-    btn.classList.toggle("is-loading", loading);
-}
-
 
 // ── Form validation helpers ───────────────────────────────────────────────────
 function setFieldError(el, msg) {
@@ -751,12 +715,25 @@ function setActiveNav() {
 // ╚══════════════════════════════════════════════════════════════╝
 
 document.addEventListener("DOMContentLoaded", () => {
+    loaderInit([
+        {pct: 30, label: "Loading categories…"},
+        {pct: 70, label: "Loading budgets…"},
+        {pct: 100, label: "Finalizing…"},
+    ]);
+
+    loaderAdvance();
+    const catPromise = loadCategories();
+
+    loaderAdvance();
+    const budgetPromise = loadBudgets();
+
+    Promise.all([catPromise, budgetPromise]).then(() => {
+        loaderAdvance();
+        loaderHide();
+    });
+
     setGreeting();
     setActiveNav();
-
-    // 📡 Load budgets, categories, and notification badge
-    loadBudgets();
-    loadCategories();
     loadNotifBadge();
 
     // ── Modal: close on overlay click ────────────────────────────
