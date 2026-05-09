@@ -7,6 +7,7 @@ const API = {
     USER: id => `/api/admin/users/${id}`,
     ROLE: id => `/api/admin/users/${id}/role`,
     TRANSACTIONS: id => `/api/admin/users/${id}/transactions`,
+    ADD_CATEGORY: '/api/categories/built-in',
 };
 
 const state = {
@@ -169,6 +170,41 @@ function renderUsers() {
     `).join('');
 }
 
+function addBuiltInCategory() {
+    document.getElementById('newCatName').value = '';
+    document.getElementById('catModalOverlay').classList.add('active');
+    document.getElementById('categoryModal').classList.add('active');
+    document.getElementById('newCatName').focus();
+}
+
+function closeCategoryModal() {
+    document.getElementById('catModalOverlay').classList.remove('active');
+    document.getElementById('categoryModal').classList.remove('active');
+}
+
+async function submitBuiltInCategory() {
+    const nameInput = document.getElementById('newCatName');
+    const name = nameInput.value.trim();
+    if (!name) return;
+
+    const btn = document.getElementById('confirmCatBtn');
+    btn.disabled = true;
+
+    try {
+        await apiFetch(API.ADD_CATEGORY, {
+            method: 'POST',
+            body: JSON.stringify({ name }),
+        });
+        showToast('Built-in category added successfully.');
+        closeCategoryModal();
+        await loadAdminData(); // Refreshes Category count stat
+    } catch (error) {
+        showToast(error.message || 'Failed to add category.');
+    } finally {
+        btn.disabled = false;
+    }
+}
+
 async function updateRole(userId, role) {
     try {
         const updated = await apiFetch(API.ROLE(userId), {
@@ -250,6 +286,8 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAdminData();
 
     document.getElementById('refreshBtn')?.addEventListener('click', loadAdminData);
+
+    document.getElementById('addCategoryBtn')?.addEventListener('click', addBuiltInCategory);
 
     document.getElementById('userSearch')?.addEventListener('input', event => {
         state.query = event.target.value;

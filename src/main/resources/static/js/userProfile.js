@@ -222,6 +222,54 @@ async function loadNotifications() {
     renderNotifBadge();
 }
 
+function addCustomCategory() {
+    document.getElementById('new-cat-name').value = '';
+    document.getElementById('cat-modal-overlay').classList.add('open');
+    document.getElementById('category-modal').classList.add('open');
+    document.getElementById('new-cat-name').focus();
+}
+
+function closeCategoryModal() {
+    document.getElementById('cat-modal-overlay').classList.remove('open');
+    document.getElementById('category-modal').classList.remove('open');
+}
+
+async function submitCustomCategory() {
+    const name = document.getElementById('new-cat-name').value.trim();
+    if (!name) return;
+
+    try {
+        const saveBtn = document.getElementById('save-cat-btn');
+        saveBtn.disabled = true;
+
+        const response = await apiFetch('/api/categories', {
+            method: 'POST',
+            body: JSON.stringify({ name: name.trim() }),
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.message || 'Failed to add custom category');
+        }
+
+        showToast('Custom category added successfully!');
+        closeCategoryModal();
+    } catch (err) {
+        showToast(err.message || 'Error adding category', 'error');
+    } finally {
+        document.getElementById('save-cat-btn').disabled = false;
+    }
+}
+
+function showToast(message, type = 'success') {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+  toast.textContent = message;
+  toast.className = `toast show ${type === 'error' ? 'toast--error' : ''}`;
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => toast.className = 'toast', 3000);
+}
+
 function formatNotificationType(type) {
     switch (type) {
         case 'BUDGET_ALERT':
@@ -511,6 +559,8 @@ async function saveProfile() {
         btnStopLoading("saveProfileBtn");
     }
 }
+
+document.getElementById('add-custom-category-btn')?.addEventListener('click', addCustomCategory);
 
 /* ─────────────────────────────────────────────
    HELPERS
