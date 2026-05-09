@@ -1,0 +1,28 @@
+@startuml Budget State Diagram
+[*] --> ON_TRACK : Budget created
+
+ON_TRACK --> NEAR_LIMIT : spentAmount >= thresholdAmount
+ON_TRACK --> EXCEEDED_LIMIT : spentAmount >= limit
+ON_TRACK --> ON_TRACK : spentAmount < thresholdAmount
+
+NEAR_LIMIT --> ON_TRACK : spentAmount < thresholdAmount
+NEAR_LIMIT --> EXCEEDED_LIMIT : spentAmount >= limit
+NEAR_LIMIT --> NEAR_LIMIT : thresholdAmount <= spentAmount < limit
+
+EXCEEDED_LIMIT --> ON_TRACK : spentAmount < thresholdAmount
+EXCEEDED_LIMIT --> NEAR_LIMIT : spentAmount < limit and spentAmount >= thresholdAmount
+EXCEEDED_LIMIT --> EXCEEDED_LIMIT : spentAmount >= limit
+
+note right of ON_TRACK
+Status when spending is below threshold
+end note
+
+note right of NEAR_LIMIT
+Status when spending is at or above threshold
+but below limit
+end note
+
+note right of EXCEEDED_LIMIT
+Status when spending exceeds limit
+end note
+@enduml

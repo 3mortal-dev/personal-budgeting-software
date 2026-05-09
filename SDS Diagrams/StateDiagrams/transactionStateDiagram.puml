@@ -1,0 +1,23 @@
+@startuml Transaction State Diagram
+[*] --> Created : Transaction added
+
+Created --> Updated : Transaction updated
+Created --> Deleted : Transaction deleted
+
+Updated --> Updated : Transaction updated again
+Updated --> Deleted : Transaction deleted
+
+Deleted --> [*] : Transaction removed
+
+note right of Created
+Initial state after creation
+end note
+
+note right of Updated
+State after modification
+end note
+
+note right of Deleted
+Final state, transaction removed
+end note
+@enduml
