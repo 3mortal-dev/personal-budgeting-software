@@ -1,0 +1,16 @@
+@startuml complete_system
+
+!include core_domain.puml
+!include budget_module.puml
+!include transaction_module.puml
+!include category_module.puml
+!include goal_module.puml
+!include notification_module.puml
+!include reporting_module.puml
+!include user_module.puml
+!include auth_module.puml
+!include admin_module.puml
+!include web_module.puml
+!include infrastructure_module.puml
+
+@enduml

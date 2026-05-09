@@ -1,0 +1,124 @@
+@startuml auth_module
+
+!theme plain
+skinparam linetype ortho
+
+class AuthenticationService {
+  - authenticationManager: AuthenticationManager
+  - tokenRepository: TokenRepository
+  - passwordEncoder: PasswordEncoder
+  - userService: UserService
+  - userRepository: UserRepository
+  - jwtService: JwtService
+  + register(RegisterRequest): String
+  - saveUserToken(User, String): void
+  + authenticate(AuthenticationRequest): String
+  - revokeAllUserTokens(User): void
+}
+
+class AuthController {
+  - authenticationService: AuthenticationService
+  + register(RegisterRequest, HttpServletResponse): ResponseEntity<Map<String, String>>
+  - addJwtCookie(HttpServletResponse, String): void
+  + authenticate(AuthenticationRequest, HttpServletResponse): ResponseEntity<Map<String, String>>
+}
+
+class SecurityConfig {
+  - jwtAuthFilter: JwtAuthenticationFilter
+  - authenticationProvider: AuthenticationProvider
+  - WHITE_LIST_URL: String[]
+  - logoutHandler: LogoutHandler
+  + securityFilterChain(HttpSecurity): SecurityFilterChain
+}
+
+class ApplicationConfig {
+  - repository: UserRepository
+  + userDetailsService(): UserDetailsService
+  + authenticationManager(AuthenticationConfiguration): AuthenticationManager
+  + authenticationProvider(): AuthenticationProvider
+  + passwordEncoder(): PasswordEncoder
+}
+
+class JwtAuthenticationFilter {
+  - tokenRepository: TokenRepository
+  - jwtService: JwtService
+  - userDetailsService: UserDetailsService
+  - extractJwt(HttpServletRequest): String?
+  # doFilterInternal(HttpServletRequest, HttpServletResponse, FilterChain): void
+}
+
+class JwtService {
+  - secretKey: String
+  - jwtExpiration: long
+  - refreshExpiration: long
+  + extractClaim(String, Function<Claims, T>): T
+  + generateToken(UserDetails): String
+  - buildToken(Map<String, Object>, UserDetails, long): String
+  - isTokenExpired(String): boolean
+  + generateToken(Map<String, Object>, UserDetails): String
+  - getSignInKey(): SecretKey
+  - extractAllClaims(String): Claims
+  - extractExpiration(String): Date
+  + extractUsername(String): String
+  + generateRefreshToken(UserDetails): String
+  + isTokenValid(String, UserDetails): boolean
+}
+
+class JwtTokenProvider {
+  - jwtSecret: String
+  - jwtExpirationMs: long
+  + getUsernameFromToken(String): String
+  - parseToken(String): Claims
+  + generateToken(UserDetails): String
+  + validateToken(String): boolean
+}
+
+class LogoutService {
+  - tokenRepository: TokenRepository
+  - extractJwtFromCookie(HttpServletRequest): String?
+  + logout(HttpServletRequest, HttpServletResponse, Authentication): void
+}
+
+entity AuthenticationRequest << record >> {
+  - password: String
+  - email: String
+  + email(): String
+  + password(): String
+}
+
+entity AuthenticationResponse << record >> {
+  - token: String
+  + token(): String
+}
+
+entity RegisterRequest << record >> {
+  - email: String
+  - password: String
+  - name: String
+  + name(): String
+  + email(): String
+  + password(): String
+}
+
+interface TokenRepository << interface >> {
+  + findByToken(String): Optional<Token>
+  + findAllValidTokenByUser(Long): List<Token>
+}
+
+AuthController "1" *-[#595959,plain]-> "authenticationService\n1" AuthenticationService
+
+AuthenticationService "1" *-[#595959,plain]-> "jwtService\n1" JwtService
+AuthenticationService "1" *-[#595959,plain]-> "tokenRepository\n1" TokenRepository
+AuthenticationService "1" *-[#595959,plain]-> "userRepository\n1" UserRepository
+AuthenticationService "1" *-[#595959,plain]-> "userService\n1" UserService
+
+JwtAuthenticationFilter "1" *-[#595959,plain]-> "jwtService\n1" JwtService
+JwtAuthenticationFilter "1" *-[#595959,plain]-> "tokenRepository\n1" TokenRepository
+
+LogoutService "1" *-[#595959,plain]-> "tokenRepository\n1" TokenRepository
+
+SecurityConfig "1" *-[#595959,plain]-> "jwtAuthFilter\n1" JwtAuthenticationFilter
+
+ApplicationConfig "1" *-[#595959,plain]-> "repository\n1" UserRepository
+
+@enduml

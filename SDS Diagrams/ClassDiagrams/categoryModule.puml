@@ -1,0 +1,75 @@
+@startuml category_module
+
+!theme plain
+skinparam linetype ortho
+
+class CategoryService {
+  - categoryRepository: CategoryRepository
+  - userRepository: UserRepository
+  + getAllCategories(Long): List<Category>
+  + getCategoryById(Long, Long): Category
+  - normalizeName(String): String
+  + addCustomCategory(Long, CreateCategoryRequest): Category
+  + getBuiltInCategories(): List<Category>
+  + editCustomCategory(Long, Long, CreateCategoryRequest): Category
+  + addBuiltInCategory(CreateCategoryRequest): Category
+  + getCustomCategories(Long): List<Category>
+  + deleteCustomCategory(Long, Long): void
+  - ensureNotBuiltInName(String): void
+  - ensureUniqueForUser(Long, String, Long): void
+}
+
+class CategoryController {
+  - categoryService: CategoryService
+  - userService: UserService
+  + getCustomCategories(UserDetails): ResponseEntity<List<CategoryResponse>>
+  + addCustomCategory(UserDetails, CreateCategoryRequest): ResponseEntity<CategoryResponse>
+  + addBuiltInCategory(CreateCategoryRequest): ResponseEntity<CategoryResponse>
+  + deleteCustomCategory(UserDetails, Long): ResponseEntity<?>
+  + editCustomCategory(UserDetails, Long, CreateCategoryRequest): ResponseEntity<CategoryResponse>
+  + getAllCategories(UserDetails): ResponseEntity<List<CategoryResponse>>
+  + getBuiltInCategories(): ResponseEntity<List<CategoryResponse>>
+  - toResponse(Category): CategoryResponse
+  - toResponseList(List<Category>): List<CategoryResponse>
+}
+
+interface CategoryRepository << interface >> {
+  + findByUserIsNull(): List<Category>
+  + findByType(CategoryType): List<Category>
+  + findByUserId(Long): List<Category>
+  + findByIdAndUserId(Long, Long): Optional<Category>
+  + existsByTypeAndNameIgnoreCase(CategoryType, String): boolean
+  + findByUserIdOrType(Long, CategoryType): List<Category>
+  + findAccessibleCategory(Long, Long): Optional<Category>
+  + existsByUserIdAndNameIgnoreCase(Long, String): boolean
+}
+
+class CreateCategoryRequest {
+  - type: CategoryType
+  - name: String
+  + getType(): CategoryType
+  + getName(): String
+}
+
+class CategoryResponse {
+  - userId: Long
+  - id: Long
+  - name: String
+  - type: CategoryType
+  + getId(): Long
+  + getUserId(): Long
+  + getType(): CategoryType
+  + getName(): String
+}
+
+CategoryController "1" *-[#595959,plain]-> "categoryService\n1" CategoryService
+CategoryController "1" *-[#595959,plain]-> "userService\n1" UserService
+CategoryController -[#595959,dashed]-> CategoryResponse
+
+CategoryService "1" *-[#595959,plain]-> "categoryRepository\n1" CategoryRepository
+CategoryService "1" *-[#595959,plain]-> "userRepository\n1" UserRepository
+
+CreateCategoryRequest "1" *-[#595959,plain]-> "type\n1" CategoryType
+CategoryResponse "1" *-[#595959,plain]-> "type\n1" CategoryType
+
+@enduml

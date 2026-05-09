@@ -1,0 +1,322 @@
+@startuml core_domain
+
+!theme plain
+skinparam linetype ortho
+
+class User {
+  - role: Role
+  - budgetAlertenabled: boolean
+  - name: String
+  - id: Long
+  - goalProgressAlertEnabled: boolean
+  - email: String
+  - password: String
+  + getId(): Long
+  + getName(): String
+  + getEmail(): String
+  + getRole(): Role
+  + isBudgetAlertenabled(): boolean
+  + isGoalProgressAlertEnabled(): boolean
+  + builder(): UserBuilder
+  + getUsername(): String
+  + getPassword(): String
+  + getAuthorities(): Collection<GrantedAuthority>
+}
+
+class UserBuilder {
+  - email: String
+  - budgetAlertenabled$value: boolean
+  - role: Role
+  - id: Long
+  - name: String
+  - password: String
+  - goalProgressAlertEnabled$value: boolean
+  + id(Long): UserBuilder
+  + name(String): UserBuilder
+  + email(String): UserBuilder
+  + password(String): UserBuilder
+  + role(Role): UserBuilder
+  + budgetAlertenabled(boolean): UserBuilder
+  + goalProgressAlertEnabled(boolean): UserBuilder
+  + build(): User
+}
+
+class Transaction {
+  - amount: double
+  - source: String
+  - category: Category
+  - id: Long
+  - user: User
+  - date: LocalDate
+  - type: TransactionType
+  - description: String
+  + getId(): Long
+  + builder(): TransactionBuilder
+  + getUser(): User
+  + getCategory(): Category
+  + getAmount(): double
+  + getType(): TransactionType
+  + getDate(): LocalDate
+  + getSource(): String
+  + getDescription(): String
+}
+
+class TransactionBuilder {
+  - amount: double
+  - type: TransactionType
+  - user: User
+  - category: Category
+  - description: String
+  - date: LocalDate
+  - id: Long
+  - source: String
+  + amount(double): TransactionBuilder
+  + id(Long): TransactionBuilder
+  + user(User): TransactionBuilder
+  + category(Category): TransactionBuilder
+  + type(TransactionType): TransactionBuilder
+  + date(LocalDate): TransactionBuilder
+  + source(String): TransactionBuilder
+  + description(String): TransactionBuilder
+  + build(): Transaction
+}
+
+class Category {
+  - name: String
+  - user: User
+  - id: Long
+  - type: CategoryType
+  + getId(): Long
+  + getUser(): User
+  + getType(): CategoryType
+  + getName(): String
+  + builder(): CategoryBuilder
+}
+
+class CategoryBuilder {
+  - name: String
+  - user: User
+  - type: CategoryType
+  - id: Long
+  + id(Long): CategoryBuilder
+  + user(User): CategoryBuilder
+  + type(CategoryType): CategoryBuilder
+  + name(String): CategoryBuilder
+  + build(): Category
+}
+
+class Budget {
+  - threshold: Double
+  - endDate: LocalDate
+  - user: User
+  - status: BudgetStatus
+  - spentAmount: Double
+  - category: Category
+  - spendingLimit: Double
+  - startDate: LocalDate
+  - id: Long
+  + getSpendingLimit(): Double
+  + getId(): Long
+  + getUser(): User
+  + getCategory(): Category
+  + getSpentAmount(): Double
+  + getStatus(): BudgetStatus
+  + getThreshold(): Double
+  + getStartDate(): LocalDate
+  + getEndDate(): LocalDate
+  + builder(): BudgetBuilder
+}
+
+class BudgetBuilder {
+  - spendingLimit: Double
+  - endDate: LocalDate
+  - category: Category
+  - threshold: Double
+  - user: User
+  - id: Long
+  - startDate: LocalDate
+  - status: BudgetStatus
+  + user(User): BudgetBuilder
+  + id(Long): BudgetBuilder
+  + category(Category): BudgetBuilder
+  + spendingLimit(Double): BudgetBuilder
+  + spentAmount(Double): BudgetBuilder
+  + threshold(Double): BudgetBuilder
+  + startDate(LocalDate): BudgetBuilder
+  + endDate(LocalDate): BudgetBuilder
+  + status(BudgetStatus): BudgetBuilder
+  + build(): Budget
+}
+
+class Goal {
+  - status: GoalStatus
+  - user: User
+  - iconClass: String
+  - currentAmount: Double
+  - id: Long
+  - iconColor: String
+  - goalName: String
+  - targetAmount: double
+  - deadline: LocalDate
+  + getUser(): User
+  + getId(): Long
+  + getGoalName(): String
+  + getTargetAmount(): double
+  + getIconColor(): String
+  + getDeadline(): LocalDate
+  + getCurrentAmount(): Double
+  + getStatus(): GoalStatus
+  + getIconClass(): String
+  + builder(): GoalBuilder
+}
+
+class GoalBuilder {
+  - targetAmount: double
+  - id: Long
+  - iconClass: String
+  - goalName: String
+  - user: User
+  - deadline: LocalDate
+  - status: GoalStatus
+  - iconColor: String
+  + goalName(String): GoalBuilder
+  + id(Long): GoalBuilder
+  + user(User): GoalBuilder
+  + targetAmount(double): GoalBuilder
+  + deadline(LocalDate): GoalBuilder
+  + currentAmount(Double): GoalBuilder
+  + status(GoalStatus): GoalBuilder
+  + iconClass(String): GoalBuilder
+  + iconColor(String): GoalBuilder
+  + build(): Goal
+}
+
+class Notification {
+  - id: Long
+  - createdAt: LocalDateTime
+  - message: String
+  - user: User
+  - type: NotificationEventType
+  - isRead: boolean
+  + getType(): NotificationEventType
+  + getId(): Long
+  + getUser(): User
+  + getMessage(): String
+  + isRead(): boolean
+  + getCreatedAt(): LocalDateTime
+  + builder(): NotificationBuilder
+}
+
+class NotificationBuilder {
+  - createdAt: LocalDateTime
+  - message: String
+  - user: User
+  - type: NotificationEventType
+  - id: Long
+  + id(Long): NotificationBuilder
+  + user(User): NotificationBuilder
+  + message(String): NotificationBuilder
+  + type(NotificationEventType): NotificationBuilder
+  + isRead(boolean): NotificationBuilder
+  + createdAt(LocalDateTime): NotificationBuilder
+  + build(): Notification
+}
+
+class Token {
+  + id: Integer
+  + tokenType: TokenType
+  - expired: boolean
+  + user: User
+  + token: String
+  - revoked: boolean
+  + getId(): Integer
+  + getToken(): String
+  + getTokenType(): TokenType
+  + getUser(): User
+  + isExpired(): boolean
+  + isRevoked(): boolean
+  + builder(): TokenBuilder
+}
+
+class TokenBuilder {
+  - token: String
+  - user: User
+  - revoked: boolean
+  - expired: boolean
+  - id: Integer
+  - tokenType$value: TokenType
+  + id(Integer): TokenBuilder
+  + token(String): TokenBuilder
+  + tokenType(TokenType): TokenBuilder
+  + revoked(boolean): TokenBuilder
+  + expired(boolean): TokenBuilder
+  + user(User): TokenBuilder
+  + build(): Token
+}
+
+enum TransactionType {
+  + EXPENSE
+  + INCOME
+}
+
+enum CategoryType {
+  + CUSTOM
+  + BUILT_IN
+}
+
+enum BudgetStatus {
+  + NEAR_LIMIT
+  + ON_TRACK
+  + EXCEEDED_LIMIT
+}
+
+enum GoalStatus {
+  + NEARLIMIT
+  + ONTRACK
+  + EXCEEDED
+}
+
+enum NotificationEventType {
+  + GOAL_REMINDER
+  + BUDGET_EXCEEDED
+  + BUDGET_NEAR_LIMIT
+}
+
+enum Role {
+  + USER
+  + ADMIN
+}
+
+enum TokenType {
+  + BEARER
+}
+
+Transaction "1" *-[#595959,plain]-> "type\n1" TransactionType
+Transaction "1" *-[#595959,plain]-> "category\n1" Category
+Transaction "1" *-[#595959,plain]-> "user\n1" User
+
+Category "1" *-[#595959,plain]-> "type\n1" CategoryType
+Category "1" *-[#595959,plain]-> "user\n1" User
+
+Budget "1" *-[#595959,plain]-> "status\n1" BudgetStatus
+Budget "1" *-[#595959,plain]-> "category\n1" Category
+Budget "1" *-[#595959,plain]-> "user\n1" User
+
+Goal "1" *-[#595959,plain]-> "status\n1" GoalStatus
+Goal "1" *-[#595959,plain]-> "user\n1" User
+
+Notification "1" *-[#595959,plain]-> "type\n1" NotificationEventType
+Notification "1" *-[#595959,plain]-> "user\n1" User
+
+Token "1" *-[#595959,plain]-> "tokenType\n1" TokenType
+Token "1" *-[#595959,plain]-> "user\n1" User
+
+UserBuilder +-[#820000,plain]- User
+TransactionBuilder +-[#820000,plain]- Transaction
+CategoryBuilder +-[#820000,plain]- Category
+BudgetBuilder +-[#820000,plain]- Budget
+GoalBuilder +-[#820000,plain]- Goal
+NotificationBuilder +-[#820000,plain]- Notification
+TokenBuilder +-[#820000,plain]- Token
+
+@enduml

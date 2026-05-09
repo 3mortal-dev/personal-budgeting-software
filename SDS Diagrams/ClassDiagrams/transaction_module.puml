@@ -1,0 +1,116 @@
+@startuml transaction_module
+
+!theme plain
+skinparam linetype ortho
+
+class TransactionService {
+  - budgetService: BudgetService
+  - categoryService: CategoryService
+  - transactionRepo: TransactionRepository
+  - userService: UserService
+  + getAllTransactions(Long): List<Transaction>
+  + getUserService(): UserService
+  + getExpenseTransactions(Long): List<Transaction>
+  + getTransactionsByDateRange(Long, LocalDate, LocalDate): List<Transaction>
+  + getRecentTransactions(Long): List<Transaction>
+  + getMonthlyExpense(Long, LocalDate, LocalDate): Double
+  + filterHistory(Long, TransactionFilterRequest): List<Transaction>
+  + getMonthlyTotal(Long, MonthlyReportRequest, TransactionType): Map<Month, Double>
+  + addTransaction(Long, CreateTransactionRequest): Transaction
+  + getTotalIncome(Long): Double
+  + updateTransaction(Long, Long, CreateTransactionRequest): Transaction
+  + getTotalExpense(Long): Double
+  + getIncomeTransactions(Long): List<Transaction>
+  + getCategoryMap(Long, TransactionType): Map<String, Double>
+  + getMonthlyIncome(Long, LocalDate, LocalDate): Double
+  + getById(Long): Transaction
+  + deleteTransaction(Long, Long): void
+  + getNumberOfTransactions(Long): Integer
+}
+
+class TransactionController {
+  - transactionService: TransactionService
+  - userService: UserService
+  + getRecentTransactions(UserDetails): ResponseEntity<List<TransactionResponse>>
+  + getAllTransactions(UserDetails): ResponseEntity<List<TransactionResponse>>
+  + deleteTransaction(Long, UserDetails): ResponseEntity<Void>
+  + updateTransaction(Long, CreateTransactionRequest, UserDetails): ResponseEntity<TransactionResponse>
+  + getIncomeTransactions(UserDetails): ResponseEntity<List<TransactionResponse>>
+  + getExpenseTransactions(UserDetails): ResponseEntity<List<TransactionResponse>>
+  + addTransaction(CreateTransactionRequest, UserDetails): ResponseEntity<TransactionResponse>
+  + filterTransactions(TransactionFilterRequest, UserDetails): ResponseEntity<List<TransactionResponse>>
+}
+
+interface TransactionRepository << interface >> {
+  + getCategoryAmount(Long, TransactionType): List<Object[]>
+  + findByUserIdAndType(Long, TransactionType): List<Transaction>
+  + findByUserId(Long): List<Transaction>
+  + findByUserIdAndDateBetween(Long, LocalDate, LocalDate): List<Transaction>
+  + findTop5ByUserIdOrderByDateDescIdDesc(Long): List<Transaction>
+  + sumByUserIdAndTypeAndDateBetween(Long, TransactionType, LocalDate, LocalDate): Double
+  + findByUserIdAndDateBetweenAndCategoryId(Long, LocalDate, LocalDate, Long): List<Transaction>
+  + countByUserId(Long): Integer
+  + sumByUserIdAndType(Long, TransactionType): Double
+  + getMonthlyTotal(Long, String, LocalDate, LocalDate): List<Object[]>
+  + findByUserIdAndDateBetweenOrdered(Long, LocalDate, LocalDate): List<Transaction>
+}
+
+class CreateTransactionRequest {
+  - categoryId: Long
+  - date: LocalDate
+  - description: String
+  - source: String
+  - amount: double
+  - type: TransactionType
+  + getSource(): String
+  + getAmount(): double
+  + getType(): TransactionType
+  + getDate(): LocalDate
+  + getCategoryId(): Long
+  + getDescription(): String
+}
+
+class TransactionResponse {
+  - id: Long
+  - source: String
+  - description: String
+  - amount: double
+  - categoryId: Long
+  - date: LocalDate
+  - userId: Long
+  - type: TransactionType
+  + getId(): Long
+  + getUserId(): Long
+  + getCategoryId(): Long
+  + getAmount(): double
+  + getType(): TransactionType
+  + getDate(): LocalDate
+  + getSource(): String
+  + getDescription(): String
+}
+
+class TransactionFilterRequest {
+  - startDate: LocalDate
+  - categoryId: Long
+  - endDate: LocalDate
+  + getStartDate(): LocalDate
+  + getEndDate(): LocalDate
+  + getCategoryId(): Long
+}
+
+class TransactionNotFoundException
+
+TransactionController "1" *-[#595959,plain]-> "transactionService\n1" TransactionService
+TransactionController "1" *-[#595959,plain]-> "userService\n1" UserService
+TransactionController -[#595959,dashed]-> TransactionResponse
+
+TransactionService "1" *-[#595959,plain]-> "budgetService\n1" BudgetService
+TransactionService "1" *-[#595959,plain]-> "categoryService\n1" CategoryService
+TransactionService "1" *-[#595959,plain]-> "transactionRepo\n1" TransactionRepository
+TransactionService "1" *-[#595959,plain]-> "userService\n1" UserService
+TransactionService -[#595959,dashed]-> TransactionNotFoundException
+
+TransactionResponse "1" *-[#595959,plain]-> "type\n1" TransactionType
+CreateTransactionRequest "1" *-[#595959,plain]-> "type\n1" TransactionType
+
+@enduml

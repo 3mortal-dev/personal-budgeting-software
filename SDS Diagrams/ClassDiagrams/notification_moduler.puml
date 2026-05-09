@@ -1,0 +1,63 @@
+@startuml notification_module
+
+!theme plain
+skinparam linetype ortho
+
+class NotificationService {
+  - notificationRepository: NotificationRepository
+  - userService: UserService
+  + createNotification(NotificationEvent): void
+  + markAsRead(Long): void
+  - buildMessage(NotificationEvent): String
+  + getUserNotifications(Long): List<Notification>
+  + getReceivedNotifications(Long, int): List<Notification>
+  + getUnreadNotifications(Long): List<Notification>
+  + deleteAllNotifications(Long): void
+  + deleteNotification(Long): void
+  + getNotificationsByType(Long, NotificationEventType): List<Notification>
+}
+
+class NotificationController {
+  - notificationService: NotificationService
+  - userService: UserService
+  + getAllNotifications(UserDetails): ResponseEntity<List<NotificationResponse>>
+  + deleteAllNotifications(UserDetails): ResponseEntity
+  + markAsRead(Long): ResponseEntity
+  + getRecentNotifications(int, UserDetails): ResponseEntity<List<NotificationResponse>>
+  + getNotificationsByType(NotificationEventType, UserDetails): ResponseEntity<List<NotificationResponse>>
+  + deleteNotification(Long): ResponseEntity
+  + getUnreadNotifications(UserDetails): ResponseEntity<List<NotificationResponse>>
+  - ResponseMapper(List<Notification>): List<NotificationResponse>
+}
+
+interface NotificationRepository << interface >> {
+  + findByType(NotificationEventType): List<Notification>
+  + findByUserIdOrType(Long, NotificationEventType): List<Notification>
+  + findByUserId(Long): List<Notification>
+  + findByIdAndUserId(Long, Long): Optional<Notification>
+  + findByUserIdAndIsReadFalse(Long): List<Notification>
+}
+
+class NotificationResponse {
+  - createdAt: String
+  - type: NotificationEventType
+  - message: String
+  - id: Long
+  - read: boolean
+  + getId(): Long
+  + getType(): NotificationEventType
+  + getMessage(): String
+  + isRead(): boolean
+  + getCreatedAt(): String
+}
+
+NotificationController "1" *-[#595959,plain]-> "notificationService\n1" NotificationService
+NotificationController "1" *-[#595959,plain]-> "userService\n1" UserService
+NotificationController -[#595959,dashed]-> NotificationResponse
+
+NotificationService "1" *-[#595959,plain]-> "notificationRepository\n1" NotificationRepository
+NotificationService "1" *-[#595959,plain]-> "userService\n1" UserService
+
+NotificationResponse "1" *-[#595959,plain]-> "type\n1" NotificationEventType
+
+@enduml

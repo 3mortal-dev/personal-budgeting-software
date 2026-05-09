@@ -1,0 +1,18 @@
+@startuml admin_module
+
+!theme plain
+skinparam linetype ortho
+
+class AdminController {
+  - transactionService: TransactionService
+  - userService: UserService
+  + deleteUser(Long): ResponseEntity<String>
+  + getAllUsers(): ResponseEntity<Iterable<User>>
+  + getUserById(Long): ResponseEntity<User>
+  + getUserTransactions(Long): ResponseEntity<List<Transaction>>
+}
+
+AdminController "1" *-[#595959,plain]-> "transactionService\n1" TransactionService
+AdminController "1" *-[#595959,plain]-> "userService\n1" UserService
+
+@enduml

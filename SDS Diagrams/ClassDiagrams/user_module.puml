@@ -1,0 +1,174 @@
+@startuml user_module
+
+!theme plain
+skinparam linetype ortho
+
+class UserService {
+  - userRepository: UserRepository
+  + userExistsByEmail(String): boolean
+  + getUserById(Long): User
+  - getUserIdByEmail(String): Long
+  + getAllUsers(): Iterable<User>
+  + saveUser(User): User
+  + updateNotificationSettings(UpdateNotificationSettings, long): void
+  + getUser(UserDetails): User
+  + deleteUserById(Long): void
+  - getUserByEmail(String): User
+  + getUserId(UserDetails): long
+}
+
+class UserProfileService {
+  - goalService: GoalService
+  - budgetService: BudgetService
+  - userService: UserService
+  - transactionService: TransactionService
+  - toDTO(User): UserProfileResponse
+  + getUserProfile(UserDetails): UserProfileResponse
+  + editUserProfile(UserDetails, UserProfileRequest): UserProfileResponse
+}
+
+class UserProfileController {
+  - userProfileService: UserProfileService
+  - userService: UserService
+  + getUserProfile(UserDetails): ResponseEntity<UserProfileResponse>
+  + updateNotifications(UserDetails, UpdateNotificationSettings): ResponseEntity<Void>
+  + editUserProfile(UserDetails, UserProfileRequest): ResponseEntity<UserProfileResponse>
+}
+
+class DashboardController {
+  - transactionService: TransactionService
+  - budgetService: BudgetService
+  - goalService: GoalService
+  - userService: UserService
+  + getDashboard(UserDetails): ResponseEntity<DashboardResponse>
+}
+
+interface UserRepository << interface >> {
+  + findByEmail(String): Optional<User>
+  + findIdByEmail(String): Optional<Long>
+  + updateNotificationSettingsById(Long, boolean, boolean): void
+}
+
+class UserProfileRequest {
+  - email: String
+  - goalsCount: int
+  - name: String
+  - budgetsCount: int
+  - role: Role
+  - transactionsCount: int
+  + getName(): String
+  + getEmail(): String
+  + getRole(): Role
+  + getTransactionsCount(): int
+  + getGoalsCount(): int
+  + getBudgetsCount(): int
+  + builder(): UserProfileRequestBuilder
+}
+
+class UserProfileRequestBuilder {
+  - name: String
+  - goalsCount: int
+  - role: Role
+  - transactionsCount: int
+  - budgetsCount: int
+  - email: String
+  + name(String): UserProfileRequestBuilder
+  + email(String): UserProfileRequestBuilder
+  + role(Role): UserProfileRequestBuilder
+  + transactionsCount(int): UserProfileRequestBuilder
+  + goalsCount(int): UserProfileRequestBuilder
+  + budgetsCount(int): UserProfileRequestBuilder
+  + build(): UserProfileRequest
+}
+
+class UserProfileResponse {
+  - transactionsCount: int
+  - name: String
+  - budgetAlertEnabled: boolean
+  - budgetsCount: int
+  - goalsCount: int
+  - email: String
+  - role: Role
+  - goalProgressAlertEnabled: boolean
+  + getName(): String
+  + getEmail(): String
+  + getRole(): Role
+  + getTransactionsCount(): int
+  + getGoalsCount(): int
+  + getBudgetsCount(): int
+  + isBudgetAlertEnabled(): boolean
+  + isGoalProgressAlertEnabled(): boolean
+  + builder(): UserProfileResponseBuilder
+}
+
+class UserProfileResponseBuilder {
+  - email: String
+  - role: Role
+  - goalsCount: int  - transactionsCount: int
+  - budgetsCount: int
+  - goalProgressAlertEnabled: boolean
+  - budgetAlertEnabled: boolean
+  - name: String
+  + transactionsCount(int): UserProfileResponseBuilder
+  + name(String): UserProfileResponseBuilder
+  + email(String): UserProfileResponseBuilder
+  + role(Role): UserProfileResponseBuilder
+  + goalsCount(int): UserProfileResponseBuilder
+  + budgetsCount(int): UserProfileResponseBuilder
+  + budgetAlertEnabled(boolean): UserProfileResponseBuilder
+  + goalProgressAlertEnabled(boolean): UserProfileResponseBuilder
+  + build(): UserProfileResponse
+}
+
+class DashboardResponse {
+  - recentTransactions: List<TransactionResponse>
+  - monthlyExpense: BigDecimal
+  - activeBudgetItems: List<BudgetResponse>
+  - monthlyIncome: BigDecimal
+  - activeGoals: Integer
+  - activeBudgets: Integer
+  - totalBalance: BigDecimal
+  - numberOfTransactions: Integer
+  + getActiveBudgetItems(): List<BudgetResponse>
+  + getTotalBalance(): BigDecimal
+  + getMonthlyIncome(): BigDecimal
+  + getMonthlyExpense(): BigDecimal
+  + getRecentTransactions(): List<TransactionResponse>
+  + getActiveBudgets(): Integer
+  + getActiveGoals(): Integer
+  + getNumberOfTransactions(): Integer
+}
+
+class UpdateNotificationSettings {
+  - budgetAlerts: boolean
+  - goalReminders: boolean
+  + isBudgetAlerts(): boolean
+  + isGoalReminders(): boolean
+}
+
+UserService "1" *-[#595959,plain]-> "userRepository\n1" UserRepository
+
+UserProfileController "1" *-[#595959,plain]-> "userProfileService\n1" UserProfileService
+UserProfileController "1" *-[#595959,plain]-> "userService\n1" UserService
+
+UserProfileService "1" *-[#595959,plain]-> "budgetService\n1" BudgetService
+UserProfileService "1" *-[#595959,plain]-> "goalService\n1" GoalService
+UserProfileService "1" *-[#595959,plain]-> "transactionService\n1" TransactionService
+UserProfileService "1" *-[#595959,plain]-> "userService\n1" UserService
+
+DashboardController "1" *-[#595959,plain]-> "budgetService\n1" BudgetService
+DashboardController "1" *-[#595959,plain]-> "goalService\n1" GoalService
+DashboardController "1" *-[#595959,plain]-> "transactionService\n1" TransactionService
+DashboardController "1" *-[#595959,plain]-> "userService\n1" UserService
+DashboardController -[#595959,dashed]-> DashboardResponse
+
+DashboardResponse "1" *-[#595959,plain]-> "activeBudgetItems\n*" BudgetResponse
+DashboardResponse "1" *-[#595959,plain]-> "recentTransactions\n*" TransactionResponse
+
+UserProfileRequestBuilder +-[#820000,plain]- UserProfileRequest
+UserProfileResponseBuilder +-[#820000,plain]- UserProfileResponse
+
+UserProfileRequest "1" *-[#595959,plain]-> "role\n1" Role
+UserProfileResponse "1" *-[#595959,plain]-> "role\n1" Role
+
+@enduml

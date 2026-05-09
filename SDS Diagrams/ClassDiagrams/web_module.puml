@@ -1,0 +1,19 @@
+@startuml web_module
+
+!theme plain
+skinparam linetype ortho
+
+class PageController {
+  + dashboardPage(): String
+  + transactionsPage(): String
+  + notificationPage(): String
+  + profilePage(): String
+  + reportsPage(): String
+  + registerPage(): String
+  + goalsPage(): String
+  + budgetPage(): String
+  + loginPage(): String
+  + indexPage(): String
+}
+
+@enduml

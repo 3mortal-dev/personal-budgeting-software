@@ -1,0 +1,110 @@
+@startuml goal_module
+
+!theme plain
+skinparam linetype ortho
+
+class GoalService {
+  - goalRepository: GoalRepository
+  - userService: UserService
+  + getGoalById(long, long): Goal
+  - assertOwner(Goal, long): void
+  + deleteGoal(long, long): void
+  + getActiveGoalsCount(long): Integer
+  + updateProgress(long, double, long): Goal
+  + getGoalsByUserId(long): List<Goal>
+  + addGoal(GoalRequest, long): Goal
+  - calculateStatus(double, double): GoalStatus
+  + editGoal(long, GoalRequest, long): Goal
+}
+
+class GoalController {
+  - goalService: GoalService
+  - userService: UserService
+  + updateProgress(long, double, UserDetails): ResponseEntity<GoalResponse>
+  + deleteGoal(long, UserDetails): ResponseEntity<Void>
+  + getUserGoals(UserDetails): ResponseEntity<List<GoalResponse>>
+  + editGoal(Long, GoalRequest, UserDetails): ResponseEntity<GoalResponse>
+  + addGoal(GoalRequest, UserDetails): ResponseEntity<GoalResponse>
+}
+
+interface GoalRepository << interface >> {
+  + findByUserId(long): List<Goal>
+  + countByUserIdAndStatus(Long, GoalStatus): Integer
+  + findByDeadline(LocalDate): List<Goal>
+  + countByUserIdAndStatusIn(long, List<GoalStatus>): Integer
+}
+
+class GoalReminderScheduler {
+  - goalRepository: GoalRepository
+  - notificationService: NotificationService
+  + sendGoalReminders(): void
+}
+
+class GoalReminderEvent {
+  - goalName: String
+  - deadline: LocalDate
+  + getType(): NotificationEventType
+  + getGoalName(): String
+  + getDeadline(): LocalDate
+}
+
+class NotificationEvent {
+  - userId: Long
+  + getUserId(): Long
+  + getType(): NotificationEventType
+}
+
+class GoalRequest {
+  - goalName: String
+  - targetAmount: Double
+  - deadline: LocalDate
+  - savedAmount: Double
+  - iconClass: String
+  - iconColor: String
+  + getGoalName(): String
+  + getTargetAmount(): Double
+  + getDeadline(): LocalDate
+  + getSavedAmount(): Double
+  + getIconClass(): String
+  + getIconColor(): String
+}
+
+class GoalResponse {
+  - iconColor: String
+  - id: Long
+  - iconClass: String
+  - name: String
+  - completed: boolean
+  - targetAmount: double
+  - savedAmount: double
+  - userId: Long
+  - deadline: LocalDate
+  - status: GoalStatus
+  + getId(): Long
+  + getUserId(): Long
+  + getName(): String
+  + getTargetAmount(): double
+  + getSavedAmount(): double
+  + getDeadline(): LocalDate
+  + getStatus(): GoalStatus
+  + isCompleted(): boolean
+  + getIconClass(): String
+  + getIconColor(): String
+}
+
+GoalReminderEvent -[#000082,plain]-^ NotificationEvent
+
+GoalController "1" *-[#595959,plain]-> "goalService\n1" GoalService
+GoalController "1" *-[#595959,plain]-> "userService\n1" UserService
+GoalController -[#595959,dashed]-> GoalResponse
+
+GoalService "1" *-[#595959,plain]-> "goalRepository\n1" GoalRepository
+GoalService "1" *-[#595959,plain]-> "userService\n1" UserService
+
+GoalReminderScheduler "1" *-[#595959,plain]-> "goalRepository\n1" GoalRepository
+GoalReminderScheduler "1" *-[#595959,plain]-> "notificationService\n1" NotificationService
+GoalReminderScheduler -[#595959,dashed]-> GoalReminderEvent
+
+GoalResponse "1" *-[#595959,plain]-> "status\n1" GoalStatus
+
+@enduml

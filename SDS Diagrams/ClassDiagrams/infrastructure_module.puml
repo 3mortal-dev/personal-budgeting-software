@@ -1,0 +1,14 @@
+@startuml infrastructure_module
+
+!theme plain
+skinparam linetype ortho
+
+class GlobalExceptionHandler {
+  + handleNotFound(TransactionNotFoundException): Map<String, Object>
+}
+
+class PersonalBudgetApplication {
+  + main(String[]): void
+}
+
+@enduml

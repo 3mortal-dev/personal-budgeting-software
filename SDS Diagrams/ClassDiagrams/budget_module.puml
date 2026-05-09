@@ -1,0 +1,131 @@
+@startuml budget_module
+
+!theme plain
+skinparam linetype ortho
+
+class BudgetService {
+  - budgetRepository: BudgetRepository
+  - categoryRepository: CategoryRepository
+  - userRepository: UserRepository
+  - notificationService: NotificationService
+  + getActiveBudgets(Long): List<Budget>
+  + getAllBudgets(Long): List<Budget>
+  + countActiveBudgets(Long): Long
+  + onTransactionDeleted(Long, Long, Double, LocalDate): void
+  + addBudget(Long, CreateBudgetRequest): Budget
+  + deleteExpiredBudgets(Long): void
+  + deleteBudgetById(Long, Long): void
+  + getExpiredBudgets(Long): List<Budget>
+  + getBudgetById(Long, Long): Budget
+  + editBudget(Long, Long, CreateBudgetRequest): Budget
+  + getNearLimitBudgets(Long): List<Budget>
+  + getActiveBudgets(Long, int): List<Budget>
+  + countExpiredBudgets(Long): Long
+  + getExeededLimitBudgets(Long): List<Budget>
+  + deleteAllBudgets(Long): void
+  + onTransactionAdded(Long, Long, Double, LocalDate): void
+}
+
+class BudgetController {
+  - budgetService: BudgetService
+  - userService: UserService
+  + getActiveBudgets(UserDetails): ResponseEntity<List<BudgetResponse>>
+  + getNearLimitBudgets(UserDetails): ResponseEntity<List<BudgetResponse>>
+  + getAllBudgets(UserDetails): ResponseEntity<List<BudgetResponse>>
+  + getExpiredBudgets(UserDetails): ResponseEntity<List<BudgetResponse>>
+  + deleteBudget(UserDetails, Long): ResponseEntity<Void>
+  + editBudget(UserDetails, Long, CreateBudgetRequest): ResponseEntity<BudgetResponse>
+  + deleteExpiredBudgets(UserDetails): ResponseEntity<Void>
+  + addBudget(UserDetails, CreateBudgetRequest): ResponseEntity<BudgetResponse>
+  + deleteAllBudgets(UserDetails): ResponseEntity<Void>
+  + getExeededLimitBudgets(UserDetails): ResponseEntity<List<BudgetResponse>>
+  - toResponse(Budget): BudgetResponse
+  - toResponseList(List<Budget>): List<BudgetResponse>
+}
+
+interface BudgetRepository << interface >> {
+  + findByUserIdAndEndDateGreaterThanEqual(Long, LocalDate, Pageable): List<Budget>
+  + countByUserIdAndEndDateGreaterThanEqual(Long, LocalDate): Long
+  + findByUserIdAndEndDateGreaterThanEqual(Long, LocalDate): List<Budget>
+  + findByUserIdAndEndDateAfter(Long, LocalDate, Pageable): List<Budget>
+  + findByUserId(Long): List<Budget>
+  + findByIdAndUserId(Long, Long): Optional<Budget>
+  + findByUserIdAndStatus(Long, BudgetStatus): List<Budget>
+  + findByUserIdAndEndDateGreaterThanEqualOrderByStartDateDescIdDesc(Long, LocalDate, Pageable): List<Budget>
+  + findByUserIdOrderByStartDateDescIdDesc(Long, Pageable): List<Budget>
+  + findByUserIdAndCategoryId(Long, Long): Optional<Budget>
+  + countByUserIdAndEndDateLessThan(Long, LocalDate): Long
+  + findByUserIdAndEndDateLessThan(Long, LocalDate): List<Budget>
+}
+
+class BudgetExceededLimitEvent {
+  - categoryName: String
+  - exceededAmount: BigDecimal
+  + getCategoryName(): String
+  + getExceededAmount(): BigDecimal
+  + getType(): NotificationEventType
+}
+
+class BudgetNearLimitEvent {
+  - categoryName: String
+  - exceededAmount: BigDecimal
+  + getExceededAmount(): BigDecimal
+  + getCategoryName(): String
+  + getType(): NotificationEventType
+}
+
+class NotificationEvent {
+  - userId: Long
+  + getUserId(): Long
+  + getType(): NotificationEventType
+}
+
+class CreateBudgetRequest {
+  - threshold: Double
+  ~ categoryId: Long
+  ~ spendingLimit: Double
+  ~ endDate: LocalDate
+  + getEndDate(): LocalDate
+  + getCategoryId(): Long
+  + getSpendingLimit(): Double
+  + getThreshold(): Double
+}
+
+class BudgetResponse {
+  - userId: Long
+  - categoryId: Long
+  - id: Long
+  - threshold: Double
+  - endDate: LocalDate
+  - spentAmount: Double
+  - spendingLimit: Double
+  - startDate: LocalDate
+  - status: BudgetStatus
+  + getId(): Long
+  + getUserId(): Long
+  + getCategoryId(): Long
+  + getSpendingLimit(): Double
+  + getSpentAmount(): Double
+  + getThreshold(): Double
+  + getStartDate(): LocalDate
+  + getEndDate(): LocalDate
+  + getStatus(): BudgetStatus
+}
+
+BudgetExceededLimitEvent -[#000082,plain]-^ NotificationEvent
+BudgetNearLimitEvent -[#000082,plain]-^ NotificationEvent
+
+BudgetController "1" *-[#595959,plain]-> "budgetService\n1" BudgetService
+BudgetController "1" *-[#595959,plain]-> "userService\n1" UserService
+BudgetController -[#595959,dashed]-> BudgetResponse
+
+BudgetService "1" *-[#595959,plain]-> "budgetRepository\n1" BudgetRepository
+BudgetService "1" *-[#595959,plain]-> "categoryRepository\n1" CategoryRepository
+BudgetService "1" *-[#595959,plain]-> "userRepository\n1" UserRepository
+BudgetService "1" *-[#595959,plain]-> "notificationService\n1" NotificationService
+BudgetService -[#595959,dashed]-> BudgetExceededLimitEvent
+BudgetService -[#595959,dashed]-> BudgetNearLimitEvent
+
+BudgetResponse "1" *-[#595959,plain]-> "status\n1" BudgetStatus
+
+@enduml

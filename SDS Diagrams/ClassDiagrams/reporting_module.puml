@@ -1,0 +1,98 @@
+@startuml reporting_module
+
+!theme plain
+skinparam linetype ortho
+
+class ReportService {
+  - transactionService: TransactionService
+  - exporterFactory: ExporterFactory
+  + generateTransactionReport(Long, ReportDownloadRequest): File
+  - getFileExtension(String): String
+  + generateMonthlyReport(Long, MonthlyReportRequest): MonthlyReportResponse
+}
+
+class ReportController {
+  - userService: UserService
+  - reportService: ReportService
+  + getMonthlyReport(MonthlyReportRequest, UserDetails): ResponseEntity<MonthlyReportResponse>
+  + downloadReport(ReportDownloadRequest, UserDetails): ResponseEntity<Resource>
+  - trySetUserId(UserDetails, Consumer<Long>): boolean
+  - getMediaType(String): MediaType
+}
+
+interface ReportExporter << interface >> {
+  + export(List<Transaction>, String): File
+}
+
+class CSVExporter {
+  + export(List<Transaction>, String): File
+  - getCategoryOrSource(Transaction): String
+}
+
+class ExcelExporter {
+  + export(List<Transaction>, String): File
+  - getCategoryOrSource(Transaction): String
+}
+
+class PDFExporter {
+  + export(List<Transaction>, String): File
+  - getCategoryOrSource(Transaction): String
+  - createCell(String, Font): PdfPCell
+}
+
+class ExporterFactory {
+  - pdfExporter: PDFExporter
+  - excelExporter: ExcelExporter
+  - csvExporter: CSVExporter
+  + getExporter(ReportFormat): ReportExporter
+}
+
+class MonthlyReportRequest {
+  - endDate: LocalDate
+  - startDate: LocalDate
+  + getStartDate(): LocalDate
+  + getEndDate(): LocalDate
+}
+
+class MonthlyReportResponse {
+  - monthlyExpense: Map<Month, Double>
+  - monthlyIncome: Map<Month, Double>
+  - expenseByCategory: Map<String, Double>
+  + getMonthlyExpense(): Map<Month, Double>
+  + getMonthlyIncome(): Map<Month, Double>
+  + getExpenseByCategory(): Map<String, Double>
+}
+
+class ReportDownloadRequest {
+  - startDate: LocalDate
+  - endDate: LocalDate
+  - format: ReportFormat
+  + getEndDate(): LocalDate
+  + getFormat(): ReportFormat
+  + getStartDate(): LocalDate
+}
+
+enum ReportFormat {
+  + CSV
+  + EXCEL
+  + PDF
+}
+
+CSVExporter -[#008200,dashed]-^ ReportExporter
+ExcelExporter -[#008200,dashed]-^ ReportExporter
+PDFExporter -[#008200,dashed]-^ ReportExporter
+
+ReportController "1" *-[#595959,plain]-> "reportService\n1" ReportService
+ReportController "1" *-[#595959,plain]-> "userService\n1" UserService
+
+ReportService "1" *-[#595959,plain]-> "transactionService\n1" TransactionService
+ReportService "1" *-[#595959,plain]-> "exporterFactory\n1" ExporterFactory
+ReportService -[#595959,dashed]-> MonthlyReportResponse
+
+ExporterFactory "1" *-[#595959,plain]-> "csvExporter\n1" CSVExporter
+ExporterFactory "1" *-[#595959,plain]-> "excelExporter\n1" ExcelExporter
+ExporterFactory "1" *-[#595959,plain]-> "pdfExporter\n1" PDFExporter
+
+ReportDownloadRequest "1" *-[#595959,plain]-> "format\n1" ReportFormat
+
+@enduml
