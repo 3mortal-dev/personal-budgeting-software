@@ -12,6 +12,7 @@ public class TransactionResponse {
     private final Long id;
     private final Long userId;
     private final Long categoryId;
+    private final String categoryName;
     private final double amount;
     private final TransactionType type;
     private final LocalDate date;
@@ -23,6 +24,7 @@ public class TransactionResponse {
         this.userId = t.getUser().getId();
         // TransactionResponse.java
         this.categoryId = t.getCategory() != null ? t.getCategory().getId() : null;
+        this.categoryName = t.getCategory() != null ? t.getCategory().getName() : null;
         this.amount = t.getAmount();
         this.type = t.getType();
         this.date = t.getDate();

@@ -8,9 +8,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.example.personal_budget.entity.User;
+import com.example.personal_budget.enums.Role;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
+
+    long countByRole(Role role);
 
     @Query("SELECT u.id FROM User u WHERE u.email = :email")
     Optional<Long> findIdByEmail(@Param("email") String email);

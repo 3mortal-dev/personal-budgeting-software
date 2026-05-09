@@ -1,6 +1,7 @@
 package com.example.personal_budget.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 
 
@@ -40,6 +41,12 @@ public class PageController {
     @GetMapping("/reports")
     public String reportsPage() {
         return "reports";
+    }
+
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String adminPage() {
+        return "admin";
     }
     
 
