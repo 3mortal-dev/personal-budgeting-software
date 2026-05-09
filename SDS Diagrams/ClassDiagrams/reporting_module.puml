@@ -1,6 +1,5 @@
 @startuml reporting_module
 
-!theme plain
 skinparam linetype ortho
 
 class ReportService {

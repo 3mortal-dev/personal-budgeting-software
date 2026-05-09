@@ -1,0 +1,176 @@
+@startuml database_schema
+
+!theme plain
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+skinparam backgroundColor #FEFEFE
+skinparam class {
+  BackgroundColor #E8F4F8
+  BorderColor #2C3E50
+  ArrowColor #34495E
+}
+
+' ============ TABLES ============
+
+class users {
+  + id : BIGINT [PK]
+  - name : VARCHAR(100) [NOT NULL]
+  - email : VARCHAR(100) [NOT NULL, UNIQUE]
+  - password : VARCHAR(255) [NOT NULL]
+  - role : VARCHAR(20) [NOT NULL]
+  - budget_alert_enabled : BOOLEAN [DEFAULT TRUE]
+  - goal_progress_alert_enabled : BOOLEAN [DEFAULT TRUE]
+  - created_at : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]
+  - updated_at : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]
+}
+
+class categories {
+  + id : BIGINT [PK]
+  - name : VARCHAR(100) [NOT NULL]
+  - type : VARCHAR(20) [NOT NULL]
+  - user_id : BIGINT [FK -> users.id, NULLABLE]
+  - created_at : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]
+  ___
+  CONSTRAINT uk_category_user_name UNIQUE(user_id, name)
+  CONSTRAINT uk_builtin_name UNIQUE(type, name) WHERE user_id IS NULL
+}
+
+class transactions {
+  + id : BIGINT [PK]
+  - amount : DECIMAL(15,2) [NOT NULL]
+  - type : VARCHAR(10) [NOT NULL]
+  - description : TEXT
+  - source : VARCHAR(100)
+  - date : DATE [NOT NULL]
+  - user_id : BIGINT [NOT NULL, FK -> users.id]
+  - category_id : BIGINT [NOT NULL, FK -> categories.id]
+  - created_at : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]
+  ___
+  INDEX idx_user_date (user_id, date)
+  INDEX idx_user_type (user_id, type)
+  INDEX idx_category (category_id)
+}
+
+class budgets {
+  + id : BIGINT [PK]
+  - spending_limit : DECIMAL(15,2) [NOT NULL]
+  - spent_amount : DECIMAL(15,2) [DEFAULT 0.00]
+  - threshold : DECIMAL(5,2) [DEFAULT 0.80]
+  - status : VARCHAR(20) [NOT NULL]
+  - start_date : DATE [NOT NULL]
+  - end_date : DATE [NOT NULL]
+  - user_id : BIGINT [NOT NULL, FK -> users.id]
+  - category_id : BIGINT [NOT NULL, FK -> categories.id]
+  - created_at : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]
+  - updated_at : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]
+  ___
+  INDEX idx_user_status (user_id, status)
+  INDEX idx_user_end_date (user_id, end_date)
+  CONSTRAINT chk_dates CHECK (start_date <= end_date)
+  CONSTRAINT chk_spent_limit CHECK (spent_amount <= spending_limit)
+}
+
+class goals {
+  + id : BIGINT [PK]
+  - goal_name : VARCHAR(100) [NOT NULL]
+  - target_amount : DECIMAL(15,2) [NOT NULL]
+  - current_amount : DECIMAL(15,2) [DEFAULT 0.00]
+  - deadline : DATE [NOT NULL]
+  - status : VARCHAR(20) [NOT NULL]
+  - icon_class : VARCHAR(50)
+  - icon_color : VARCHAR(20)
+  - user_id : BIGINT [NOT NULL, FK -> users.id]
+  - created_at : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]
+  - updated_at : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]
+  ___
+  INDEX idx_user_status (user_id, status)
+  INDEX idx_deadline (deadline)
+  CONSTRAINT chk_current_target CHECK (current_amount <= target_amount)
+}
+
+class notifications {
+  + id : BIGINT [PK]
+  - message : TEXT [NOT NULL]
+  - type : VARCHAR(30) [NOT NULL]
+  - is_read : BOOLEAN [DEFAULT FALSE]
+  - created_at : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]
+  - user_id : BIGINT [NOT NULL, FK -> users.id]
+  ___
+  INDEX idx_user_read (user_id, is_read)
+  INDEX idx_type (type)
+  INDEX idx_created (created_at)
+}
+
+class tokens {
+  + id : BIGINT [PK]
+  - token : VARCHAR(255) [NOT NULL, UNIQUE]
+  - token_type : VARCHAR(20) [NOT NULL]
+  - expired : BOOLEAN [DEFAULT FALSE]
+  - revoked : BOOLEAN [DEFAULT FALSE]
+  - user_id : BIGINT [NOT NULL, FK -> users.id]
+  - created_at : TIMESTAMP [DEFAULT CURRENT_TIMESTAMP]
+  ___
+  INDEX idx_token (token)
+  INDEX idx_user_valid (user_id, expired, revoked)
+}
+
+' ============ ENUM TABLES (Reference) ============
+
+enum transaction_type {
+  + EXPENSE
+  + INCOME
+}
+
+enum category_type {
+  + BUILT_IN
+  + CUSTOM
+}
+
+enum budget_status {
+  + ON_TRACK
+  + NEAR_LIMIT
+  + EXCEEDED_LIMIT
+}
+
+enum goal_status {
+  + ONTRACK
+  + NEARLIMIT
+  + EXCEEDED
+}
+
+enum notification_event_type {
+  + BUDGET_NEAR_LIMIT
+  + BUDGET_EXCEEDED
+  + GOAL_REMINDER
+}
+
+enum role_type {
+  + USER
+  + ADMIN
+}
+
+enum token_type {
+  + BEARER
+}
+
+' ============ STACK ENUMS VERTICALLY ============
+transaction_type   -[hidden]down-> category_type
+category_type      -[hidden]down-> budget_status
+budget_status      -[hidden]down-> goal_status
+goal_status        -[hidden]down-> notification_event_type
+notification_event_type -[hidden]down-> role_type
+role_type          -[hidden]down-> token_type
+
+' ============ RELATIONSHIPS ============
+
+users ||--o{ transactions : "has"
+users ||--o{ categories : "owns (custom only)"
+users ||--o{ budgets : "has"
+users ||--o{ goals : "has"
+users ||--o{ notifications : "receives"
+users ||--o{ tokens : "has"
+
+categories ||--o{ transactions : "categorizes"
+categories ||--o{ budgets : "targets"
+
+@enduml

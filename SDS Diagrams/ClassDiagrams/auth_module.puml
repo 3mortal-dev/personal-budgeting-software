@@ -1,6 +1,5 @@
 @startuml auth_module
 
-!theme plain
 skinparam linetype ortho
 
 class AuthenticationService {

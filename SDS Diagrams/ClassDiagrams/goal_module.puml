@@ -1,6 +1,5 @@
 @startuml goal_module
 
-!theme plain
 skinparam linetype ortho
 
 class GoalService {

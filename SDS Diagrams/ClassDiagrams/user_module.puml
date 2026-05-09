@@ -1,6 +1,5 @@
 @startuml user_module
 
-!theme plain
 skinparam linetype ortho
 
 class UserService {

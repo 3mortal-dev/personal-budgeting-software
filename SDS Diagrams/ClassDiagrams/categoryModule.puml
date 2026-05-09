@@ -1,6 +1,6 @@
 @startuml category_module
 
-!theme plain
+
 skinparam linetype ortho
 
 class CategoryService {

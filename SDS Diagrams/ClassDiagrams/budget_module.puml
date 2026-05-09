@@ -1,6 +1,5 @@
 @startuml budget_module
 
-!theme plain
 skinparam linetype ortho
 
 class BudgetService {

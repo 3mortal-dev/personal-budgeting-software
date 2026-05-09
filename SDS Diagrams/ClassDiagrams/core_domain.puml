@@ -1,6 +1,5 @@
 @startuml core_domain
 
-!theme plain
 skinparam linetype ortho
 
 class User {

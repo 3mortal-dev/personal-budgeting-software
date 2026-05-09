@@ -1,6 +1,5 @@
 @startuml notification_module
 
-!theme plain
 skinparam linetype ortho
 
 class NotificationService {
