@@ -412,7 +412,7 @@ function renderBudgets(budgets) {
         const pct = limit > 0 ? Math.min((spent / limit) * 100, 100) : 0;
         const color = pct >= 90 ? "#e84040" : pct >= 70 ? "#f59e0b" : "#2aa96b";
         const cat = state.categories.find(c => c.id === budget.categoryId);
-        const catName = cat?.name ?? `Category #${budget.categoryId ?? "N/A"}`;
+        const catName = cat.name;
         return `
       <div class="budget-item">
         <div class="budget-row">
