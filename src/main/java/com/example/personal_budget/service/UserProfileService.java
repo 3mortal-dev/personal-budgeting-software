@@ -5,10 +5,9 @@ import org.springframework.stereotype.Service;
 
 import com.example.personal_budget.dto.request.UserProfileRequest;
 import com.example.personal_budget.dto.response.UserProfileResponse;
-import com.example.personal_budget.repository.UserRepository;
+import com.example.personal_budget.entity.User;
 
 import lombok.RequiredArgsConstructor;
-import com.example.personal_budget.entity.User;
 
 @RequiredArgsConstructor
 @Service
@@ -22,7 +21,7 @@ public class UserProfileService {
     private UserProfileResponse toDTO(User user) {
 
         int goalsCount = goalService.getGoalsByUserId(user.getId()).size();
-        int transactionsCount = transactionService.getAllTransactions(user.getId()).size();
+        int transactionsCount = transactionService.getNumberOfTransactions(user.getId());
         int budgetsCount = budgetService.getAllBudgets(user.getId()).size();
 
         return UserProfileResponse.builder()
