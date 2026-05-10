@@ -4,6 +4,81 @@
 ═══════════════════════════════════════════════════ */
 
 /* ═══════════════════════════════════════════════════
+   TOAST NOTIFICATION SYSTEM
+═══════════════════════════════════════════════════ */
+
+const Toast = (() => {
+  let container = null;
+
+  const ICONS = {
+    success: "✓",
+    error: "✕",
+    info: "ℹ",
+    warning: "⚠",
+  };
+
+  const TITLES = {
+    success: "Success",
+    error: "Error",
+    info: "Info",
+    warning: "Warning",
+  };
+
+  function getContainer() {
+    if (!container) {
+      container = document.createElement("div");
+      container.className = "bw-toast-container";
+      document.body.appendChild(container);
+    }
+    return container;
+  }
+
+  function dismiss(toast) {
+    toast.classList.add("is-leaving");
+    toast.addEventListener("animationend", () => toast.remove(), {
+      once: true,
+    });
+  }
+
+  function show(type, message, { title, duration = 4000 } = {}) {
+    const c = getContainer();
+
+    const toast = document.createElement("div");
+    toast.className = `bw-toast bw-toast--${type}`;
+    toast.innerHTML = `
+      <span class="bw-toast__icon">${ICONS[type] || ICONS.info}</span>
+      <div class="bw-toast__body">
+        <div class="bw-toast__title">${title || TITLES[type] || "Notice"}</div>
+        ${message ? `<div class="bw-toast__message">${message}</div>` : ""}
+      </div>
+      <button class="bw-toast__close" aria-label="Dismiss">×</button>
+      <div class="bw-toast__progress" style="animation-duration:${duration}ms"></div>
+    `;
+
+    toast
+      .querySelector(".bw-toast__close")
+      .addEventListener("click", () => dismiss(toast));
+
+    c.appendChild(toast);
+
+    if (duration > 0) {
+      setTimeout(() => {
+        if (toast.isConnected) dismiss(toast);
+      }, duration);
+    }
+
+    return toast;
+  }
+
+  return {
+    success: (msg, opts) => show("success", msg, opts),
+    error: (msg, opts) => show("error", msg, opts),
+    info: (msg, opts) => show("info", msg, opts),
+    warning: (msg, opts) => show("warning", msg, opts),
+  };
+})();
+
+/* ═══════════════════════════════════════════════════
    API CONFIGURATION
 ═══════════════════════════════════════════════════ */
 
@@ -406,6 +481,14 @@ function applyReportData(data) {
   }
 
   showEl("summaryCards", true);
+
+  // Trigger pop animation on stat cards
+  document.querySelectorAll(".stat-card").forEach((card, i) => {
+    setTimeout(() => {
+      card.classList.add("animating");
+      setTimeout(() => card.classList.remove("animating"), 500);
+    }, i * 80);
+  });
 }
 
 /* ═══════════════════════════════════════════════════
@@ -466,7 +549,17 @@ async function loadMonthlyReport() {
   }
 
   btnStartLoading("loadReportBtn");
-  showEl("reportLoading", true);
+  setLoadReportLoading(true);
+
+  // Add shimmer to chart cards while loading
+  document
+    .querySelectorAll(".chart-card")
+    .forEach((c) => c.classList.add("is-loading"));
+
+  const loadingToast = Toast.info("Fetching your report data…", {
+    title: "Loading",
+    duration: 0,
+  });
 
   const result = await apiFetch(API.MONTHLY, {
     method: "POST",
@@ -478,17 +571,25 @@ async function loadMonthlyReport() {
   });
 
   btnStopLoading("loadReportBtn");
+  setLoadReportLoading(false);
   showEl("reportLoading", false);
+  loadingToast.classList.add("is-leaving");
+
+  document
+    .querySelectorAll(".chart-card")
+    .forEach((c) => c.classList.remove("is-loading"));
 
   if (!result || result.error) {
     setText("reportError", result?.message || "Could not load report.");
-
     showEl("reportError", true);
-
+    Toast.error(result?.message || "Could not load report.", {
+      title: "Report failed",
+    });
     return;
   }
 
   applyReportData(result);
+  Toast.success("Report loaded successfully.", { title: "Done" });
 }
 
 /* ═══════════════════════════════════════════════════
@@ -527,6 +628,37 @@ async function downloadReport() {
   }
 
   btnStartLoading("downloadBtn");
+  const downloadBtn = $("downloadBtn");
+  if (downloadBtn) downloadBtn.classList.add("is-downloading");
+
+  // Show progress UI
+  let progressEl = $("downloadProgress");
+  if (!progressEl) {
+    progressEl = document.createElement("div");
+    progressEl.id = "downloadProgress";
+    progressEl.className = "download-progress";
+    progressEl.innerHTML = `
+      <div class="download-progress__track">
+        <div class="download-progress__fill" id="downloadFill"></div>
+      </div>
+      <div class="download-progress__label" id="downloadProgressLabel">Preparing your ${format} report…</div>
+    `;
+    downloadBtn?.parentElement?.after(progressEl);
+  }
+  progressEl.classList.add("is-visible");
+
+  // Animate progress bar (simulated)
+  const fill = $("downloadFill");
+  const progressLabel = $("downloadProgressLabel");
+  if (fill) fill.style.width = "30%";
+  const progressTimer = setTimeout(() => {
+    if (fill) fill.style.width = "70%";
+  }, 400);
+
+  const downloadingToast = Toast.info(`Generating your ${format} report…`, {
+    title: "Download starting",
+    duration: 0,
+  });
 
   try {
     const token = localStorage.getItem("token");
@@ -536,7 +668,7 @@ async function downloadReport() {
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}), // ← missing here
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
       body: JSON.stringify({ format, startDate: start, endDate: end }),
     });
@@ -552,7 +684,15 @@ async function downloadReport() {
       throw new Error(txt || `HTTP ${response.status}`);
     }
 
+    // Fill to 90% while blob is processing
+    if (fill) fill.style.width = "90%";
+    if (progressLabel) progressLabel.textContent = "Processing file…";
+
     const blob = await response.blob();
+
+    // Complete the bar
+    if (fill) fill.style.width = "100%";
+    if (progressLabel) progressLabel.textContent = "Download complete!";
 
     const filename =
       parseFilename(response.headers.get("Content-Disposition")) || "report";
@@ -573,14 +713,107 @@ async function downloadReport() {
     setTimeout(() => {
       URL.revokeObjectURL(url);
     }, 1000);
+
+    // Success state on button
+    clearTimeout(progressTimer);
+    if (downloadBtn) {
+      downloadBtn.classList.remove("is-downloading");
+      downloadBtn.classList.add("is-success");
+      const label = downloadBtn.querySelector(".btn-label");
+      const originalLabel = label?.textContent;
+      if (label) label.textContent = "✓ Downloaded!";
+      setTimeout(() => {
+        downloadBtn.classList.remove("is-success");
+        if (label) label.textContent = originalLabel;
+      }, 2500);
+    }
+
+    downloadingToast.classList.add("is-leaving");
+    Toast.success(`${format} report downloaded successfully.`, {
+      title: "Download complete",
+    });
+
+    setTimeout(() => {
+      progressEl.classList.remove("is-visible");
+      if (fill) fill.style.width = "0%";
+    }, 2000);
   } catch (error) {
     console.error(error);
 
-    setText("downloadError", error.message || "Download failed.");
+    clearTimeout(progressTimer);
+    if (fill) fill.style.width = "0%";
+    progressEl.classList.remove("is-visible");
 
+    // Error state on button
+    if (downloadBtn) {
+      downloadBtn.classList.remove("is-downloading");
+      downloadBtn.classList.add("is-error");
+      const label = downloadBtn.querySelector(".btn-label");
+      const originalLabel = label?.textContent;
+      if (label) label.textContent = "✕ Failed";
+      setTimeout(() => {
+        downloadBtn.classList.remove("is-error");
+        if (label) label.textContent = originalLabel;
+      }, 2500);
+    }
+
+    setText("downloadError", error.message || "Download failed.");
     showEl("downloadError", true);
+
+    downloadingToast.classList.add("is-leaving");
+    Toast.error(error.message || "Download failed. Please try again.", {
+      title: "Download failed",
+    });
   } finally {
     btnStopLoading("downloadBtn");
+    if (downloadBtn) downloadBtn.classList.remove("is-downloading");
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   BUTTON RIPPLE EFFECT
+═══════════════════════════════════════════════════ */
+
+function initButtonRipples() {
+  document.querySelectorAll(".btn-primary").forEach((btn) => {
+    btn.addEventListener("click", function (e) {
+      if (this.disabled) return;
+
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height) * 1.4;
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+
+      const ripple = document.createElement("span");
+      ripple.className = "btn-ripple";
+      ripple.style.cssText = `
+        width: ${size}px;
+        height: ${size}px;
+        left: ${x}px;
+        top: ${y}px;
+      `;
+
+      this.appendChild(ripple);
+      ripple.addEventListener("animationend", () => ripple.remove(), {
+        once: true,
+      });
+    });
+  });
+}
+
+function setLoadReportLoading(on) {
+  const btn = $("loadReportBtn");
+  if (!btn) return;
+  if (on) {
+    btn.classList.add("is-loading-state");
+  } else {
+    btn.classList.remove("is-loading-state");
+    // brief success flash
+    // btn.style.transition = "background 0.2s";
+    btn.style.background = "#059669";
+    setTimeout(() => {
+      btn.style.background = "";
+    }, 700);
   }
 }
 
@@ -589,34 +822,35 @@ async function downloadReport() {
 ═══════════════════════════════════════════════════ */
 
 document.addEventListener("DOMContentLoaded", async () => {
+  loaderInit([
+    { pct: 50, label: "Generating reports…" },
+    { pct: 100, label: "Finalizing…" },
+  ]);
 
-    loaderInit([
-        {pct: 50, label: "Generating reports…"},
-        {pct: 100, label: "Finalizing…"},
-    ]);
+  initButtonRipples();
 
-    if ($("rangeStart")) {
-        $("rangeStart").value = yearStartISO();
-    }
+  if ($("rangeStart")) {
+    $("rangeStart").value = yearStartISO();
+  }
 
-    if ($("rangeEnd")) {
-        $("rangeEnd").value = todayISO();
-    }
+  if ($("rangeEnd")) {
+    $("rangeEnd").value = todayISO();
+  }
 
-    if ($("downloadStart")) {
-        $("downloadStart").value = yearStartISO();
-    }
+  if ($("downloadStart")) {
+    $("downloadStart").value = yearStartISO();
+  }
 
-    if ($("downloadEnd")) {
-        $("downloadEnd").value = todayISO();
-    }
+  if ($("downloadEnd")) {
+    $("downloadEnd").value = todayISO();
+  }
 
-    $("loadReportBtn")?.addEventListener("click", loadMonthlyReport);
+  $("loadReportBtn")?.addEventListener("click", loadMonthlyReport);
 
-    $("downloadBtn")?.addEventListener("click", downloadReport);
+  $("downloadBtn")?.addEventListener("click", downloadReport);
 
-    loaderAdvance();
-    await loadMonthlyReport();
-    loaderAdvance();
-    loaderHide();
+  loaderAdvance();
+  await loadMonthlyReport();
+  loaderAdvance();
+  loaderHide();
 });
