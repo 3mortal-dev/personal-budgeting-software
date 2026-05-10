@@ -2,31 +2,35 @@
    CSS VARIABLES
 ───────────────────────────────────────── */
 :root {
-  --green:        #2faa72;
-  --green-dark:   #27966400;
-  --green-mid:    #27966480;
-  --green-btn:    #2aa96b;
-  --green-btn-h:  #249460;
-  --text-dark:    #1a2e3b;
-  --text-body:    #4a5a6a;
-  --text-muted:   #8a98a8;
-  --border:       #dce4ec;
-  --bg-page:      #eef1f5;
-  --white:        #ffffff;
-  --radius-card:  20px;
+  --green: #2faa72;
+  --green-dark: #27966400;
+  --green-mid: #27966480;
+  --green-btn: #2aa96b;
+  --green-btn-h: #249460;
+  --text-dark: #1a2e3b;
+  --text-body: #4a5a6a;
+  --text-muted: #8a98a8;
+  --border: #dce4ec;
+  --bg-page: #eef1f5;
+  --white: #ffffff;
+  --radius-card: 20px;
   --radius-input: 12px;
-  --shadow-card:  0 24px 64px rgba(0,0,0,.12), 0 4px 16px rgba(0,0,0,.06);
-  --font:         'DM Sans', sans-serif;
-  --transition:   .2s ease;
+  --shadow-card: 0 24px 64px rgba(0, 0, 0, .12), 0 4px 16px rgba(0, 0, 0, .06);
+  --font: 'DM Sans', sans-serif;
+  --transition: .2s ease;
 }
 
 /* ─────────────────────────────────────────
    RESET & BASE
 ───────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 body {
-  font-family: var(--font);
+  font-family: var(--font-body);
   background: var(--bg-page);
   min-height: 100vh;
   display: flex;
@@ -35,8 +39,13 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-a { text-decoration: none; }
-svg { display: block; }
+a {
+  text-decoration: none;
+}
+
+svg {
+  display: block;
+}
 
 /* ─────────────────────────────────────────
    PAGE BACKGROUND
@@ -62,12 +71,19 @@ svg { display: block; }
   overflow: hidden;
   box-shadow: var(--shadow-card);
   background: var(--white);
-  animation: cardIn .5s cubic-bezier(.22,1,.36,1) both;
+  animation: cardIn .5s cubic-bezier(.22, 1, .36, 1) both;
 }
 
 @keyframes cardIn {
-  from { opacity: 0; transform: translateY(20px) scale(.98); }
-  to   { opacity: 1; transform: translateY(0)   scale(1);    }
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* ─────────────────────────────────────────
@@ -99,7 +115,7 @@ svg { display: block; }
 .logo-icon {
   width: 36px;
   height: 36px;
-  background: rgba(255,255,255,.18);
+  background: rgba(255, 255, 255, .18);
   border-radius: 9px;
   display: flex;
   align-items: center;
@@ -107,7 +123,10 @@ svg { display: block; }
   flex-shrink: 0;
 }
 
-.logo-icon svg { width: 18px; height: 18px; }
+.logo-icon svg {
+  width: 18px;
+  height: 18px;
+}
 
 /* Copy */
 .panel-copy {
@@ -128,7 +147,7 @@ svg { display: block; }
 .panel-copy p {
   font-size: 14.5px;
   line-height: 1.65;
-  color: rgba(255,255,255,.82);
+  color: rgba(255, 255, 255, .82);
   max-width: 290px;
 }
 
@@ -136,7 +155,7 @@ svg { display: block; }
 .blob {
   position: absolute;
   border-radius: 50%;
-  background: rgba(255,255,255,.10);
+  background: rgba(255, 255, 255, .10);
   pointer-events: none;
 }
 
@@ -167,7 +186,7 @@ svg { display: block; }
   width: 28px;
   height: 5px;
   border-radius: 99px;
-  background: rgba(255,255,255,.35);
+  background: rgba(255, 255, 255, .35);
   transition: background var(--transition);
 }
 
@@ -235,7 +254,9 @@ label {
   margin-bottom: 8px;
 }
 
-.label-row label { margin-bottom: 0; }
+.label-row label {
+  margin-bottom: 0;
+}
 
 .forgot-link {
   font-size: 13px;
@@ -244,7 +265,9 @@ label {
   transition: color var(--transition);
 }
 
-.forgot-link:hover { color: var(--green-btn-h); }
+.forgot-link:hover {
+  color: var(--green-btn-h);
+}
 
 /* ─────────────────────────────────────────
    INPUT WRAP
@@ -266,7 +289,10 @@ label {
   align-items: center;
 }
 
-.input-icon svg { width: 18px; height: 18px; }
+.input-icon svg {
+  width: 18px;
+  height: 18px;
+}
 
 .input-wrap input {
   width: 100%;
@@ -274,7 +300,7 @@ label {
   padding: 0 44px 0 44px;
   border: 1.5px solid var(--border);
   border-radius: var(--radius-input);
-  font-family: var(--font);
+  font-family: var(--font-body);
   font-size: 14.5px;
   color: var(--text-dark);
   background: var(--white);
@@ -282,17 +308,19 @@ label {
   transition: border-color var(--transition), box-shadow var(--transition);
 }
 
-.input-wrap input::placeholder { color: var(--text-muted); }
+.input-wrap input::placeholder {
+  color: var(--text-muted);
+}
 
 .input-wrap input:focus {
   border-color: var(--green);
-  box-shadow: 0 0 0 3px rgba(47,170,114,.14);
+  box-shadow: 0 0 0 3px rgba(47, 170, 114, .14);
 }
 
 /* Error state */
 .input-wrap.error input {
   border-color: #e55;
-  box-shadow: 0 0 0 3px rgba(220,50,50,.10);
+  box-shadow: 0 0 0 3px rgba(220, 50, 50, .10);
 }
 
 .toggle-pw {
@@ -308,8 +336,14 @@ label {
   transition: color var(--transition);
 }
 
-.toggle-pw:hover { color: var(--text-dark); }
-.toggle-pw svg   { width: 18px; height: 18px; }
+.toggle-pw:hover {
+  color: var(--text-dark);
+}
+
+.toggle-pw svg {
+  width: 18px;
+  height: 18px;
+}
 
 /* ─────────────────────────────────────────
    FIELD ERROR TEXT
@@ -342,7 +376,7 @@ label {
   border-radius: 14px;
   background: var(--green-btn);
   color: var(--white);
-  font-family: var(--font);
+  font-family: var(--font-body);
   font-size: 16px;
   font-weight: 700;
   letter-spacing: .2px;
@@ -358,28 +392,39 @@ label {
 
 .btn-login:hover {
   background: var(--green-btn-h);
-  box-shadow: 0 8px 24px rgba(42,169,107,.35);
+  box-shadow: 0 8px 24px rgba(42, 169, 107, .35);
   transform: translateY(-1px);
 }
 
-.btn-login:active { transform: translateY(0); box-shadow: none; }
+.btn-login:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
 
 .btn-login.loading .btn-text,
-.btn-login.loading .btn-arrow { opacity: 0; }
+.btn-login.loading .btn-arrow {
+  opacity: 0;
+}
 
-.btn-login.loading .btn-spinner { display: block !important; }
+.btn-login.loading .btn-spinner {
+  display: block !important;
+}
 
 .btn-spinner {
   width: 20px;
   height: 20px;
-  border: 2.5px solid rgba(255,255,255,.35);
+  border: 2.5px solid rgba(255, 255, 255, .35);
   border-top-color: var(--white);
   border-radius: 50%;
   animation: spin .7s linear infinite;
   position: absolute;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 /* ─────────────────────────────────────────
    SIGN UP PROMPT
@@ -398,18 +443,24 @@ label {
   transition: color var(--transition);
 }
 
-.signup-link:hover { color: var(--green-btn-h); }
+.signup-link:hover {
+  color: var(--green-btn-h);
+}
 
 /* ─────────────────────────────────────────
    UTILITY
 ───────────────────────────────────────── */
-.hidden { display: none !important; }
+.hidden {
+  display: none !important;
+}
 
 /* ─────────────────────────────────────────
    RESPONSIVE
 ───────────────────────────────────────── */
 @media (max-width: 680px) {
-  .card { flex-direction: column; }
+  .card {
+    flex-direction: column;
+  }
 
   .panel-left {
     width: 100%;
@@ -417,8 +468,15 @@ label {
     min-height: unset;
   }
 
-  .panel-copy { margin: 24px 0 20px; }
-  .dots { margin-top: 0; }
+  .panel-copy {
+    margin: 24px 0 20px;
+  }
 
-  .panel-right { padding: 36px 28px; }
+  .dots {
+    margin-top: 0;
+  }
+
+  .panel-right {
+    padding: 36px 28px;
+  }
 }

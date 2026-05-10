@@ -54,7 +54,7 @@
 }
 
 body {
-    font-family: var(--font);
+    font-family: var(--font-body);
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
@@ -75,7 +75,7 @@ svg {
 
 button {
     cursor: pointer;
-    font-family: var(--font);
+    font-family: var(--font-body);
     border: none;
     background: none;
 }
@@ -1318,7 +1318,7 @@ button {
     border: 1.5px solid var(--border);
     border-radius: 10px;
     padding: 0 14px;
-    font-family: var(--font);
+    font-family: var(--font-body);
     font-size: 14px;
     color: var(--text);
     background: var(--white);
@@ -1483,7 +1483,7 @@ button {
     font-size: 14px;
     color: var(--text);
     background: var(--white);
-    font-family: var(--font);
+    font-family: var(--font-body);
     outline: none;
     transition: border-color .2s ease, box-shadow .2s ease, transform var(--transition-fast);
 }

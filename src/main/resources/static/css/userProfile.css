@@ -59,7 +59,7 @@
    BASE
 ═══════════════════════════════════════════════ */
 body {
-    font-family: var(--font);
+    font-family: var(--font-body);
     background: var(--bg);
     color: var(--text-primary);
     display: flex;
@@ -399,7 +399,7 @@ nav {
     padding: 4px 8px;
     border-radius: 6px;
     transition: background var(--transition-fast), transform var(--transition-fast);
-    font-family: var(--font);
+    font-family: var(--font-body);
 }
 
 .notif-mark-all-btn:hover {
@@ -737,7 +737,7 @@ nav {
     color: #fff;
     border: none;
     border-radius: 10px;
-    font-family: var(--font);
+    font-family: var(--font-body);
     font-size: .875rem;
     font-weight: 600;
     cursor: pointer;
@@ -1203,7 +1203,7 @@ nav {
     flex: 1;
     border: none;
     outline: none;
-    font-family: var(--font);
+    font-family: var(--font-body);
     font-size: .9rem;
     color: var(--text-primary);
     background: transparent;
@@ -1226,7 +1226,7 @@ nav {
     border: 1.5px solid var(--border);
     background: #fff;
     border-radius: 10px;
-    font-family: var(--font);
+    font-family: var(--font-body);
     font-size: .875rem;
     font-weight: 600;
     color: var(--text-secondary);
@@ -1245,7 +1245,7 @@ nav {
     background: var(--brand);
     border: none;
     border-radius: 10px;
-    font-family: var(--font);
+    font-family: var(--font-body);
     font-size: .875rem;
     font-weight: 600;
     color: #fff;
@@ -1371,7 +1371,7 @@ nav {
     color: #fff;
     border: none;
     border-radius: 10px;
-    font-family: var(--font);
+    font-family: var(--font-body);
     font-size: .85rem;
     font-weight: 600;
     cursor: pointer;
