@@ -1,11 +1,5 @@
 /* BudgetWise – Reports page (extends dashboard.css) */
 
-.nav-item.is-active {
-  background: var(--green-light);
-  color: var(--green-dark);
-  font-weight: 600;
-}
-
 .reports-topbar {
   padding: 24px 28px 0;
   border-bottom: 1px solid var(--border);
@@ -210,33 +204,10 @@
     padding-right: 16px;
   }
 
-  /* .sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  } */
-
   .layout {
     flex-direction: column;
   }
 
-  .nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-
-  .nav-item {
-    flex: 1 1 auto;
-    justify-content: center;
-    font-size: 13px;
-  }
-
-  .logout .nav-item {
-    justify-content: center;
-  }
 }
 
 .chart-card {

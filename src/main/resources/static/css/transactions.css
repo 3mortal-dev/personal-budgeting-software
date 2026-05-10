@@ -51,168 +51,6 @@ a { text-decoration: none; color: inherit; }
 button { cursor: pointer; font-family: var(--font); border: none; background: none; }
 
 /* ═══════════════════════════════════════════════
-   SIDEBAR  — pixel-perfect match to userProfile.css
-═══════════════════════════════════════════════ */
-/* .sidebar {
-    width: 260px;
-    min-height: 100vh;
-    background: var(--sidebar-bg);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    padding: 24px 16px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    animation: slideInLeft 0.45s cubic-bezier(.22,1,.36,1) both;
-} */
-
-/* ── Logo ── */
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.2rem;
-    font-weight: 800;
-    letter-spacing: -.3px;
-    color: var(--brand);
-    margin-bottom: 36px;
-    padding: 0 8px;
-}
-
-.logo-icon {
-    width: 36px;
-    height: 36px;
-    background: var(--brand);
-    border-radius: 10px;
-    display: grid;
-    place-items: center;
-    flex-shrink: 0;
-    transition: transform var(--transition-spring), box-shadow var(--transition-fast);
-}
-
-.logo:hover .logo-icon {
-    transform: rotate(-8deg) scale(1.1);
-    box-shadow: var(--shadow-brand);
-}
-
-.logo-icon svg { color: #fff; }
-
-/* ── Nav ── */
-nav {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.nav-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 11px 14px;
-    border-radius: 12px;
-    font-size: .9rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-    cursor: pointer;
-    text-decoration: none;
-    position: relative;
-    overflow: hidden;
-    transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
-    animation: navItemIn 0.4s cubic-bezier(.22,1,.36,1) both;
-}
-
-.nav-item:nth-child(1) { animation-delay: .05s; }
-.nav-item:nth-child(2) { animation-delay: .10s; }
-.nav-item:nth-child(3) { animation-delay: .15s; }
-.nav-item:nth-child(4) { animation-delay: .20s; }
-.nav-item:nth-child(5) { animation-delay: .25s; }
-.nav-item:nth-child(6) { animation-delay: .30s; }
-.nav-item:nth-child(7) { animation-delay: .35s; }
-
-.nav-item::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--bg);
-    border-radius: 12px;
-    opacity: 0;
-    transform: scaleX(.85);
-    transition: opacity var(--transition-fast), transform var(--transition-fast);
-}
-
-.nav-item:hover::before { opacity: 1; transform: scaleX(1); }
-
-.nav-item:hover {
-    color: var(--text-primary);
-    transform: translateX(3px);
-}
-
-.nav-item:hover svg,
-.nav-item:hover span { position: relative; z-index: 1; }
-
-.nav-item.active {
-    background: var(--brand-light);
-    color: var(--brand-dark);
-    font-weight: 600;
-}
-
-.nav-item.active::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 20%;
-    bottom: 20%;
-    width: 3px;
-    background: var(--brand);
-    border-radius: 0 3px 3px 0;
-}
-
-.nav-item svg {
-    flex-shrink: 0;
-    transition: transform var(--transition-spring);
-    position: relative;
-    z-index: 1;
-}
-
-.nav-item:hover svg { transform: scale(1.15); }
-
-/* ── Logout ── */
-.logout {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 11px 14px;
-    color: var(--red);
-    font-weight: 500;
-    font-size: .9rem;
-    cursor: pointer;
-    border-radius: 12px;
-    transition: background var(--transition-fast), transform var(--transition-fast);
-    animation: navItemIn .45s cubic-bezier(.22,1,.36,1) .4s both;
-}
-
-.logout:hover {
-    background: #fee2e2;
-    transform: translateX(3px);
-}
-
-.logout svg { transition: transform var(--transition-spring); }
-.logout:hover svg { transform: translateX(4px); }
-
-/* ═══════════════════════════════════════════════
-   MAIN LAYOUT
-═══════════════════════════════════════════════ */
-.main {
-    margin-left: 260px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-/* ═══════════════════════════════════════════════
    TOPBAR
 ═══════════════════════════════════════════════ */
 .topbar {
@@ -963,16 +801,11 @@ nav {
    RESPONSIVE
 ═══════════════════════════════════════════════ */
 @media (max-width: 1024px) {
-    .main { margin-left: 220px; }
-    /* .sidebar { width: 220px; } */
     .content { padding: 24px; }
     .col-source { display: none; }
 }
 
 @media (max-width: 768px) {
-    /* .sidebar { transform: translateX(-100%); transition: transform .3s ease; z-index: 200; width: 260px; } */
-    /* .sidebar.open { transform: translateX(0); } */
-    .main { margin-left: 0; }
     .content { padding: 16px; }
     .page-header { flex-direction: column; gap: 12px; }
     .page-header h1 { font-size: 1.5rem; }
@@ -992,19 +825,9 @@ nav {
     to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-@keyframes slideInLeft {
-    from { opacity: 0; transform: translateX(-32px); }
-    to   { opacity: 1; transform: translateX(0); }
-}
-
 @keyframes topbarIn {
     from { opacity: 0; transform: translateY(-20px); }
     to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes navItemIn {
-    from { opacity: 0; transform: translateX(-16px); }
-    to   { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes modalIn {
