@@ -398,6 +398,7 @@ function openAddModal() {
     .getElementById("budgetSubmitBtn")
     .querySelector(".btn-label").textContent = "Create Budget";
   document.getElementById("editBudgetId").value = "";
+  document.getElementById("budgetEndDate").valueAsDate = new Date();
 
   // Ensure category select is enabled for new budgets
   const select = document.getElementById("budgetCategorySelect");
