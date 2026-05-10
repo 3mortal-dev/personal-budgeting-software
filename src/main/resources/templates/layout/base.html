@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:fragment="layout (activePage, headFragment, bodyFragment)">
+<head th:replace="${headFragment}">
+</head>
+<body>
+<th:block th:replace="~{fragments/sidebar :: sidebar(activePage=${activePage})}"/>
+<th:block th:replace="${bodyFragment}"/>
+</body>
+</html>

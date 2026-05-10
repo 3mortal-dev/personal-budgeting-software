@@ -1,13 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: layout('profile', ~{:: head}, ~{:: page-body})}">
+<head th:fragment="head">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>BudgetWise – Profile</title>
   <link rel="stylesheet" th:href="@{/css/loading.css}" href="../static/css/loading.css"/>
   <link rel="stylesheet" th:href="@{/css/userProfile.css}" href="../static/css/userProfile.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link rel="stylesheet" th:href="@{/css/goals.css}" href="../static/css/goals.css"/>
 </head>
 <body>
+<th:block th:fragment="page-body">
 
 <!-- ══ PAGE LOADER ══ -->
 <div class="page-loader" id="pageLoader">
@@ -26,56 +29,6 @@
     </div>
     <div class="page-loader__label" id="loaderLabel">Loading your dashboard…</div>
 </div>
-
-<!-- ═══════════ SIDEBAR ═══════════ -->
-<aside class="sidebar">
-  <div class="logo">
-    <div class="logo-icon">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-        <path d="M3 3h18v4H3zM3 10h18v4H3zM3 17h18v4H3z"/>
-      </svg>
-    </div>
-    BudgetWise
-  </div>
-
-  <nav>
-    <a class="nav-item" th:href="@{/dashboard}" href="/dashboard">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      Home
-    </a>
-    <a class="nav-item" th:href="@{/transactions}" href="/transactions">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-      Transactions
-    </a>
-    <a class="nav-item" th:href="@{/budget}" href="/budget">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-      Budgets
-    </a>
-    <a class="nav-item" th:href="@{/goals}" href="/goals">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
-      Goals
-    </a>
-    <a class="nav-item" th:href="@{/reports}" href="/reports">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      Reports
-    </a>
-    <a class="nav-item" th:href="@{/notifications}" href="/notifications">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-      Notifications
-    </a>
-    <a class="nav-item active" th:href="@{/userProfile}" href="/userProfile">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      Profile
-    </a>
-  </nav>
-
-  <div class="logout" onclick="handleLogout()">
-    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
-    </svg>
-    Logout
-  </div>
-</aside>
 
 <!-- ═══════════ MAIN ═══════════ -->
 <div class="main">
@@ -415,5 +368,6 @@
 <script th:src="@{/js/Bankintegration.js}" src="../static/js/Bankintegration.js"></script>
 <script th:src="@{/js/userProfile.js}" src="../static/js/userProfile.js"></script>
 <script th:src="@{/js/navbar-notifications.js}" src="../static/js/navbar-notifications.js"></script>
+</th:block>
 </body>
 </html>

@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: layout('goals', ~{:: head}, ~{:: page-body})}">
+<head th:fragment="head">
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>BudgetWise – Goals</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
     <link rel="stylesheet" th:href="@{/css/loading.css}" href="../static/css/loading.css"/>
-    <link rel="stylesheet" th:href="@{/css/goal.css}" href="../static/css/goal.css"/>
+    <link rel="stylesheet" th:href="@{/css/goals.css}" href="../static/css/goals.css"/>
 </head>
 <body>
+<th:block th:fragment="page-body">
 
 <!-- ══ PAGE LOADER ══ -->
 <div class="page-loader" id="pageLoader">
@@ -33,42 +34,6 @@
     <span></span><span></span><span></span><span></span>
     <span></span><span></span><span></span><span></span>
 </div>
-
-<!-- ═══════════════════════════ SIDEBAR ═══════════════════════════ -->
-<aside class="sidebar">
-    <div class="sidebar__logo">
-        <div class="sidebar__logo-icon"><i class="fa-solid fa-wallet"></i></div>
-        <span class="sidebar__logo-text">BudgetWise</span>
-    </div>
-    <nav class="sidebar__nav">
-        <a class="sidebar__link" th:href="@{/dashboard}" href="/dashboard">
-            <i class="fa-solid fa-house"></i><span>Home</span>
-        </a>
-        <a class="sidebar__link" th:href="@{/transactions}" href="/transactions">
-            <i class="fa-solid fa-receipt"></i><span>Transactions</span>
-        </a>
-        <a class="sidebar__link" th:href="@{/budget}" href="/budget">
-            <i class="fa-solid fa-chart-pie"></i><span>Budgets</span>
-        </a>
-        <a class="sidebar__link sidebar__link--active" th:href="@{/goals}" href="/goals">
-            <i class="fa-solid fa-bullseye"></i><span>Goals</span>
-        </a>
-        <a class="sidebar__link" th:href="@{/reports}" href="/reports">
-            <i class="fa-solid fa-chart-bar"></i><span>Reports</span>
-        </a>
-        <a class="sidebar__link" th:href="@{/notifications}" href="/notifications">
-            <i class="fa-solid fa-bell"></i><span>Notifications</span>
-        </a>
-        <a class="sidebar__link" th:href="@{/userProfile}" href="/userProfile">
-            <i class="fa-solid fa-user"></i><span>Profile</span>
-        </a>
-    </nav>
-    <form class="sidebar__logout-form" th:action="@{/api/auth/logout}" method="post">
-        <button type="submit" class="sidebar__logout">
-            <i class="fa-solid fa-arrow-right-from-bracket"></i><span>Logout</span>
-        </button>
-    </form>
-</aside>
 
 <!-- ═══════════════════════════ MAIN ═══════════════════════════ -->
 <main class="main">
@@ -288,7 +253,8 @@
 <div class="toast" id="toast"></div>
 
 <script th:src="@{/js/loading.js}" src="../static/js/loading.js"></script>
-<script th:src="@{/js/goal.js}" src="../static/js/goal.js"></script>
+<script th:src="@{/js/goals.js}" src="../static/js/goals.js"></script>
 <script th:src="@{/js/navbar-notifications.js}" src="../static/js/navbar-notifications.js"></script>
+</th:block>
 </body>
 </html>

@@ -585,7 +585,7 @@ function formatDate(dateString) {
 let toastTimer;
 
 /**
- * Core toast engine — matches goal.js pattern.
+ * Core toast engine — matches goals.js pattern.
  * @param {string} msg   - Message text
  * @param {'success'|'error'|'info'|'warning'} type
  * @param {number}  [duration=3200]
