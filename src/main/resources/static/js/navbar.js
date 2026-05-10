@@ -25,7 +25,7 @@
   ];
 
   const NOTIF_API = {
-    ALL: "/notifications/all",
+    ALL: "/api/notifications/all",
     MARK_READ: (id) => `/notifications/${id}/markRead`,
   };
 
