@@ -7,8 +7,8 @@
 ═══════════════════════════════════════════════════ */
 
 const API = {
-  BASE_URL: "http://localhost:8080/api/notifications",
-  PROFILE_URL: "http://localhost:8080/api/profile",
+  BASE_URL: "/api/notifications",
+  PROFILE_URL: "/api/profile",
 
   ALL: "/all",
   UNREAD: "/unread",
