@@ -1,94 +1,105 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BudgetWise - Create Account</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/register.css}">
-    <script src="https://unpkg.com/lucide@latest"></script>
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>BudgetWise - Create Account</title>
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+            rel="stylesheet">
+        <link rel="stylesheet" th:href="@{/css/register.css}">
+        <script src="https://unpkg.com/lucide@latest"></script>
+    </head>
+    <body>
 
-<div class="container">
-    <aside class="sidebar">
-        <div class="logo-section">
-            <div class="logo-box"><i data-lucide="wallet"></i></div>
-            <span>BudgetWise</span>
-        </div>
-        <div class="hero-text">
-            <h1>Join thousands of smart savers</h1>
-            <p>Start your journey to financial freedom today.</p>
-        </div>
-        <div class="security-badge">
-            <i data-lucide="shield-check" class="shield-icon"></i>
-            <span>Bank-grade security</span>
-        </div>
-    </aside>
-
-    <main class="form-section">
-        <header class="form-header">
-            <h2>Create Account</h2>
-            <p>Enter your details to get started</p>
-        </header>
-
-        <form id="registrationForm">
-            <div class="input-group">
-                <label>Full Name</label>
-                <div class="input-wrapper">
-                    <i data-lucide="user"></i>
-                    <input type="text" id="name" placeholder="Ahmed Salem" required>
+        <div class="container">
+            <aside class="sidebar">
+                <div class="logo-section">
+                    <div class="logo-box"><i data-lucide="wallet"></i></div>
+                    <span>BudgetWise</span>
                 </div>
-            </div>
-
-            <div class="input-group">
-                <label>Email Address</label>
-                <div class="input-wrapper">
-                    <i data-lucide="mail"></i>
-                    <input type="email" id="email" placeholder="ahmed@example.com" required>
+                <div class="hero-text">
+                    <h1>Join thousands of smart savers</h1>
+                    <p>Start your journey to financial freedom today.</p>
                 </div>
-            </div>
-
-            <!-- Password -->
-            <div class="input-group">
-                <label>Create Password</label>
-                <div class="input-wrapper">
-                    <i data-lucide="lock"></i>
-                    <input type="password" id="password" placeholder="••••••••" required>
-                    <span class="toggle-password" id="togglePassword">
-                        <i data-lucide="eye"></i>
-                    </span>
-                    <!-- New Error Message -->
-                    <span class="error-msg pass-error">Password must be at least 8 characters</span>
+                <div class="security-badge">
+                    <i data-lucide="shield-check" class="shield-icon"></i>
+                    <span>Bank-grade security</span>
                 </div>
-            </div>
+            </aside>
 
-            <!-- Confirm Password -->
-            <div class="input-group">
-                <label>Confirm Password</label>
-                <div class="input-wrapper">
-                    <i data-lucide="shield-check"></i>
-                    <input type="password" id="confirmPassword" placeholder="••••••••" required>
-                    <span class="error-msg match-error">Passwords do not match</span>
+            <main class="form-section">
+                <header class="form-header">
+                    <h2>Create Account</h2>
+                    <p>Enter your details to get started</p>
+                </header>
+
+                <form id="registrationForm">
+                    <div class="input-group">
+                        <label>Full Name</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="user"></i>
+                            <input type="text" id="name"
+                                placeholder="Ahmed Salem" required>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Email Address</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="mail"></i>
+                            <input type="email" id="email"
+                                placeholder="ahmed@example.com" required>
+                        </div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="input-group">
+                        <label>Create Password</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="lock"></i>
+                            <input type="password" id="password"
+                                placeholder="••••••••" required>
+                            <span class="toggle-password" id="togglePassword">
+                                <i data-lucide="eye"></i>
+                            </span>
+                            <!-- New Error Message -->
+                            <span class="error-msg pass-error">Password must be
+                                at least 8 characters</span>
+                        </div>
+                    </div>
+
+                    <!-- Confirm Password -->
+                    <div class="input-group">
+                        <label>Confirm Password</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="shield-check"></i>
+                            <input type="password" id="confirmPassword"
+                                placeholder="••••••••" required>
+                            <span class="error-msg match-error">Passwords do not
+                                match</span>
+                        </div>
+                    </div>
+
+                    <div class="terms-row">
+                        <input type="checkbox" id="terms">
+                        <label for="terms">I agree to the <a href="#">Terms of
+                                Service</a></label>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="submitBtn"
+                        disabled>
+                        Create Account <i data-lucide="arrow-right"></i>
+                    </button>
+                </form>
+
+                <div class="login-footer">
+                    Already have an account? <a th:href="@{login}">Log In</a>
                 </div>
-            </div>
-
-            <div class="terms-row">
-                <input type="checkbox" id="terms">
-                <label for="terms">I agree to the <a href="#">Terms of Service</a></label>
-            </div>
-
-            <button type="submit" class="btn-submit" id="submitBtn" disabled>
-                Create Account <i data-lucide="arrow-right"></i>
-            </button>
-        </form>
-
-        <div class="login-footer">
-            Already have an account? <a th:href="@{login}">Log In</a>
+            </main>
         </div>
-    </main>
-</div>
 
-<script th:src="@{/js/register.js}"></script>
-</body>
+        <script th:src="@{/js/register.js}"></script>
+    </body>
 </html>

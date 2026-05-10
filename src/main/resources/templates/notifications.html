@@ -1,256 +1,197 @@
 <!DOCTYPE html>
 <html xmlns="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BudgetWise – Notifications</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BudgetWise – Notifications</title>
 
-  <link rel="stylesheet" th:href="@{/css/loading.css}" href="../static/css/loading.css"/>
-  <link rel="stylesheet" th:href="@{/css/dashboard.css}" href="../static/css/dashboard.css"/>
-  <link rel="stylesheet" th:href="@{/css/notification.css}" href="../static/css/notification.css"/>
-</head>
-<body>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" th:href="@{/css/navbar.css}"
+      href="../static/css/navbar.css" />
 
-  <!-- ══ PAGE LOADER ══ -->
-  <div class="page-loader" id="pageLoader">
-    <div class="page-loader__logo">
-      <div class="page-loader__icon">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="5" width="20" height="14" rx="2"/>
-          <path d="M2 10h20"/>
-        </svg>
+    <link rel="stylesheet" th:href="@{/css/loading.css}"
+      href="../static/css/loading.css" />
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}"
+      href="../static/css/dashboard.css" />
+    <link rel="stylesheet" th:href="@{/css/notification.css}"
+      href="../static/css/notification.css" />
+  </head>
+  <body>
+
+    <!-- ══ PAGE LOADER ══ -->
+    <div class="page-loader" id="pageLoader">
+      <div class="page-loader__logo">
+        <div class="page-loader__icon">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none"
+            stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="5" width="20" height="14" rx="2" />
+            <path d="M2 10h20" />
+          </svg>
+        </div>
+        BudgetWise
       </div>
-      BudgetWise
+      <div class="page-loader__bar-track">
+        <div class="page-loader__bar-fill" id="loaderBar"></div>
+      </div>
+      <div class="page-loader__label" id="loaderLabel">Loading your
+        dashboard…</div>
     </div>
-    <div class="page-loader__bar-track">
-      <div class="page-loader__bar-fill" id="loaderBar"></div>
-    </div>
-    <div class="page-loader__label" id="loaderLabel">Loading your dashboard…</div>
-  </div>
 
-  <div class="layout">
+    <div class="layout">
 
-    <!-- ══ SIDEBAR ══ -->
-    <aside class="sidebar">
-      <div class="logo">
-        <div class="logo-icon">
-          <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2" stroke-width="2"/><path d="M2 10h20" stroke-width="2"/></svg>
-        </div>
-        <span class="logo-text">BudgetWise</span>
-      </div>
+      <div id="sidebar-root"></div>
 
-      <nav class="nav">
-        <a class="nav-item" th:href="@{/dashboard}" href="/dashboard">
-          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          Dashboard
-        </a>
+      <!-- ══ MAIN ══ -->
+      <div class="main">
 
-        <a class="nav-item" th:href="@{/transactions}" href="/transactions">
-          <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-          Transactions
-        </a>
+        <div id="topbar-root"></div>
 
-        <a class="nav-item" th:href="@{/budget}" href="/budget">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          Budgets
-        </a>
+        <!-- NOTIFICATIONS CONTENT -->
+        <div class="notif-page-content">
 
-        <a class="nav-item" th:href="@{/goals}" href="/goals">
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
-          Goals
-        </a>
-
-        <a class="nav-item" th:href="@{/reports}" href="/reports">
-          <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-          Reports
-        </a>
-
-        <a class="nav-item active" th:href="@{/notifications}" href="/notifications">
-          <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          Notifications
-        </a>
-
-        <a class="nav-item" th:href="@{/userProfile}" href="/userProfile">
-          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Profile
-        </a>
-      </nav>
-
-      <div class="logout">
-        <a class="nav-item" th:href="@{/index}" href="/index">
-          <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Logout
-        </a>
-      </div>
-    </aside>
-
-    <!-- ══ MAIN ══ -->
-    <div class="main">
-
-      <!-- TOP NAV -->
-      <div class="topnav">
-        <div class="topnav-greeting" id="greeting">Good morning, Ahmed <span>👋</span></div>
-
-        <div class="topnav-actions">
-          <div class="notif-wrapper" id="notifWrapper">
-            <button class="btn-icon notif-btn" id="notifBtn" onclick="toggleNotifDropdown()" aria-label="Notifications">
-              <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-              <span class="notif-badge" id="notifBadge"></span>
-            </button>
-
-            <div class="notif-dropdown" id="notifDropdown">
-              <div class="notif-dropdown-header">
-                <span class="notif-dropdown-title">Notifications</span>
-                <button class="notif-mark-all" onclick="markAllRead()">Mark all read</button>
-              </div>
-
-              <div class="notif-list" id="notifDropdownList"></div>
-
-              <div class="notif-dropdown-footer">
-                <span class="notif-view-all" style="cursor:default;opacity:.6;">
-                  You're on this page
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <div class="avatar">AS</div>
-        </div>
-      </div>
-
-      <!-- NOTIFICATIONS CONTENT -->
-      <div class="notif-page-content">
-
-        <!-- HEADER -->
-        <div class="notif-page-header">
-          <div>
-            <h1>Notifications</h1>
-            <p>Stay on top of your budget alerts, goals, and account activity.</p>
-          </div>
-
-          <div class="notif-page-actions">
-            <div class="filter-bar" id="filterBar">
-                <button class="filter-btn active"
-                        data-filter="all"
-                        onclick="setFilter('all')">
-                All
-                </button>
-
-                <button class="filter-btn"
-                        data-filter="unread"
-                        onclick="setFilter('unread')">
-                Unread
-                </button>
-
-                <button class="filter-btn"
-                        data-filter="BUDGET_ALERT"
-                        onclick="setFilter('BUDGET_ALERT')">
-                Budget Alerts
-                </button>
-
-                <button class="filter-btn"
-                        data-filter="GOAL_REACHED"
-                        onclick="setFilter('GOAL_REACHED')">
-                Goals
-                </button>
-            </div>
-
-            <button class="btn-outline" onclick="markAllRead()">
-              <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-              Mark all read
-            </button>
-
-            <button class="btn-danger-outline" onclick="confirmDeleteAll()">
-              <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-              Clear all
-            </button>
-          </div>
-        </div>
-
-        <!-- STATS -->
-        <div class="notif-stats">
-          <div class="notif-stat-card">
-            <div class="notif-stat-icon" style="background:#eff6ff;">
-              <svg viewBox="0 0 24 24" stroke="var(--blue)"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            </div>
+          <!-- HEADER -->
+          <div class="notif-page-header">
             <div>
-              <div class="notif-stat-label">Total</div>
-              <div class="notif-stat-val" id="statTotal">—</div>
+              <h1>Notifications</h1>
+              <p>Stay on top of your budget alerts, goals, and account
+                activity.</p>
+            </div>
+
+            <div class="notif-page-actions">
+              <div class="filter-bar" id="filterBar">
+                <button class="filter-btn active"
+                  data-filter="all"
+                  onclick="setFilter('all')">
+                  All
+                </button>
+
+                <button class="filter-btn"
+                  data-filter="unread"
+                  onclick="setFilter('unread')">
+                  Unread
+                </button>
+
+                <button class="filter-btn"
+                  data-filter="BUDGET_ALERT"
+                  onclick="setFilter('BUDGET_ALERT')">
+                  Budget Alerts
+                </button>
+
+                <button class="filter-btn"
+                  data-filter="GOAL_REACHED"
+                  onclick="setFilter('GOAL_REACHED')">
+                  Goals
+                </button>
+              </div>
+
+              <button class="btn-outline" onclick="markAllRead()">
+                <svg viewBox="0 0 24 24"><polyline
+                    points="20 6 9 17 4 12" /></svg>
+                Mark all read
+              </button>
+
+              <button class="btn-danger-outline" onclick="confirmDeleteAll()">
+                <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6" /><path
+                    d="M19 6l-1 14H6L5 6" /><path d="M10 11v6M14 11v6" /><path
+                    d="M9 6V4h6v2" /></svg>
+                Clear all
+              </button>
             </div>
           </div>
+
+          <!-- STATS -->
+          <div class="notif-stats">
+            <div class="notif-stat-card">
+              <div class="notif-stat-icon" style="background:#eff6ff;">
+                <svg viewBox="0 0 24 24" stroke="var(--blue)"><path
+                    d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path
+                    d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
+              </div>
+              <div>
+                <div class="notif-stat-label">Total</div>
+                <div class="notif-stat-val" id="statTotal">—</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- LIST -->
+          <div class="notif-page-card" id="notifPageCard">
+            <div id="notifPageList">
+
+              <!-- Skeleton 1 -->
+              <div class="notif-skeleton">
+                <div class="skel-icon"></div>
+                <div class="skel-body">
+                  <div class="skel-line short"></div>
+                  <div class="skel-line long"></div>
+                  <div class="skel-line" style="width:30%"></div>
+                </div>
+              </div>
+
+              <!-- Skeleton 2 -->
+              <div class="notif-skeleton">
+                <div class="skel-icon"></div>
+                <div class="skel-body">
+                  <div class="skel-line short"></div>
+                  <div class="skel-line long"></div>
+                  <div class="skel-line" style="width:30%"></div>
+                </div>
+              </div>
+
+              <!-- Skeleton 3 -->
+              <div class="notif-skeleton">
+                <div class="skel-icon"></div>
+                <div class="skel-body">
+                  <div class="skel-line short"></div>
+                  <div class="skel-line long"></div>
+                  <div class="skel-line" style="width:30%"></div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL -->
+    <div id="confirmModal" class="modal-overlay" role="dialog"
+      aria-modal="true">
+      <div class="modal-box confirm-box">
+        <div class="modal-header">
+          <h3 class="modal-title">Clear all notifications?</h3>
+          <button class="modal-close" onclick="closeConfirmModal()">×</button>
         </div>
 
-        <!-- LIST -->
-        <div class="notif-page-card" id="notifPageCard">
-          <div id="notifPageList">
+        <div class="modal-body">
+          <p class="confirm-body">
+            This will permanently delete all your notifications.
+          </p>
 
-            <!-- Skeleton 1 -->
-            <div class="notif-skeleton">
-              <div class="skel-icon"></div>
-              <div class="skel-body">
-                <div class="skel-line short"></div>
-                <div class="skel-line long"></div>
-                <div class="skel-line" style="width:30%"></div>
-              </div>
-            </div>
+          <div class="confirm-actions">
+            <button class="btn-cancel"
+              onclick="closeConfirmModal()">Cancel</button>
 
-            <!-- Skeleton 2 -->
-            <div class="notif-skeleton">
-              <div class="skel-icon"></div>
-              <div class="skel-body">
-                <div class="skel-line short"></div>
-                <div class="skel-line long"></div>
-                <div class="skel-line" style="width:30%"></div>
-              </div>
-            </div>
-
-            <!-- Skeleton 3 -->
-            <div class="notif-skeleton">
-              <div class="skel-icon"></div>
-              <div class="skel-body">
-                <div class="skel-line short"></div>
-                <div class="skel-line long"></div>
-                <div class="skel-line" style="width:30%"></div>
-              </div>
-            </div>
-
+            <button class="btn-confirm-del btn-loadable" id="confirmDelBtn"
+              onclick="deleteAllNotifications()">
+              <span class="btn-label">Yes, clear all</span>
+              <span class="btn-spinner" aria-hidden="true"></span>
+            </button>
           </div>
         </div>
-
       </div>
     </div>
-  </div>
 
-  <!-- MODAL -->
-  <div id="confirmModal" class="modal-overlay" role="dialog" aria-modal="true">
-    <div class="modal-box confirm-box">
-      <div class="modal-header">
-        <h3 class="modal-title">Clear all notifications?</h3>
-        <button class="modal-close" onclick="closeConfirmModal()">×</button>
-      </div>
+    <!-- TOAST -->
+    <div id="toast"></div>
 
-      <div class="modal-body">
-        <p class="confirm-body">
-          This will permanently delete all your notifications.
-        </p>
-
-        <div class="confirm-actions">
-          <button class="btn-cancel" onclick="closeConfirmModal()">Cancel</button>
-
-          <button class="btn-confirm-del btn-loadable" id="confirmDelBtn" onclick="deleteAllNotifications()">
-            <span class="btn-label">Yes, clear all</span>
-            <span class="btn-spinner" aria-hidden="true"></span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- TOAST -->
-  <div id="toast"></div>
-
-  <script th:src="@{/js/loading.js}" src="../static/js/loading.js"></script>
-  <script th:src="@{/js/notification.js}" src="../static/js/notification.js"></script>
-</body>
+    <script th:src="@{/js/loading.js}" src="../static/js/loading.js"></script>
+    <script th:src="@{/js/navbar.js}" src="../static/js/navbar.js"></script>
+    <script th:src="@{/js/notification.js}"
+      src="../static/js/notification.js"></script>
+  </body>
 </html>

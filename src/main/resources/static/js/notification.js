@@ -2,234 +2,199 @@
    BudgetWise - Notifications JavaScript
 ═══════════════════════════════════════════════════ */
 
-
 /* ═══════════════════════════════════════════════════
    API CONFIGURATION
 ═══════════════════════════════════════════════════ */
 
 const API = {
-    BASE_URL: "http://localhost:8080/notifications",
-    PROFILE_URL: "http://localhost:8080/api/profile",
+  BASE_URL: "http://localhost:8080/api/notifications",
+  PROFILE_URL: "http://localhost:8080/api/profile",
 
-    ALL: "/all",
-    UNREAD: "/unread",
+  ALL: "/all",
+  UNREAD: "/unread",
 
-    MARK_READ: (id) => `/${id}/markRead`,
-    DELETE: (id) => `/${id}/delete`,
+  MARK_READ: (id) => `/${id}/markRead`,
+  DELETE: (id) => `/${id}/delete`,
 
-    DELETE_ALL: "/deleteAll",
+  DELETE_ALL: "/deleteAll",
 
-    BY_TYPE: (type) => `/type?type=${type}`,
+  BY_TYPE: (type) => `/type?type=${type}`,
 };
-
 
 /* ═══════════════════════════════════════════════════
    STATE
 ═══════════════════════════════════════════════════ */
 
 const state = {
-    notifications: [],
-    activeFilter: "all",
+  notifications: [],
+  activeFilter: "all",
 };
-
 
 /* ═══════════════════════════════════════════════════
    FETCH HELPER
 ═══════════════════════════════════════════════════ */
 
 async function apiFetch(endpoint, options = {}) {
+  try {
+    const response = await fetch(`${API.BASE_URL}${endpoint}`, {
+      credentials: "include",
 
-    try {
+      headers: {
+        "Content-Type": "application/json",
+      },
 
-        const response = await fetch(
-            `${API.BASE_URL}${endpoint}`,
-            {
-                credentials: "include",
+      ...options,
+    });
 
-                headers: {
-                    "Content-Type": "application/json",
-                },
-
-                ...options,
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-        }
-
-        const contentType =
-            response.headers.get("content-type");
-
-        if (
-            contentType &&
-            contentType.includes("application/json")
-        ) {
-            return await response.json();
-        }
-
-        return true;
-
-    } catch (error) {
-
-        console.error("API ERROR:", error);
-
-        showToast("Something went wrong");
-
-        return null;
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
     }
-}
 
+    const contentType = response.headers.get("content-type");
+
+    if (contentType && contentType.includes("application/json")) {
+      return await response.json();
+    }
+
+    return true;
+  } catch (error) {
+    console.error("API ERROR:", error);
+
+    showToast("Something went wrong");
+
+    return null;
+  }
+}
 
 /* ═══════════════════════════════════════════════════
    PROFILE  —  greeting + avatar
 ═══════════════════════════════════════════════════ */
 
 async function loadProfile() {
-    try {
-        const response = await fetch(API.PROFILE_URL, {
-            credentials: "include",
-            headers: {"Content-Type": "application/json"},
-        });
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = await response.json();
-        renderProfile(data);
-    } catch (err) {
-        console.error("Failed to load profile:", err);
-        // Leave the greeting as-is rather than crashing the page
-    }
+  try {
+    const response = await fetch(API.PROFILE_URL, {
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    renderProfile(data);
+  } catch (err) {
+    console.error("Failed to load profile:", err);
+    // Leave the greeting as-is rather than crashing the page
+  }
 }
 
 function renderProfile(data) {
-    const name = data?.name || data?.username || "there";
-    const firstName = name.trim().split(/\s+/)[0];
-    const initials = name.trim().split(/\s+/)
-        .filter(Boolean).slice(0, 2)
-        .map(w => w[0].toUpperCase()).join("");
+  const name = data?.name || data?.username || "there";
+  const firstName = name.trim().split(/\s+/)[0];
+  const initials = name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join("");
 
-    // Greeting
-    const hour = new Date().getHours();
-    const timeOfDay = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
-    const greetingEl = document.getElementById("greeting");
-    if (greetingEl) {
-        greetingEl.innerHTML = `Good ${timeOfDay}, ${escapeHtml(firstName)} <span>👋</span>`;
-    }
+  // Greeting
+  const hour = new Date().getHours();
+  const timeOfDay = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
+  const greetingEl = document.getElementById("greeting");
+  if (greetingEl) {
+    greetingEl.innerHTML = `Good ${timeOfDay}, ${escapeHtml(firstName)} <span>👋</span>`;
+  }
 
-    // Avatar — try the topnav avatar first, fall back to any .avatar element
-    const avatarEl = document.getElementById("topnavAvatar")
-        || document.querySelector(".avatar");
-    if (avatarEl) {
-        avatarEl.textContent = initials || "?";
-        avatarEl.classList.remove("skeleton-light");
-    }
+  // Avatar — try the topnav avatar first, fall back to any .avatar element
+  const avatarEl =
+    document.getElementById("topnavAvatar") ||
+    document.querySelector(".avatar");
+  if (avatarEl) {
+    avatarEl.textContent = initials || "?";
+    avatarEl.classList.remove("skeleton-light");
+  }
 }
-
 
 async function loadNotifications() {
+  const data = await apiFetch(API.ALL);
 
-    const data = await apiFetch(API.ALL);
+  if (!data) {
+    renderErrorState();
+    return;
+  }
 
-    if (!data) {
-        renderErrorState();
-        return;
-    }
+  state.notifications = data;
 
-    state.notifications = data;
-
-    renderEverything();
+  renderEverything();
 }
-
 
 /* ═══════════════════════════════════════════════════
    MAIN RENDER
 ═══════════════════════════════════════════════════ */
 
 function renderEverything() {
+  renderList();
 
-    renderList();
+  renderStats();
 
-    renderStats();
+  renderFilterCounts();
 
-    renderFilterCounts();
+  updateTopNavBadge();
 
-    updateTopNavBadge();
-
-    renderDropdownList();
+  renderDropdownList();
 }
-
 
 /* ═══════════════════════════════════════════════════
    FILTERING
 ═══════════════════════════════════════════════════ */
 
 function getFilteredNotifications() {
+  if (state.activeFilter === "all") {
+    return state.notifications;
+  }
 
-    if (state.activeFilter === "all") {
-        return state.notifications;
-    }
+  if (state.activeFilter === "unread") {
+    return state.notifications.filter((n) => !n.read);
+  }
 
-    if (state.activeFilter === "unread") {
-
-        return state.notifications.filter(
-            n => !n.read
-        );
-    }
-
-    return state.notifications.filter(
-        n => n.type === state.activeFilter
-    );
+  return state.notifications.filter((n) => n.type === state.activeFilter);
 }
-
 
 function setFilter(filter) {
+  state.activeFilter = filter;
 
-    state.activeFilter = filter;
+  document.querySelectorAll(".filter-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.filter === filter);
+  });
 
-    document
-        .querySelectorAll(".filter-btn")
-        .forEach(btn => {
+  renderList();
 
-            btn.classList.toggle(
-                "active",
-                btn.dataset.filter === filter
-            );
-        });
-
-    renderList();
-
-    renderStats();
+  renderStats();
 }
-
 
 /* ═══════════════════════════════════════════════════
    RENDER LIST
 ═══════════════════════════════════════════════════ */
 
 function renderList() {
+  const list = document.getElementById("notifPageList");
 
-    const list =
-        document.getElementById("notifPageList");
+  if (!list) return;
 
-    if (!list) return;
+  const notifications = getFilteredNotifications();
 
-    const notifications =
-        getFilteredNotifications();
-
-    if (!notifications.length) {
-
-        list.innerHTML = `
+  if (!notifications.length) {
+    list.innerHTML = `
       <div class="notif-empty-page">
         <p>No notifications found.</p>
       </div>
     `;
 
-        return;
-    }
+    return;
+  }
 
-    list.innerHTML =
-        notifications.map(notification => {
-
-            return `
+  list.innerHTML = notifications
+    .map((notification) => {
+      return `
         <div class="notif-page-item ${!notification.read ? "unread" : ""}">
 
           <div class="notif-page-body">
@@ -250,7 +215,9 @@ function renderList() {
 
           <div class="notif-page-actions-row">
 
-            ${!notification.read ? `
+            ${
+              !notification.read
+                ? `
               <button
                 class="notif-action-btn"
                 onclick="markRead(${notification.id})"
@@ -258,7 +225,9 @@ function renderList() {
               >
                 ✓
               </button>
-            ` : ""}
+            `
+                : ""
+            }
 
             <button
               class="notif-action-btn delete-btn"
@@ -272,119 +241,84 @@ function renderList() {
 
         </div>
       `;
-
-        }).join("");
+    })
+    .join("");
 }
-
 
 /* ═══════════════════════════════════════════════════
    STATS
 ═══════════════════════════════════════════════════ */
 
 function renderStats() {
+  const visibleNotifications = getFilteredNotifications();
 
-    const visibleNotifications =
-        getFilteredNotifications();
+  const total = visibleNotifications.length;
 
-    const total =
-        visibleNotifications.length;
+  const unread = visibleNotifications.filter((n) => !n.read).length;
 
-    const unread =
-        visibleNotifications.filter(
-            n => !n.read
-        ).length;
+  const alerts = visibleNotifications.filter(
+    (n) => n.type === "BUDGET_ALERT",
+  ).length;
 
-    const alerts =
-        visibleNotifications.filter(
-            n => n.type === "BUDGET_ALERT"
-        ).length;
+  const goals = visibleNotifications.filter(
+    (n) => n.type === "GOAL_REACHED" || n.type === "GOAL_REMINDER",
+  ).length;
 
-    const goals =
-        visibleNotifications.filter(
-            n =>
-                n.type === "GOAL_REACHED" ||
-                n.type === "GOAL_REMINDER"
-        ).length;
+  setText("statTotal", total);
 
-    setText("statTotal", total);
+  setText("statUnread", unread);
 
-    setText("statUnread", unread);
+  setText("statAlerts", alerts);
 
-    setText("statAlerts", alerts);
-
-    setText("statGoals", goals);
+  setText("statGoals", goals);
 }
-
 
 function renderFilterCounts() {
+  setText("countAll", state.notifications.length);
 
-    setText(
-        "countAll",
-        state.notifications.length
-    );
-
-    setText(
-        "countUnread",
-        state.notifications.filter(
-            n => !n.read
-        ).length
-    );
+  setText("countUnread", state.notifications.filter((n) => !n.read).length);
 }
-
 
 /* ═══════════════════════════════════════════════════
    TOP NAV BADGE
 ═══════════════════════════════════════════════════ */
 
 function updateTopNavBadge() {
+  const badge = document.getElementById("notifBadge");
 
-    const badge =
-        document.getElementById("notifBadge");
+  if (!badge) return;
 
-    if (!badge) return;
+  const unread = state.notifications.filter((n) => !n.read).length;
 
-    const unread =
-        state.notifications.filter(
-            n => !n.read
-        ).length;
+  badge.textContent = unread > 0 ? unread : "";
 
-    badge.textContent =
-        unread > 0 ? unread : "";
-
-    badge.classList.toggle(
-        "has-unread",
-        unread > 0
-    );
+  badge.classList.toggle("has-unread", unread > 0);
 }
-
 
 /* ═══════════════════════════════════════════════════
    DROPDOWN
 ═══════════════════════════════════════════════════ */
 
 function renderDropdownList() {
+  const list = document.getElementById("notifDropdownList");
 
-    const list =
-        document.getElementById("notifDropdownList");
+  if (!list) return;
 
-    if (!list) return;
+  const recent = state.notifications.slice(0, 5);
 
-    const recent =
-        state.notifications.slice(0, 5);
-
-    if (!recent.length) {
-
-        list.innerHTML = `
+  if (!recent.length) {
+    list.innerHTML = `
       <div class="notif-empty">
         No notifications
       </div>
     `;
 
-        return;
-    }
+    return;
+  }
 
-    list.innerHTML =
-        recent.map(notification => `
+  list.innerHTML = recent
+    .map(
+      (notification) => `
 
       <div
         class="notif-item ${!notification.read ? "unread" : ""}"
@@ -409,145 +343,104 @@ function renderDropdownList() {
 
       </div>
 
-    `).join("");
+    `,
+    )
+    .join("");
 }
-
 
 /* ═══════════════════════════════════════════════════
    ACTIONS
 ═══════════════════════════════════════════════════ */
 
 async function markRead(id) {
+  const result = await apiFetch(API.MARK_READ(id), {
+    method: "PUT",
+  });
 
-    const result =
-        await apiFetch(
-            API.MARK_READ(id),
-            {
-                method: "PUT",
-            }
-        );
+  if (!result) return;
 
-    if (!result) return;
+  const notification = state.notifications.find((n) => n.id === id);
 
-    const notification =
-        state.notifications.find(
-            n => n.id === id
-        );
+  if (notification) {
+    notification.read = true;
+  }
 
-    if (notification) {
-        notification.read = true;
-    }
+  renderEverything();
 
-    renderEverything();
-
-    showToast("Notification marked as read");
+  showToast("Notification marked as read");
 }
-
 
 async function markAllRead() {
+  const unreadNotifications = state.notifications.filter((n) => !n.read);
 
-    const unreadNotifications =
-        state.notifications.filter(
-            n => !n.read
-        );
+  if (!unreadNotifications.length) {
+    showToast("No unread notifications");
 
-    if (!unreadNotifications.length) {
+    return;
+  }
 
-        showToast("No unread notifications");
+  await Promise.all(
+    unreadNotifications.map((notification) =>
+      apiFetch(API.MARK_READ(notification.id), {
+        method: "PUT",
+      }),
+    ),
+  );
 
-        return;
-    }
+  unreadNotifications.forEach((n) => {
+    n.read = true;
+  });
 
-    await Promise.all(
-        unreadNotifications.map(notification =>
+  renderEverything();
 
-            apiFetch(
-                API.MARK_READ(notification.id),
-                {
-                    method: "PUT",
-                }
-            )
-        )
-    );
-
-    unreadNotifications.forEach(n => {
-        n.read = true;
-    });
-
-    renderEverything();
-
-    showToast("All notifications marked as read");
+  showToast("All notifications marked as read");
 }
-
 
 async function deleteNotification(id) {
+  const result = await apiFetch(API.DELETE(id), {
+    method: "DELETE",
+  });
 
-    const result =
-        await apiFetch(
-            API.DELETE(id),
-            {
-                method: "DELETE",
-            }
-        );
+  if (!result) return;
 
-    if (!result) return;
+  state.notifications = state.notifications.filter((n) => n.id !== id);
 
-    state.notifications =
-        state.notifications.filter(
-            n => n.id !== id
-        );
+  renderEverything();
 
-    renderEverything();
-
-    showToast("Notification deleted");
+  showToast("Notification deleted");
 }
-
 
 async function deleteAllNotifications() {
+  btnStartLoading("confirmDelBtn");
 
-    btnStartLoading('confirmDelBtn');
+  const result = await apiFetch(API.DELETE_ALL, {
+    method: "DELETE",
+  });
 
-    const result =
-        await apiFetch(
-            API.DELETE_ALL,
-            {
-                method: "DELETE",
-            }
-        );
+  btnStopLoading("confirmDelBtn");
 
-    btnStopLoading('confirmDelBtn');
+  if (!result) return;
 
-    if (!result) return;
+  state.notifications = [];
 
-    state.notifications = [];
+  renderEverything();
 
-    renderEverything();
+  closeConfirmModal();
 
-    closeConfirmModal();
-
-    showToast("All notifications deleted");
+  showToast("All notifications deleted");
 }
-
 
 /* ═══════════════════════════════════════════════════
    MODAL
 ═══════════════════════════════════════════════════ */
 
 function confirmDeleteAll() {
-
-    document
-        .getElementById("confirmModal")
-        ?.classList.add("is-open");
+  document.getElementById("confirmModal")?.classList.add("is-open");
 }
-
 
 function closeConfirmModal() {
-
-    document
-        .getElementById("confirmModal")
-        ?.classList.remove("is-open");
+  document.getElementById("confirmModal")?.classList.remove("is-open");
 }
-
 
 /* ═══════════════════════════════════════════════════
    TOAST
@@ -556,171 +449,131 @@ function closeConfirmModal() {
 let toastTimeout;
 
 function showToast(message) {
+  const toast = document.getElementById("toast");
 
-    const toast =
-        document.getElementById("toast");
+  if (!toast) return;
 
-    if (!toast) return;
+  toast.textContent = message;
 
-    toast.textContent = message;
+  toast.classList.add("show");
 
-    toast.classList.add("show");
+  clearTimeout(toastTimeout);
 
-    clearTimeout(toastTimeout);
-
-    toastTimeout =
-        setTimeout(() => {
-
-            toast.classList.remove("show");
-
-        }, 2500);
+  toastTimeout = setTimeout(() => {
+    toast.classList.remove("show");
+  }, 2500);
 }
-
 
 /* ═══════════════════════════════════════════════════
    HELPERS
 ═══════════════════════════════════════════════════ */
 
 function setText(id, value) {
+  const element = document.getElementById(id);
 
-    const element =
-        document.getElementById(id);
-
-    if (element) {
-        element.textContent = value;
-    }
+  if (element) {
+    element.textContent = value;
+  }
 }
-
 
 function escapeHtml(str) {
+  if (!str) return "";
 
-    if (!str) return "";
-
-    return str
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
-
 
 function formatTime(dateString) {
+  if (!dateString) return "";
 
-    if (!dateString) return "";
+  const date = new Date(dateString);
 
-    const date = new Date(dateString);
-
-    return date.toLocaleString();
+  return date.toLocaleString();
 }
-
 
 function formatNotificationType(type) {
+  switch (type) {
+    case "BUDGET_ALERT":
+      return "Budget Alert";
 
-    switch (type) {
+    case "GOAL_REACHED":
+      return "Goal Reached";
 
-        case "BUDGET_ALERT":
-            return "Budget Alert";
+    case "GOAL_REMINDER":
+      return "Goal Reminder";
 
-        case "GOAL_REACHED":
-            return "Goal Reached";
-
-        case "GOAL_REMINDER":
-            return "Goal Reminder";
-
-        default:
-            return type;
-    }
+    default:
+      return type;
+  }
 }
-
 
 /* ═══════════════════════════════════════════════════
    DROPDOWN
 ═══════════════════════════════════════════════════ */
 
 function toggleNotifDropdown() {
-
-    document
-        .getElementById("notifDropdown")
-        ?.classList.toggle("is-open");
+  document.getElementById("notifDropdown")?.classList.toggle("is-open");
 }
-
 
 /* ═══════════════════════════════════════════════════
    ERROR STATE
 ═══════════════════════════════════════════════════ */
 
 function renderErrorState() {
+  const list = document.getElementById("notifPageList");
 
-    const list =
-        document.getElementById("notifPageList");
+  if (!list) return;
 
-    if (!list) return;
-
-    list.innerHTML = `
+  list.innerHTML = `
     <div class="notif-empty-page">
       <p>Failed to load notifications.</p>
     </div>
   `;
 }
 
-
 /* ═══════════════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════════════ */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    async () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  loaderInit([
+    { pct: 30, label: "Loading your profile…" },
+    { pct: 70, label: "Loading notifications…" },
+    { pct: 100, label: "Almost ready…" },
+  ]);
 
-        loaderInit([
-            {pct: 30, label: "Loading your profile…"},
-            {pct: 70, label: "Loading notifications…"},
-            {pct: 100, label: "Almost ready…"},
-        ]);
+  // Skeleton placeholders while data loads
+  const greetingEl = document.getElementById("greeting");
+  if (greetingEl)
+    greetingEl.innerHTML = '<span class="skeleton-greeting"></span>';
 
-        // Skeleton placeholders while data loads
-        const greetingEl = document.getElementById("greeting");
-        if (greetingEl) greetingEl.innerHTML = '<span class="skeleton-greeting"></span>';
+  const avatarEl =
+    document.getElementById("topnavAvatar") ||
+    document.querySelector(".avatar");
+  if (avatarEl) avatarEl.classList.add("skeleton-light");
 
-        const avatarEl = document.getElementById("topnavAvatar")
-            || document.querySelector(".avatar");
-        if (avatarEl) avatarEl.classList.add("skeleton-light");
+  showNotifSkeletons(3);
 
-        showNotifSkeletons(3);
+  loaderAdvance(); // → profile
 
-        loaderAdvance(); // → profile
+  await loadProfile();
 
-        await loadProfile();
+  loaderAdvance(); // → notifications
 
-        loaderAdvance(); // → notifications
+  await loadNotifications();
 
-        await loadNotifications();
+  loaderAdvance(); // → 100%
+  loaderHide();
 
-        loaderAdvance(); // → 100%
-        loaderHide();
+  document.addEventListener("click", (e) => {
+    const wrapper = document.getElementById("notifWrapper");
 
-        document.addEventListener(
-            "click",
-            (e) => {
-
-                const wrapper =
-                    document.getElementById(
-                        "notifWrapper"
-                    );
-
-                if (
-                    wrapper &&
-                    !wrapper.contains(e.target)
-                ) {
-
-                    document
-                        .getElementById(
-                            "notifDropdown"
-                        )
-                        ?.classList.remove("is-open");
-                }
-            }
-        );
+    if (wrapper && !wrapper.contains(e.target)) {
+      document.getElementById("notifDropdown")?.classList.remove("is-open");
     }
-);
+  });
+});
