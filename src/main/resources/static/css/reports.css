@@ -2,27 +2,43 @@
 
 
 :root {
-  --brand: #10b981;
-  --brand-light: #d1fae5;
-  --brand-dark: #059669;
-  --brand-glow: rgba(16, 185, 129, 0.25);
-  --bg: #f0f4f3;
-  --sidebar-bg: #ffffff;
-  --card-bg: #ffffff;
-  --text-primary: #111827;
-  --text-secondary: #6b7280;
-  --text-muted: #9ca3af;
-  --border: #e5e7eb;
-  --red: #ef4444;
+  /* ── Navbar source-of-truth variables ── */
+  --green: #1db954;
+  --green-dark: #17a348;
+  --green-light: #e8f8ee;
+  --green-mid: #c6f0d6;
+  --navy: #0f1b2d;
+  --text: #1a2332;
+  --text-muted-side: #6b7a8f;
+  --surface: #ffffff;
+  --bg: #f4f6fa;
+  --border: #e4e9f0;
+  --red: #e53e3e;
+  --red-light: #fff0f0;
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, .06);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, .10);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, .15);
+  --radius: 14px;
+  --radius-sm: 8px;
+  --sidebar-w: 240px;
+  --font-body: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --transition: 0.2s ease;
+
+  /* ── Shared extras (used across page stylesheets) ── */
+  --white: #ffffff;
+  --text2: #4a5a6a;
+  --text3: #8a98a8;
+  --blue: #2251a3;
+  --blue-mid: #1a3f8f;
+  --blue-card: #1e3a8a;
   --orange: #f59e0b;
-  --blue: #3b82f6;
-  --shadow: 0 1px 3px rgba(0, 0, 0, .06), 0 4px 20px rgba(0, 0, 0, .05);
-  --shadow-lg: 0 8px 40px rgba(0, 0, 0, .12);
-  --shadow-brand: 0 8px 32px rgba(16, 185, 129, .2);
-  --radius: 18px;
-  --font: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --shadow: 0 2px 12px rgba(0, 0, 0, .06);
+  --shadow-brand: 0 8px 30px rgba(29, 185, 84, .22);
   --transition-fast: 160ms cubic-bezier(.4, 0, .2, 1);
   --transition-spring: 320ms cubic-bezier(.34, 1.56, .64, 1);
+  --font: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-h: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --sidebar: 240px;
 }
 
 .nav-item.is-active {
