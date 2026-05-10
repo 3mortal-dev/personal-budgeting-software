@@ -174,7 +174,9 @@ function setGreeting() {
 // FIX 1: fetch from real API instead of mock data
 async function loadNotifications() {
   try {
-    const response = await apiFetch("/notifications/all", { method: "GET" });
+    const response = await apiFetch("/api/notifications/all", {
+      method: "GET",
+    });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     const data = await response.json();
@@ -423,7 +425,7 @@ async function markNotifRead(id) {
   if (!notif || notif.read) return;
 
   try {
-    const response = await apiFetch(`/notifications/${id}/markRead`, {
+    const response = await apiFetch(`/api/notifications/${id}/markRead`, {
       method: "PUT",
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -444,7 +446,7 @@ async function markAllRead() {
 
   const results = await Promise.all(
     unread.map((n) =>
-      apiFetch(`/notifications/${n.id}/markRead`, { method: "PUT" })
+      apiFetch(`/api/notifications/${n.id}/markRead`, { method: "PUT" })
         .then((r) => r.ok)
         .catch(() => false),
     ),
@@ -483,7 +485,7 @@ async function onNotifGoalsChange(enabled) {
   state.prefs.notifGoals = enabled;
 
   try {
-    const response = await apiFetch("/api/profile/notifications", {
+    const response = await apiFetch("/api/profile/api/notifications", {
       method: "PUT",
       body: JSON.stringify({
         budgetAlerts: state.prefs.notifTransactions,
@@ -508,7 +510,7 @@ async function onNotifTransactionsChange(enabled) {
   state.prefs.notifTransactions = enabled;
 
   try {
-    const response = await apiFetch("/api/profile/notifications", {
+    const response = await apiFetch("/api/profile/api/notifications", {
       method: "PUT",
       body: JSON.stringify({
         budgetAlerts: enabled,

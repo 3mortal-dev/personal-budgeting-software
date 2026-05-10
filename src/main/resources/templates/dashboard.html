@@ -15,6 +15,56 @@
             href="../static/css/loading.css" />
         <link rel="stylesheet" th:href="@{/css/dashboard.css}"
             href="../static/css/dashboard.css" />
+        <style>
+            /* ── Inline validation additions ── */
+            .field-error {
+                display: block;
+                margin-top: 4px;
+                font-size: 12px;
+                color: var(--danger, #e84040);
+                min-height: 16px;
+                line-height: 1.4;
+            }
+            .field-hint {
+                display: block;
+                margin-top: 3px;
+                font-size: 11px;
+                color: var(--text3, #8a93a8);
+            }
+            .form-error-banner:not(:empty) {
+                padding: 10px 14px;
+                border-radius: 8px;
+                background: rgba(232, 64, 64, 0.1);
+                border: 1px solid rgba(232, 64, 64, 0.35);
+                color: var(--danger, #e84040);
+                font-size: 13px;
+                margin-bottom: 14px;
+                line-height: 1.5;
+            }
+            /* ── Notification icon ── */
+            .notif-item {
+                display: flex;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .notif-item-icon {
+                font-size: 18px;
+                flex-shrink: 0;
+                line-height: 1.3;
+            }
+            /* Colour tinting for notification types */
+            .notif-item.notif--error   { border-left: 3px solid var(--danger, #e84040); }
+            .notif-item.notif--warning { border-left: 3px solid #f59e0b; }
+            .notif-item.notif--success { border-left: 3px solid #2aa96b; }
+            .notif-item.notif--info    { border-left: 3px solid var(--accent, #6c7ce7); }
+            /* Transaction form errors */
+            #addTransactionForm .field-error {
+                color: var(--danger, #e84040);
+                font-size: 12px;
+                margin-top: 3px;
+                display: block;
+            }
+        </style>
     </head>
     <body>
 
@@ -340,34 +390,31 @@
                             Amount</label>
                         <input id="budgetAmount" type="number"
                             class="form-control" placeholder="0.00" min="0"
-                            step="0.01" />
+                            step="1" />
                         <span class="field-error" id="budgetAmountErr"></span>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label"
-                            for="budgetThreshold">Threshold</label>
+                            for="budgetThreshold">Spending Alert
+                            Threshold</label>
                         <input id="budgetThreshold" type="number"
-                            class="form-control" />
+                            class="form-control" placeholder="0-100%" min="0"
+                            max="100"
+                            step="1" />
                         <span class="field-error"
                             id="budgetThresholdErr"></span>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="budgetEnd">End
-                            Date</label>
+                        <label class="form-label"
+                            for="budgetEnd">End Date <span
+                                style="color:var(--danger,#e84040)">*</span></label>
                         <input id="budgetEnd" type="date"
                             class="form-control" />
+                        <small class="field-hint">Required — sets when this
+                            budget period ends.</small>
                         <span class="field-error" id="budgetEndErr"></span>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="budgetAlert">Spending
-                            Alert Threshold</label>
-                        <select id="budgetAlert" class="form-control">
-                            <option value="80">80% of budget</option>
-                            <option value="100">100% of budget</option>
-                        </select>
                     </div>
 
                     <button class="btn-submit" id="addBudgetBtn"
