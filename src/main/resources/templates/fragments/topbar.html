@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+  <!-- TOPBAR -->
+  <header class="topbar" th:fragment="topbar">
+    <span class="topbar-greeting" id="greeting">Good morning 👋</span>
+    <div class="topbar-right">
+
+      <!-- NOTIFICATION BELL + PANEL -->
+      <div class="notif-wrapper">
+        <button class="notif-btn" id="notif-icon-btn" onclick="toggleNotifPanel(event)" aria-label="Notifications">
+          <svg width="16" height="16" fill="none" stroke="#374151" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
+          </svg>
+          <!-- Red dot for unread count -->
+          <span class="notif-dot" id="notif-dot" style="display:none"></span>
+        </button>
+
+        <!-- DROPDOWN PANEL -->
+        <div class="notif-panel" id="notif-panel">
+          <div class="notif-panel-header">
+            <span class="notif-panel-title">Notifications</span>
+            <button class="notif-mark-all-btn" onclick="markAllRead()">Mark all read</button>
+          </div>
+          <div class="notif-list" id="notif-list">
+            <!-- Rendered by JS -->
+          </div>
+          <div class="notif-panel-footer">
+            <a th:href="@{/notifications}" href="/notifications" class="notif-view-all-link">View all notifications →</a>
+          </div>
+        </div>
+      </div><!-- /notif-wrapper -->
+
+      <div class="avatar-btn" id="topbar-avatar"></div>
+    </div>
+  </header>
+
+</body>
+</html>
