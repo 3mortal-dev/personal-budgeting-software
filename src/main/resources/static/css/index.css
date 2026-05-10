@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+
 /* ============================================================
    BudgetWise — style.css
    ============================================================ */
@@ -68,7 +70,7 @@ a { text-decoration: none; }
 }
 
 .hero__title {
-  font-family: 'Playfair Display', serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: clamp(42px, 5vw, 72px);
   font-weight: 900;
   line-height: 1.05;
@@ -258,7 +260,7 @@ a { text-decoration: none; }
 }
 
 .scroll-message__title {
-  font-family: 'Playfair Display', serif;
+  font-family: 'DM Sans', sans-serif;
   font-size: 22px;
   font-weight: 700;
   color: var(--navy);
