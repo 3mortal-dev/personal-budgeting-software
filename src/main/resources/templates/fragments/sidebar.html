@@ -9,7 +9,7 @@
     </div>
     <nav class="sidebar__nav">
         <a class="sidebar__link" th:classappend="${activePage == 'dashboard'} ? 'sidebar__link--active'" th:href="@{/dashboard}" href="/dashboard">
-            <i class="fa-solid fa-house"></i><span>Home</span>
+            <i class="fa-solid fa-house"></i><span>Dashboard</span>
         </a>
         <a class="sidebar__link" th:classappend="${activePage == 'transactions'} ? 'sidebar__link--active'" th:href="@{/transactions}" href="/transactions">
             <i class="fa-solid fa-receipt"></i><span>Transactions</span>
