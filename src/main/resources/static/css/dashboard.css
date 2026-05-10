@@ -69,7 +69,7 @@ button { cursor: pointer; font-family: var(--font); border: none; background: no
 /* ═══════════════════════════════════════════
    SIDEBAR
 ═══════════════════════════════════════════ */
-.sidebar {
+/* .sidebar {
     width: var(--sidebar);
     background: var(--white);
     border-right: 1px solid var(--border);
@@ -81,7 +81,7 @@ button { cursor: pointer; font-family: var(--font); border: none; background: no
     height: 100vh;
     overflow-y: auto;
     animation: slideInLeft 0.45s cubic-bezier(.22, 1, .36, 1) both;
-}
+} */
 
 /* Logo */
 .logo {
@@ -2521,7 +2521,7 @@ button { cursor: pointer; font-family: var(--font); border: none; background: no
 }
 
 /* Sidebar slide in */
-@keyframes slideInLeft {
+/* @keyframes slideInLeft {
     from {
         opacity: 0;
         transform: translateX(-32px);
@@ -2530,7 +2530,7 @@ button { cursor: pointer; font-family: var(--font); border: none; background: no
         opacity: 1;
         transform: translateX(0);
     }
-}
+} */
 
 /* Topbar drop in */
 @keyframes topbarIn {
@@ -2647,7 +2647,7 @@ button { cursor: pointer; font-family: var(--font); border: none; background: no
 
 @media (max-width: 600px) {
     :root { --sidebar: 0px; }
-    .sidebar { display: none; }
+    /* .sidebar { display: none; } */
     .content { padding: 16px; }
     .topnav  { padding: 0 16px; }
     .content-right { grid-template-columns: 1fr; }

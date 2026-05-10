@@ -210,13 +210,13 @@
     padding-right: 16px;
   }
 
-  .sidebar {
+  /* .sidebar {
     width: 100%;
     height: auto;
     position: relative;
     border-right: none;
     border-bottom: 1px solid var(--border);
-  }
+  } */
 
   .layout {
     flex-direction: column;
