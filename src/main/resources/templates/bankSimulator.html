@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BudgetWise — Mock Bank Simulator</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>BudgetWise — Mock Bank Simulator</title>
+        <link rel="icon" type="image/svg+xml" href="/favicon2.svg" />
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+        <style>
         :root {
             --bank-primary: #1e3a8a;
             --bank-secondary: #1e40af;
@@ -235,77 +237,84 @@
         .ledger-row-amount.INCOME  { color: #16a34a; }
         .ledger-row-amount.EXPENSE { color: #dc2626; }
     </style>
-</head>
-<body>
+    </head>
+    <body>
 
-    <!-- Back to profile -->
-    <div class="top-bar">
-        <a class="back-link" href="/userProfile">
-            <i class="fas fa-arrow-left"></i> Back to Profile
-        </a>
-        <span class="dev-badge">🛠 DEV TOOL</span>
-    </div>
-
-    <!-- Main card -->
-    <div class="bank-wrapper">
-        <div class="bank-header">
-            <div class="bank-logo">
-                <i class="fas fa-university"></i>
-                Global Mock Bank
-            </div>
-            <p>Simulated external banking interface for BudgetWise</p>
+        <!-- Back to profile -->
+        <div class="top-bar">
+            <a class="back-link" href="/userProfile">
+                <i class="fas fa-arrow-left"></i> Back to Profile
+            </a>
+            <span class="dev-badge">🛠 DEV TOOL</span>
         </div>
 
-        <div class="bank-content">
-
-            <div class="info-banner">
-                <i class="fas fa-info-circle"></i>
-                <span>
-                    Records added here are <strong>pending</strong> until you click
-                    <strong>Sync Now</strong> on your Profile page. They will be imported
-                    with <em>no category</em> — you can assign one from the Transactions page.
-                </span>
+        <!-- Main card -->
+        <div class="bank-wrapper">
+            <div class="bank-header">
+                <div class="bank-logo">
+                    <i class="fas fa-university"></i>
+                    Global Mock Bank
+                </div>
+                <p>Simulated external banking interface for BudgetWise</p>
             </div>
 
-            <form id="bank-form" class="bank-form">
-                <div class="field-group">
-                    <label>Transaction Description</label>
-                    <input type="text" id="b-desc" placeholder="e.g. Starbucks, Rent, Salary" required>
-                </div>
-                <div class="field-group">
-                    <label>Amount (USD)</label>
-                    <input type="number" id="b-amount" placeholder="0.00" step="0.01" min="0.01" required>
-                </div>
-                <div class="field-group">
-                    <label>Movement Type</label>
-                    <select id="b-type">
-                        <option value="EXPENSE">Withdrawal / Expense</option>
-                        <option value="INCOME">Deposit / Income</option>
-                    </select>
-                </div>
-                <button type="submit" class="b-btn" id="submit-btn">
-                    <i class="fas fa-lock"></i> Authenticate & Record
-                </button>
-            </form>
+            <div class="bank-content">
 
-            <div id="b-msg" class="b-msg"></div>
+                <div class="info-banner">
+                    <i class="fas fa-info-circle"></i>
+                    <span>
+                        Records added here are <strong>pending</strong> until
+                        you click
+                        <strong>Sync Now</strong> on your Profile page. They
+                        will be imported
+                        with <em>no category</em> — you can assign one from the
+                        Transactions page.
+                    </span>
+                </div>
 
-            <!-- Pending ledger — shows what's been recorded this session -->
-            <div class="ledger-section">
-                <div class="ledger-title">
-                    <i class="fas fa-clock"></i>
-                    Pending Transactions
-                    <span class="badge" id="pending-count">0</span>
+                <form id="bank-form" class="bank-form">
+                    <div class="field-group">
+                        <label>Transaction Description</label>
+                        <input type="text" id="b-desc"
+                            placeholder="e.g. Starbucks, Rent, Salary" required>
+                    </div>
+                    <div class="field-group">
+                        <label>Amount (USD)</label>
+                        <input type="number" id="b-amount" placeholder="0.00"
+                            step="0.01" min="0.01" required>
+                    </div>
+                    <div class="field-group">
+                        <label>Movement Type</label>
+                        <select id="b-type">
+                            <option value="EXPENSE">Withdrawal /
+                                Expense</option>
+                            <option value="INCOME">Deposit / Income</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="b-btn" id="submit-btn">
+                        <i class="fas fa-lock"></i> Authenticate & Record
+                    </button>
+                </form>
+
+                <div id="b-msg" class="b-msg"></div>
+
+                <!-- Pending ledger — shows what's been recorded this session -->
+                <div class="ledger-section">
+                    <div class="ledger-title">
+                        <i class="fas fa-clock"></i>
+                        Pending Transactions
+                        <span class="badge" id="pending-count">0</span>
+                    </div>
+                    <div class="ledger-list" id="ledger-list">
+                        <div class="ledger-empty">No pending transactions
+                            yet.</div>
+                    </div>
                 </div>
-                <div class="ledger-list" id="ledger-list">
-                    <div class="ledger-empty">No pending transactions yet.</div>
-                </div>
+
             </div>
-
         </div>
-    </div>
 
-    <script>
+        <script>
 
     const form       = document.getElementById('bank-form');
     const msgEl      = document.getElementById('b-msg');
@@ -421,5 +430,5 @@
 
     loadPending();
     </script>
-</body>
+    </body>
 </html>
