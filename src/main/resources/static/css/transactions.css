@@ -13,7 +13,28 @@
    DESIGN TOKENS  — exact copy from userProfile.css
 ═══════════════════════════════════════════════ */
 :root {
-    /* ── Navbar source-of-truth variables ── */
+    --brand: #10b981;
+    --brand-light: #d1fae5;
+    --brand-dark: #059669;
+    --brand-glow: rgba(16, 185, 129, 0.25);
+    --bg: #f0f4f3;
+    --sidebar-bg: #ffffff;
+    --card-bg: #ffffff;
+    --text-primary: #111827;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --border: #e5e7eb;
+    --red: #ef4444;
+    --orange: #f59e0b;
+    --blue: #3b82f6;
+    --shadow: 0 1px 3px rgba(0, 0, 0, .06), 0 4px 20px rgba(0, 0, 0, .05);
+    --shadow-lg: 0 8px 40px rgba(0, 0, 0, .12);
+    --shadow-brand: 0 8px 32px rgba(16, 185, 129, .2);
+    --radius: 18px;
+    --font: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-body: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    --transition-fast: 160ms cubic-bezier(.4, 0, .2, 1);
+    --transition-spring: 320ms cubic-bezier(.34, 1.56, .64, 1);
     --green: #1db954;
     --green-dark: #17a348;
     --green-light: #e8f8ee;
