@@ -13,8 +13,10 @@ import com.example.personal_budget.dto.request.BudgetExceededLimitEvent;
 import com.example.personal_budget.dto.request.BudgetNearLimitEvent;
 import com.example.personal_budget.dto.request.CreateBudgetRequest;
 import com.example.personal_budget.dto.request.NotificationEvent;
+import com.example.personal_budget.dto.request.TransactionFilterRequest;
 import com.example.personal_budget.entity.Budget;
 import com.example.personal_budget.entity.Category;
+import com.example.personal_budget.entity.Transaction;
 import com.example.personal_budget.entity.User;
 import com.example.personal_budget.enums.BudgetStatus;
 import com.example.personal_budget.repository.BudgetRepository;
@@ -33,6 +35,7 @@ public class BudgetService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+	private final TransactionService transactionService;
 
     public List<Budget> getAllBudgets(Long userID) {
         return budgetRepository.findByUserId(userID);
@@ -87,17 +90,31 @@ public class BudgetService {
             }
         }
 
+		TransactionFilterRequest filterRequest = new TransactionFilterRequest();
+		
+		filterRequest.setStartDate(request.getStartDate());
+		filterRequest.setEndDate(request.getEndDate());
+		filterRequest.setCategoryId(request.getCategoryId());
+
+		Double totalSpent = 0.0;
+		List<Transaction> transactions = transactionService.filterHistory(userID, filterRequest);
+	
+		for (Transaction t : transactions) {
+			totalSpent += t.getAmount();
+		}
+
         Budget budget = Budget.builder()
                 .user(user)
                 .category(category)
-                .spendingLimit(request.getSpendingLimit())
+				.spentAmount(totalSpent)
+                .spendingLimit(0.0)
                 .threshold(request.getThreshold())
-                .startDate(LocalDate.now())
+                .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
                 .status(BudgetStatus.ON_TRACK)
                 .build();
 
-        return budgetRepository.save(budget);
+        return updateBudgetSpending(budget, request.getSpendingLimit());
     }
 
     public Budget editBudget(Long userID, Long budgetID, CreateBudgetRequest request) {
@@ -105,19 +122,9 @@ public class BudgetService {
         Budget budget = budgetRepository.findByIdAndUserId(budgetID, userID)
                 .orElseThrow(() -> new RuntimeException("Budget not found"));
 
-        Budget updatedBudget = Budget.builder()
-                .id(budget.getId())
-                .user(budget.getUser())
-                .category(budget.getCategory())
-                .spendingLimit(request.getSpendingLimit())
-                .spentAmount(budget.getSpentAmount())
-                .threshold(request.getThreshold())
-                .startDate(budget.getStartDate())
-                .endDate(request.getEndDate())
-                .status(budget.getStatus())
-                .build();
+		budgetRepository.delete(budget);
 
-        return budgetRepository.save(updatedBudget);
+		return addBudget(userID, request);
     }
 
     public void deleteAllBudgets(Long userID) {
@@ -180,7 +187,7 @@ public class BudgetService {
         updateBudgetSpending(budget, newSpentAmount);
     }
 
-    private void updateBudgetSpending(Budget budget, Double newSpentAmount) {
+    private Budget updateBudgetSpending(Budget budget, Double newSpentAmount) {
 
         budget.setSpentAmount(newSpentAmount);
 
@@ -211,7 +218,7 @@ public class BudgetService {
             budget.setStatus(BudgetStatus.ON_TRACK);
         }
 
-        budgetRepository.save(budget);
+        return budgetRepository.save(budget);
     }
 
     public List<Budget> getActiveBudgets(Long userId, int limit) {
