@@ -565,16 +565,20 @@ async function loadCategories() {
 
   const categorySelectTrans = document.getElementById("transactionCategory");
   const categorySelectBudget = document.getElementById("budgetCategory");
-  if (!categorySelectTrans) return;
-  if (!categorySelectBudget) return;
 
-  categorySelectTrans.innerHTML = data
-    .map((cat) => `<option value="${cat.id}">${cat.name}</option>`)
-    .join("");
+  if (categorySelectTrans) {
+    categorySelectTrans.innerHTML = data
+      .map((cat) => `<option value="${cat.id}">${cat.name}</option>`)
+      .join("");
+  }
 
-  categorySelectBudget.innerHTML = data
-    .map((cat) => `<option value="${cat.id}">${cat.name}</option>`)
-    .join("");
+  if (categorySelectBudget) {
+    categorySelectBudget.innerHTML =
+      `<option value="" disabled selected>Select a category…</option>` +
+      data
+        .map((cat) => `<option value="${cat.id}">${cat.name}</option>`)
+        .join("");
+  }
 }
 
 function updateNotifBadge() {
@@ -929,9 +933,14 @@ function validateBudgetForm(categoryId, spendingLimit, threshold, startDate, end
     setBudgetFieldError("budgetCategoryErr", "Please select a category.");
     valid = false;
   } else {
-    // 2. Duplicate-category check — look at currently displayed budgets
+    // 2. Duplicate-category check — only flag if the existing budget is still active
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const activeBudgets = state.dashboard?.activeBudgetItems ?? [];
-    const duplicate = activeBudgets.find((b) => b.categoryId === categoryId);
+    const duplicate = activeBudgets.find((b) => {
+      if (b.categoryId !== categoryId) return false;
+      return new Date(b.endDate) >= today;
+    });
     if (duplicate) {
       const cat = state.categories.find((c) => c.id === categoryId);
       const catName = cat?.name ?? "that category";
@@ -944,33 +953,26 @@ function validateBudgetForm(categoryId, spendingLimit, threshold, startDate, end
   }
 
   // 3. Spending limit: required & positive
-  if (!spendingLimit || spendingLimit <= 0) {
+  if (isNaN(spendingLimit) || spendingLimit <= 0) {
     setBudgetFieldError(
       "budgetAmountErr",
-      "Enter a budget amount greater than $0.",
+      "Please Enter a limit greater than $0.",
     );
     valid = false;
   }
 
-  // 4. Threshold: optional but must be 0–100 if provided
-  const rawThreshold = document.getElementById("budgetThreshold")?.value;
-  if (
-    rawThreshold !== "" &&
-    rawThreshold !== null &&
-    rawThreshold !== undefined
-  ) {
-    if (threshold < 0 || threshold > 100) {
+  // 4. Threshold: must be 0–100
+  if (isNaN(threshold) || threshold < 0 || threshold > 100) {
       setBudgetFieldError(
-        "budgetThresholdErr",
-        "Alert threshold must be between 0% and 100%.",
+          "budgetThresholdErr",
+          "Alert threshold must be between 0% and 100%.",
       );
       valid = false;
-    }
   }
 
     // 5. Start date: required
   if (!startDate) {
-      setBudgetFieldError("budgetStartErr", "A start date is required.");
+      setBudgetFieldError("budgetStartErr", "Please select a start date.");
       valid = false;
   } else if (endDate && new Date(startDate) >= new Date(endDate)) {
       setBudgetFieldError("budgetStartErr", "Start date must be before the end date.");
@@ -981,7 +983,7 @@ function validateBudgetForm(categoryId, spendingLimit, threshold, startDate, end
   if (!endDate) {
     setBudgetFieldError(
       "budgetEndErr",
-      "An end date is required — this tells us when to stop tracking this budget.",
+      "Please select a end date.",
     );
     valid = false;
   } else {
@@ -1001,12 +1003,8 @@ async function addBudget() {
   clearBudgetFormErrors();
 
   const categoryId = parseInt(document.getElementById("budgetCategory").value);
-  const spendingLimit = Number(
-    document.getElementById("budgetAmount")?.value || 0,
-  );
-  const threshold = Number(
-    document.getElementById("budgetThreshold")?.value || 0,
-  );
+  const spendingLimit = document.getElementById("budgetAmount")?.value;
+  const threshold = document.getElementById("budgetThreshold")?.value;
   const startDate = document.getElementById("budgetStart")?.value || null;
   const endDate = document.getElementById("budgetEnd")?.value || null;
 

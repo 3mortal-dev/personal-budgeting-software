@@ -495,13 +495,27 @@ async function submitBudget() {
   if (!isEdit && (!selectEl.value || isNaN(categoryId))) {
     setFieldError(selectEl, "Please select a category.");
     hasError = true;
+  } else if (!isEdit) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const duplicate = state.budgets.find((b) => {
+        if (b.categoryId !== categoryId) return false;
+        if (!b.endDate) return true;
+        return new Date(b.endDate) >= today;
+    });
+    if (duplicate) {
+        const cat = state.categories.find((c) => c.id === categoryId);
+        const catName = cat?.name ?? "that category";
+        setFieldError(selectEl, `You already have an active budget for "${catName}". Delete it first or choose a different category.`);
+        hasError = true;
+    }
   }
   if (isNaN(spendingLimit) || spendingLimit <= 0) {
-    setFieldError(limitEl, "Please enter a spending limit greater than 0.");
+    setFieldError(limitEl, "Please Enter a limit greater than $0.");
     hasError = true;
   }
   if (isNaN(threshold) || threshold < 0 || threshold > 100) {
-    setFieldError(threshEl, "Threshold must be between 0 and 100.");
+    setFieldError(threshEl, "Alert threshold must be between 0% and 100%.");
     hasError = true;
   }
   if (!startDate) {
@@ -511,9 +525,17 @@ async function submitBudget() {
   if (!endDate) {
     setFieldError(endDateEl, "Please select an end date.");
     hasError = true;
+  } else {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const picked = new Date(endDate);
+    if (picked <= today) {
+        setFieldError(endDateEl, "End date must be in the future.");
+        hasError = true;
+    }
   }
   if (startDate && endDate && new Date(startDate) >= new Date(endDate)) {
-    setFieldError(endDateEl, "End date must be after start date.");
+    setFieldError(endDateEl, "Start date must be before the end date.");
     hasError = true;
   }
 
