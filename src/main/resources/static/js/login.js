@@ -1,6 +1,4 @@
-/* ─────────────────────────────────────────
-   BudgetWise – Login Page JS
-───────────────────────────────────────── */
+// Budget - login page
 
 (function () {
     'use strict';
@@ -147,7 +145,7 @@
         }
     });
 
-    /* ── Slide dots (decorative cycling) ── */
+    /* Slide dots (decorative cycling) */
 
     const dots = document.querySelectorAll('.dot');
     let current = 0;

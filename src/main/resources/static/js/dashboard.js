@@ -59,18 +59,14 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  DASHBOARD-SPECIFIC SKELETON HELPERS                         ║
-// ╚══════════════════════════════════════════════════════════════╝
+// DASHBOARD-SPECIFIC SKELETON HELPERS
 
 /** Removes skeleton class from the three stat value elements */
 function clearStatSkeletons() {
   clearSkeletons("statTx", "statBudgets", "statGoals");
 }
 
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  TOAST NOTIFICATIONS                                         ║
-// ╚══════════════════════════════════════════════════════════════╝
+// TOAST NOTIFICATIONS
 
 let toastTimer;
 
@@ -125,7 +121,7 @@ function showInfo(message) {
   showToast(message, "info");
 }
 
-// ── Transactions ──────────────────────────────────────────────────────────────
+// ── Transactions
 
 /**
  * Transaction successfully added.
@@ -149,7 +145,7 @@ function toastSaveFailed(action = "save") {
   );
 }
 
-// ── Dashboard data ────────────────────────────────────────────────────────────
+//Dashboard data
 
 /**
  * Dashboard summary failed to load on page init.
@@ -175,7 +171,7 @@ function toastDashboardRefreshed() {
   showToast("Dashboard updated.", "info", 2400);
 }
 
-// ── Budgets ───────────────────────────────────────────────────────────────────
+// Budgets
 
 /**
  * New budget created successfully.
@@ -220,7 +216,7 @@ function toastBudgetExceeded(categoryName) {
   );
 }
 
-// ── Spending alerts ───────────────────────────────────────────────────────────
+// Spending alerts
 
 /**
  * High overall spending ratio (≥ 80 % of monthly income spent).
@@ -247,7 +243,7 @@ function toastSpendingIncreased(increasePct) {
   );
 }
 
-// ── Notifications ─────────────────────────────────────────────────────────────
+// Notifications
 
 /**
  * Notifications failed to load (badge / dropdown unavailable).
@@ -266,7 +262,7 @@ function toastNotificationsMarkedRead() {
   showToast("All notifications marked as read.", "info", 2400);
 }
 
-// ── Profile / session ─────────────────────────────────────────────────────────
+// Profile / session
 
 /**
  * Profile couldn't be fetched (greeting falls back to "there").
@@ -285,7 +281,7 @@ function toastSessionExpired() {
   showToast("Your session has expired. Please log in again.", "error", 6000);
 }
 
-// ── Categories ────────────────────────────────────────────────────────────────
+// Categories
 
 /**
  * Category list failed to load (affects budget + transaction modals).
@@ -294,7 +290,7 @@ function toastCategoriesLoadFailed() {
   showToast("Categories couldn't be loaded. Try refreshing the page.", "error");
 }
 
-// ── Generic helpers ───────────────────────────────────────────────────────────
+// Generic helpers
 
 /**
  * Generic network / connectivity error (fallback when action is unknown).
@@ -419,7 +415,7 @@ function renderTransactions(transactions) {
       const type = (tx.type || "").toString().toUpperCase();
       const isIncome = type === "INCOME";
       const label =
-        tx.description || tx.source || `Category #${tx.categoryId ?? "N/A"}`;
+         tx.source || `${tx.categoryName ?? "N/A"}` || tx.description;
       const signedAmount = `${isIncome ? "+" : "−"}${formatCurrency(tx.amount)}`;
       return `
       <div class="tx-item">
@@ -565,16 +561,20 @@ async function loadCategories() {
 
   const categorySelectTrans = document.getElementById("transactionCategory");
   const categorySelectBudget = document.getElementById("budgetCategory");
-  if (!categorySelectTrans) return;
-  if (!categorySelectBudget) return;
 
-  categorySelectTrans.innerHTML = data
-    .map((cat) => `<option value="${cat.id}">${cat.name}</option>`)
-    .join("");
+  if (categorySelectTrans) {
+    categorySelectTrans.innerHTML = data
+      .map((cat) => `<option value="${cat.id}">${cat.name}</option>`)
+      .join("");
+  }
 
-  categorySelectBudget.innerHTML = data
-    .map((cat) => `<option value="${cat.id}">${cat.name}</option>`)
-    .join("");
+  if (categorySelectBudget) {
+    categorySelectBudget.innerHTML =
+      `<option value="" disabled selected>Select a category…</option>` +
+      data
+        .map((cat) => `<option value="${cat.id}">${cat.name}</option>`)
+        .join("");
+  }
 }
 
 function updateNotifBadge() {
@@ -779,7 +779,7 @@ function closeBudgetModal() {
   clearBudgetFormErrors();
 }
 
-// ── Transaction form validation ───────────────────────────────────────────────
+// Transaction form validation
 
 function setTxFieldError(inputId, message) {
   const input = document.getElementById(inputId);
@@ -891,14 +891,15 @@ async function addTransaction(event) {
   }
 }
 
-// ── Budget form validation helpers ───────────────────────────────────────────
+// Budget form validation helpers 
 
 function clearBudgetFormErrors() {
   [
-    "budgetCategoryErr",
-    "budgetAmountErr",
-    "budgetThresholdErr",
-    "budgetEndErr",
+	"budgetCategoryErr", 
+	"budgetAmountErr", 
+	"budgetThresholdErr", 
+	"budgetStartErr", 
+	"budgetEndErr"
   ].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.textContent = "";
@@ -920,7 +921,7 @@ function setBudgetFormError(message) {
 /**
  * Returns true when all fields are valid, false otherwise (also populates inline errors).
  */
-function validateBudgetForm(categoryId, spendingLimit, threshold, endDate) {
+function validateBudgetForm(categoryId, spendingLimit, threshold, startDate, endDate) {
   let valid = true;
 
   // 1. Category: must be selected
@@ -928,9 +929,14 @@ function validateBudgetForm(categoryId, spendingLimit, threshold, endDate) {
     setBudgetFieldError("budgetCategoryErr", "Please select a category.");
     valid = false;
   } else {
-    // 2. Duplicate-category check — look at currently displayed budgets
+    // 2. Duplicate-category check — only flag if the existing budget is still active
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const activeBudgets = state.dashboard?.activeBudgetItems ?? [];
-    const duplicate = activeBudgets.find((b) => b.categoryId === categoryId);
+    const duplicate = activeBudgets.find((b) => {
+      if (b.categoryId !== categoryId) return false;
+      return new Date(b.endDate) >= today;
+    });
     if (duplicate) {
       const cat = state.categories.find((c) => c.id === categoryId);
       const catName = cat?.name ?? "that category";
@@ -943,35 +949,37 @@ function validateBudgetForm(categoryId, spendingLimit, threshold, endDate) {
   }
 
   // 3. Spending limit: required & positive
-  if (!spendingLimit || spendingLimit <= 0) {
+  if (isNaN(spendingLimit) || spendingLimit <= 0) {
     setBudgetFieldError(
       "budgetAmountErr",
-      "Enter a budget amount greater than $0.",
+      "Please Enter a limit greater than $0.",
     );
     valid = false;
   }
 
-  // 4. Threshold: optional but must be 0–100 if provided
-  const rawThreshold = document.getElementById("budgetThreshold")?.value;
-  if (
-    rawThreshold !== "" &&
-    rawThreshold !== null &&
-    rawThreshold !== undefined
-  ) {
-    if (threshold < 0 || threshold > 100) {
+  // 4. Threshold: must be 0–100
+  if (isNaN(threshold) || threshold < 0 || threshold > 100) {
       setBudgetFieldError(
-        "budgetThresholdErr",
-        "Alert threshold must be between 0% and 100%.",
+          "budgetThresholdErr",
+          "Alert threshold must be between 0% and 100%.",
       );
       valid = false;
-    }
   }
 
-  // 5. End date: required
+    // 5. Start date: required
+  if (!startDate) {
+      setBudgetFieldError("budgetStartErr", "Please select a start date.");
+      valid = false;
+  } else if (endDate && new Date(startDate) >= new Date(endDate)) {
+      setBudgetFieldError("budgetStartErr", "Start date must be before the end date.");
+      valid = false;
+  }
+  
+  // 6. End date: required
   if (!endDate) {
     setBudgetFieldError(
       "budgetEndErr",
-      "An end date is required — this tells us when to stop tracking this budget.",
+      "Please select a end date.",
     );
     valid = false;
   } else {
@@ -991,15 +999,12 @@ async function addBudget() {
   clearBudgetFormErrors();
 
   const categoryId = parseInt(document.getElementById("budgetCategory").value);
-  const spendingLimit = Number(
-    document.getElementById("budgetAmount")?.value || 0,
-  );
-  const threshold = Number(
-    document.getElementById("budgetThreshold")?.value || 0,
-  );
+  const spendingLimit = document.getElementById("budgetAmount")?.value;
+  const threshold = document.getElementById("budgetThreshold")?.value;
+  const startDate = document.getElementById("budgetStart")?.value || null;
   const endDate = document.getElementById("budgetEnd")?.value || null;
 
-  if (!validateBudgetForm(categoryId, spendingLimit, threshold, endDate)) {
+  if (!validateBudgetForm(categoryId, spendingLimit, threshold, startDate, endDate)) {
     // Scroll to the first visible error inside the modal body
     const firstErr = document.querySelector(".field-error:not(:empty)");
     if (firstErr)
@@ -1008,7 +1013,7 @@ async function addBudget() {
   }
 
   btnStartLoading("addBudgetBtn");
-  const payload = { categoryId, spendingLimit, threshold, endDate };
+  const payload = { categoryId, spendingLimit, threshold, startDate, endDate };
   const result = await apiFetch(API.BUDGETS, {
     method: "POST",
     body: JSON.stringify(payload),

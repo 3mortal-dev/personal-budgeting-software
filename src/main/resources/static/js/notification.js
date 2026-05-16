@@ -1,10 +1,4 @@
-/* ═══════════════════════════════════════════════════
-   BudgetWise - Notifications JavaScript
-═══════════════════════════════════════════════════ */
-
-/* ═══════════════════════════════════════════════════
-   API CONFIGURATION
-═══════════════════════════════════════════════════ */
+// API CONFIGURATION
 
 const API = {
   BASE_URL: "/api/notifications",
@@ -21,18 +15,14 @@ const API = {
   BY_TYPE: (type) => `/type?type=${type}`,
 };
 
-/* ═══════════════════════════════════════════════════
-   STATE
-═══════════════════════════════════════════════════ */
+// State
 
 const state = {
   notifications: [],
   activeFilter: "all",
 };
 
-/* ═══════════════════════════════════════════════════
-   FETCH HELPER
-═══════════════════════════════════════════════════ */
+// Fetch Helper
 
 async function apiFetch(endpoint, options = {}) {
   try {
@@ -66,9 +56,7 @@ async function apiFetch(endpoint, options = {}) {
   }
 }
 
-/* ═══════════════════════════════════════════════════
-   PROFILE  —  greeting + avatar
-═══════════════════════════════════════════════════ */
+// profile
 
 async function loadProfile() {
   try {
@@ -127,9 +115,7 @@ async function loadNotifications() {
   renderEverything();
 }
 
-/* ═══════════════════════════════════════════════════
-   MAIN RENDER
-═══════════════════════════════════════════════════ */
+// Main Render
 
 function renderEverything() {
   renderList();
@@ -143,9 +129,7 @@ function renderEverything() {
   renderDropdownList();
 }
 
-/* ═══════════════════════════════════════════════════
-   FILTERING
-═══════════════════════════════════════════════════ */
+// Filtering
 
 function getFilteredNotifications() {
   if (state.activeFilter === "all") {
@@ -171,9 +155,7 @@ function setFilter(filter) {
   renderStats();
 }
 
-/* ═══════════════════════════════════════════════════
-   RENDER LIST
-═══════════════════════════════════════════════════ */
+// RENDER LIST
 
 function renderList() {
   const list = document.getElementById("notifPageList");
@@ -279,9 +261,7 @@ function renderFilterCounts() {
   setText("countUnread", state.notifications.filter((n) => !n.read).length);
 }
 
-/* ═══════════════════════════════════════════════════
-   TOP NAV BADGE
-═══════════════════════════════════════════════════ */
+// Top Nav
 
 function updateTopNavBadge() {
   const badge = document.getElementById("notifBadge");
@@ -295,9 +275,7 @@ function updateTopNavBadge() {
   badge.classList.toggle("has-unread", unread > 0);
 }
 
-/* ═══════════════════════════════════════════════════
-   DROPDOWN
-═══════════════════════════════════════════════════ */
+// Drop Down
 
 function renderDropdownList() {
   const list = document.getElementById("notifDropdownList");
@@ -348,9 +326,7 @@ function renderDropdownList() {
     .join("");
 }
 
-/* ═══════════════════════════════════════════════════
-   ACTIONS
-═══════════════════════════════════════════════════ */
+// Actions
 
 async function markRead(id) {
   const result = await apiFetch(API.MARK_READ(id), {
@@ -511,17 +487,13 @@ function formatNotificationType(type) {
   }
 }
 
-/* ═══════════════════════════════════════════════════
-   DROPDOWN
-═══════════════════════════════════════════════════ */
+// Drop down
 
 function toggleNotifDropdown() {
   document.getElementById("notifDropdown")?.classList.toggle("is-open");
 }
 
-/* ═══════════════════════════════════════════════════
-   ERROR STATE
-═══════════════════════════════════════════════════ */
+// Error state
 
 function renderErrorState() {
   const list = document.getElementById("notifPageList");
@@ -535,9 +507,7 @@ function renderErrorState() {
   `;
 }
 
-/* ═══════════════════════════════════════════════════
-   INIT
-═══════════════════════════════════════════════════ */
+// Init
 
 document.addEventListener("DOMContentLoaded", async () => {
   loaderInit([

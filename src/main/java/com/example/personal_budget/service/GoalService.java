@@ -16,11 +16,6 @@ public class GoalService {
     private final GoalRepository goalRepository;
     private final UserService userService;
 
-    // ─────────────────────────────────────────────────────────────
-    // Status helper — single source of truth for status calculation.
-    // Used by addGoal, editGoal, and updateProgress so they all
-    // apply identical thresholds.
-    // ─────────────────────────────────────────────────────────────
     private GoalStatus calculateStatus(double saved, double target) {
         if (target <= 0) {
             return GoalStatus.ONTRACK;
@@ -35,22 +30,20 @@ public class GoalService {
         return GoalStatus.ONTRACK;
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // Ownership guard — reused in every mutating method.
-    // ─────────────────────────────────────────────────────────────
+
     private void assertOwner(Goal goal, long userId) {
         if (!goal.getUser().getId().equals(userId)) {
             throw new RuntimeException("Unauthorized");
         }
     }
 
-    /*
-	 * Adds a new financial goal for the user.
-	 *
-	 * @param request  the details of the goal to be added, including name, target amount, deadline, etc.
-	 * @param userId   the ID of the user to whom the goal belongs
-	 * @return the created Goal entity with all details filled in, including calculated status
-    */
+    /**
+     * Adds a new financial goal for the user.
+     *
+     * @param request the details of the goal to add
+     * @param userId the owner user id
+     * @return the created goal with its initial status
+     */
     public Goal addGoal(GoalRequest request, long userId) {
         double target = (request.getTargetAmount() != null ? request.getTargetAmount() : 0.0);
 
@@ -68,6 +61,14 @@ public class GoalService {
         return goalRepository.save(goal);
     }
 
+    /**
+     * Updates an existing goal after verifying ownership.
+     *
+     * @param id the goal id
+     * @param request the requested goal changes
+     * @param userId the authenticated user's id
+     * @return the updated goal
+     */
     public Goal editGoal(long id, GoalRequest request, long userId) {
         Goal goal = goalRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Goal not found"));
@@ -83,14 +84,18 @@ public class GoalService {
         goal.setIconClass(request.getIconClass());
         goal.setIconColor(request.getIconColor());
 
-        // FIX: recalculate status whenever amounts change.
-        // Previously status was never updated on edit, so a goal
-        // edited to 100% would still show ONTRACK in the response.
         goal.setStatus(calculateStatus(saved, target));
 
         return goalRepository.save(goal);
     }
 
+    /**
+     * Loads a goal by id after verifying ownership.
+     *
+     * @param id the goal id
+     * @param userId the authenticated user's id
+     * @return the matching goal
+     */
     public Goal getGoalById(long id, long userId) {
         Goal goal = goalRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Goal not found"));
@@ -98,6 +103,14 @@ public class GoalService {
         return goal;
     }
 
+    /**
+     * Replaces the saved progress amount for a goal and recalculates its status.
+     *
+     * @param id the goal id
+     * @param amount the new saved amount
+     * @param userId the authenticated user's id
+     * @return the updated goal
+     */
     public Goal updateProgress(long id, double amount, long userId) {
         Goal goal = goalRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Goal not found"));
@@ -114,6 +127,12 @@ public class GoalService {
         return goalRepository.save(goal);
     }
 
+    /**
+     * Deletes a goal after verifying ownership.
+     *
+     * @param id the goal id
+     * @param userId the authenticated user's id
+     */
     public void deleteGoal(long id, long userId) {
         Goal goal = goalRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Goal not found"));
@@ -121,13 +140,22 @@ public class GoalService {
         goalRepository.delete(goal);
     }
 
+    /**
+     * Retrieves all goals owned by a user.
+     *
+     * @param userId the owner user id
+     * @return the user's goals
+     */
     public List<Goal> getGoalsByUserId(long userId) {
         return goalRepository.findByUserId(userId);
     }
 
-    // FIX: count both ONTRACK and NEARLIMIT as "active".
-    // NEARLIMIT goals (80–99%) are not completed — they are active.
-    // Previously only ONTRACK was counted, so the summary badge was wrong.
+    /**
+     * Counts goals that are still active for dashboard display.
+     *
+     * @param userId the owner user id
+     * @return the count of on-track or near-limit goals
+     */
     public Integer getActiveGoalsCount(long userId) {
         return goalRepository.countByUserIdAndStatusIn(
                 userId,

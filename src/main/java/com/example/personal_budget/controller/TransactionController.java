@@ -24,6 +24,13 @@ public class TransactionController {
     private final TransactionService transactionService;
     private final UserService userService;
 
+    /**
+     * Creates a transaction for the authenticated user.
+     *
+     * @param request the transaction details
+     * @param userDetails the authenticated principal
+     * @return the created transaction
+     */
     @PostMapping
     public ResponseEntity<TransactionResponse> addTransaction(
             @Valid @RequestBody CreateTransactionRequest request,
@@ -35,6 +42,12 @@ public class TransactionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /**
+     * Lists all transactions for the authenticated user.
+     *
+     * @param userDetails the authenticated principal
+     * @return the user's transactions
+     */
     @GetMapping
     public ResponseEntity<List<TransactionResponse>> getAllTransactions(
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -45,6 +58,12 @@ public class TransactionController {
         return ResponseEntity.ok(transactions);
     }
 
+    /**
+     * Lists income transactions for the authenticated user.
+     *
+     * @param userDetails the authenticated principal
+     * @return income transactions
+     */
     @GetMapping("/income")
     public ResponseEntity<List<TransactionResponse>> getIncomeTransactions(
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -55,6 +74,12 @@ public class TransactionController {
         return ResponseEntity.ok(transactions);
     }
 
+    /**
+     * Lists expense transactions for the authenticated user.
+     *
+     * @param userDetails the authenticated principal
+     * @return expense transactions
+     */
     @GetMapping("/expense")
     public ResponseEntity<List<TransactionResponse>> getExpenseTransactions(
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -65,6 +90,14 @@ public class TransactionController {
         return ResponseEntity.ok(transactions);
     }
 
+    /**
+     * Updates a transaction owned by the authenticated user.
+     *
+     * @param transactionId the transaction id
+     * @param request the replacement transaction details
+     * @param userDetails the authenticated principal
+     * @return the updated transaction
+     */
     @PutMapping("/{transactionId}")
     public ResponseEntity<TransactionResponse> updateTransaction(
             @PathVariable Long transactionId,
@@ -77,6 +110,13 @@ public class TransactionController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Deletes a transaction owned by the authenticated user.
+     *
+     * @param transactionId the transaction id
+     * @param userDetails the authenticated principal
+     * @return an empty no-content response
+     */
     @DeleteMapping("/{transactionId}")
     public ResponseEntity<Void> deleteTransaction(
             @PathVariable Long transactionId,
@@ -87,6 +127,13 @@ public class TransactionController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Filters the authenticated user's transaction history.
+     *
+     * @param request the filter criteria
+     * @param userDetails the authenticated principal
+     * @return matching transactions
+     */
     @PostMapping("/filter")
     public ResponseEntity<List<TransactionResponse>> filterTransactions(
             @RequestBody TransactionFilterRequest request,
@@ -99,6 +146,12 @@ public class TransactionController {
         return ResponseEntity.ok(transactions);
     }
 
+    /**
+     * Lists the authenticated user's most recent transactions.
+     *
+     * @param userDetails the authenticated principal
+     * @return recent transactions ordered newest first
+     */
     @GetMapping("/recent")
     public ResponseEntity<List<TransactionResponse>> getRecentTransactions(
             @AuthenticationPrincipal UserDetails userDetails) {

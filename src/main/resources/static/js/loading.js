@@ -1,39 +1,4 @@
-/* ═══════════════════════════════════════════════════════════════
-   BudgetWise — loading.js
-   Shared loading helpers: page loader, skeletons, button spinners.
-   Include BEFORE the page's own JS on every page.
 
-   HOW TO USE ON A NEW PAGE
-   ────────────────────────
-   1. Add loading.css to <head>.
-   2. Paste the #pageLoader HTML block right after <body> opens.
-   3. Add <script src="/js/loading.js"></script> before your page JS.
-   4. In your DOMContentLoaded init:
-
-        // Define your steps (label + % for each fetch)
-        loaderInit([
-            { pct: 20,  label: "Loading your profile…"   },
-            { pct: 60,  label: "Fetching your data…"     },
-            { pct: 100, label: "Almost ready…"            },
-        ]);
-
-        loaderAdvance();          // moves bar to step 0
-        await loadProfile();
-
-        loaderAdvance();          // moves bar to step 1
-        await loadPageData();
-
-        loaderAdvance();          // moves bar to step 2 (100%)
-        loaderHide();             // fades out and removes overlay
-
-   5. For every async list, call a skeleton helper before the fetch,
-      and remove it when the render function replaces the content.
-═══════════════════════════════════════════════════════════════ */
-
-
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  PAGE LOADER                                                 ║
-// ╚══════════════════════════════════════════════════════════════╝
 
 let _loaderSteps = [];
 let _loaderStep = 0;
@@ -74,9 +39,7 @@ function loaderHide() {
 }
 
 
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  BUTTON SPINNER                                              ║
-// ╚══════════════════════════════════════════════════════════════╝
+// Button spinner
 
 /**
  * Put a submit button into loading state.
@@ -104,9 +67,6 @@ function btnStopLoading(btnId) {
 }
 
 
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  GENERIC SKELETON RENDERER                                   ║
-// ╚══════════════════════════════════════════════════════════════╝
 
 /**
  * Fill a container with N copies of a skeleton HTML template.
@@ -132,10 +92,6 @@ function clearSkeletons(...ids) {
 }
 
 
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  PRE-BUILT SKELETON TEMPLATES                                ║
-// ║  Use with showSkeletons(containerId, SKELETONS.xxx, count)   ║
-// ╚══════════════════════════════════════════════════════════════╝
 
 const SKELETONS = {
 

@@ -75,16 +75,16 @@ function showToast(message) {
     showToast.timer = setTimeout(() => toast.classList.remove('show'), 2800);
 }
 
-async function loadProfile() {
-    try {
-        const profile = await apiFetch(API.PROFILE);
-        const name = profile.name || 'Admin';
-        document.getElementById('adminGreeting').textContent = `Admin console, ${name}`;
-        document.getElementById('adminAvatar').textContent = getInitials(name);
-    } catch {
-        document.getElementById('adminGreeting').textContent = 'Admin console';
-    }
-}
+// async function loadProfile() {
+//     try {
+//         const profile = await apiFetch(API.PROFILE);
+//         const name = profile.name || 'Admin';
+//         document.getElementById('adminGreeting').textContent = `Admin console, ${name}`;
+//         document.getElementById('adminAvatar').textContent = getInitials(name);
+//     } catch {
+//         document.getElementById('adminGreeting').textContent = 'Admin console';
+//     }
+// }
 
 async function loadAdminData() {
     const refreshBtn = document.getElementById('refreshBtn');
@@ -295,8 +295,18 @@ async function handleLogout() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadProfile();
-    loadAdminData();
+    // loadProfile();
+	
+    loaderInit([
+        { pct: 50,  label: "Loading admin data…" },
+        { pct: 100, label: "Almost ready…" },
+    ]);
+    loaderAdvance();
+
+    loadAdminData().finally(() => {
+        loaderAdvance();
+        loaderHide();
+    });
 
     document.getElementById('refreshBtn')?.addEventListener('click', loadAdminData);
 

@@ -1,7 +1,3 @@
-/* ══════════════════════════════════════════════════════
-   BudgetWise – Shared Navbar / Sidebar Stylesheet
-   ══════════════════════════════════════════════════════ */
-
 :root {
     --green: #1db954;
     --green-dark: #17a348;
@@ -612,9 +608,7 @@
     text-decoration: underline;
 }
 
-/* ═══════════════════ RESPONSIVE ══════════════════════
-   < 768px  → sidebar hidden off-screen, hamburger shown
-   ═══════════════════════════════════════════════════ */
+
 @media (max-width: 768px) {
 
     /* Sidebar slides off-screen by default */

@@ -1,10 +1,4 @@
-/* ═══════════════════════════════════════════════════════════════
-   app.js  –  BudgetWise Profile Page
-═══════════════════════════════════════════════════════════════ */
 
-/* ─────────────────────────────────────────────
-   API FETCH WRAPPER  –  always sends cookies
-───────────────────────────────────────────── */
 function apiFetch(url, options = {}) {
   return fetch(url, {
     ...options,
@@ -16,9 +10,7 @@ function apiFetch(url, options = {}) {
   });
 }
 
-/* ─────────────────────────────────────────────
-   IN-MEMORY STATE
-───────────────────────────────────────────── */
+
 const state = {
   user: {
     name: "",
@@ -40,18 +32,14 @@ const state = {
   categories: [], // custom categories
 };
 
-/* ─────────────────────────────────────────────
-   CURRENCY META
-───────────────────────────────────────────── */
+
 const CURRENCIES = {
   EGP: { flag: "🇪🇬", name: "Egyptian Pound" },
   USD: { flag: "🇺🇸", name: "US Dollar" },
   EUR: { flag: "🇪🇺", name: "Euro" },
 };
 
-/* ─────────────────────────────────────────────
-   INIT
-───────────────────────────────────────────── */
+
 async function init() {
   loaderInit([
     { pct: 40, label: "Loading your profile…" },
@@ -98,8 +86,8 @@ async function init() {
   } catch (err) {
     console.error("Failed to load profile:", err);
   } finally {
-    loaderAdvance(); // → 100%
-    loaderHide(); // Always hide the loader, even on error
+    loaderAdvance();
+    loaderHide();
   }
 
   // Close currency dropdown on outside click
@@ -131,9 +119,7 @@ async function init() {
   });
 }
 
-/* ═══════════════════════════════════════════
-   RENDER
-═══════════════════════════════════════════ */
+// Render
 function renderAll() {
   const { user, stats, prefs } = state;
 
@@ -167,11 +153,8 @@ function setGreeting() {
     );
 }
 
-/* ═══════════════════════════════════════════
-   NOTIFICATIONS PANEL
-═══════════════════════════════════════════ */
+// Notofication panel
 
-// FIX 1: fetch from real API instead of mock data
 async function loadNotifications() {
   try {
     const response = await apiFetch("/api/notifications/all", {
@@ -419,7 +402,6 @@ function renderNotifList() {
     .join("");
 }
 
-// FIX 2: async, calls backend, skips already-read, reverts on failure
 async function markNotifRead(id) {
   const notif = state.notifications.find((n) => n.id === id);
   if (!notif || notif.read) return;
@@ -439,7 +421,6 @@ async function markNotifRead(id) {
   renderNotifBadge();
 }
 
-// FIX 3: async, calls backend per notification, only updates state on success
 async function markAllRead() {
   const unread = state.notifications.filter((n) => !n.read);
   if (!unread.length) return;
@@ -460,9 +441,7 @@ async function markAllRead() {
   renderNotifBadge();
 }
 
-/* ═══════════════════════════════════════════
-   AVATAR UPLOAD
-═══════════════════════════════════════════ */
+
 function previewAvatar(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -478,9 +457,8 @@ function previewAvatar(event) {
   reader.readAsDataURL(file);
 }
 
-/* ═══════════════════════════════════════════
-   NOTIFICATION PREFERENCES
-═══════════════════════════════════════════ */
+// NOTIFICATION PREFERENCES
+
 async function onNotifGoalsChange(enabled) {
   state.prefs.notifGoals = enabled;
 
@@ -531,9 +509,7 @@ function toggleNotifTransactions() {
   onNotifTransactionsChange(checkbox.checked);
 }
 
-/* ═══════════════════════════════════════════
-   CURRENCY DROPDOWN
-═══════════════════════════════════════════ */
+// Currency Dropdown
 function toggleCurrencyDropdown(event) {
   event.stopPropagation();
   const dropdown = document.getElementById("currency-dropdown");
@@ -565,9 +541,6 @@ function selectCurrency(optionEl) {
   setCurrencyDisplay(value);
   state.prefs.currency = value;
   closeCurrencyDropdown();
-
-  // TODO: persist to backend
-  // await apiFetch('/api/profile/preferences', { method: 'PATCH', body: JSON.stringify({ currency: value }) });
 }
 
 function setCurrencyDisplay(value) {
@@ -576,9 +549,8 @@ function setCurrencyDisplay(value) {
   document.getElementById("cur-flag").textContent = meta.flag;
 }
 
-/* ═══════════════════════════════════════════
-   EDIT MODAL  –  name only
-═══════════════════════════════════════════ */
+// EDIT MODAL  –  name only
+
 function openEditModal() {
   document.getElementById("edit-name").value = state.user.name;
   document.getElementById("modal-overlay").classList.add("open");
@@ -638,9 +610,7 @@ document
   .getElementById("add-custom-category-btn")
   ?.addEventListener("click", addCustomCategory);
 
-/* ─────────────────────────────────────────────
-   HELPERS
-───────────────────────────────────────────── */
+// Helpers
 function getInitials(fullName) {
   return fullName
     .split(" ")
@@ -650,9 +620,6 @@ function getInitials(fullName) {
     .join("");
 }
 
-/* ═══════════════════════════════════════════
-   LOGOUT
-═══════════════════════════════════════════ */
 async function handleLogout() {
   try {
     await apiFetch("/api/auth/logout", {

@@ -4,9 +4,9 @@ import com.example.personal_budget.dto.request.MonthlyReportRequest;
 import com.example.personal_budget.dto.request.ReportDownloadRequest;
 import com.example.personal_budget.dto.response.MonthlyReportResponse;
 import com.example.personal_budget.entity.Transaction;
+import com.example.personal_budget.enums.ReportFormat;
 import com.example.personal_budget.enums.TransactionType;
 import com.example.personal_budget.util.ExporterFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -26,7 +26,13 @@ public class ReportService {
     }
 
 
-    // 1. Generate monthly report for a user for visual representation
+    /**
+     * Generates monthly income, expense, and category breakdown data for reports.
+     *
+     * @param contextUserId the user id used as the data access context
+     * @param request the report date range
+     * @return the monthly report data used by the UI
+     */
     public MonthlyReportResponse generateMonthlyReport (Long contextUserId, MonthlyReportRequest request) {
 
         Map<Month, Double> expenseMap = transactionService.getMonthlyTotal(contextUserId, request,
@@ -42,14 +48,20 @@ public class ReportService {
     }
 
 
-    // 2. Generate a file with the all transaction when user request it (csv, excel, pdf) with a data range
+    /**
+     * Generates a downloadable transaction report file in the requested format.
+     *
+     * @param contextUserId the user id used as the data access context
+     * @param request the requested date range and export format
+     * @return the generated report file
+     */
     public File generateTransactionReport (Long contextUserId, ReportDownloadRequest request) {
         List<Transaction> transactions = transactionService.getTransactionsByDateRange(contextUserId,
                                                                                        request.getStartDate(),
                                                                                        request.getEndDate());
 
         String fileName = "transaction_report_" + System.currentTimeMillis();
-        String fileExtension = getFileExtension(request.getFormat().toString());
+        String fileExtension = getFileExtension(request.getFormat());
         String filePath = fileName + fileExtension;
 
         try {
@@ -59,12 +71,11 @@ public class ReportService {
         }
     }
 
-    private String getFileExtension (String format) {
-        return switch (format.toUpperCase()) {
-            case "PDF" -> ".pdf";
-            case "EXCEL" -> ".xlsx";
-            case "CSV" -> ".csv";
-            default -> ".txt";
+    private String getFileExtension (ReportFormat format) {
+        return switch (format) {
+            case PDF -> ".pdf";
+            case EXCEL -> ".xlsx";
+            case CSV -> ".csv";
         };
     }
 

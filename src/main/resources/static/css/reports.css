@@ -203,9 +203,7 @@
   box-shadow: none;
 }
 
-/* ══════════════════════════════════════
-   RIPPLE EFFECT
-══════════════════════════════════════ */
+/* ripple effect */
 
 @keyframes rippleSpread {
   from {
@@ -228,9 +226,7 @@
   transform-origin: center;
 }
 
-/* ══════════════════════════════════════
-   LOAD REPORT BUTTON — LOADING STATE
-══════════════════════════════════════ */
+/* Load Report */
 
 @keyframes btnLoadingPulse {
   0%, 100% {
@@ -676,9 +672,7 @@
   background: #f59e0b;
 }
 
-/* ══════════════════════════════════════
-   DOWNLOAD PROGRESS OVERLAY
-══════════════════════════════════════ */
+/* DOWNLOAD PROGRESS OVERLAY */
 
 @keyframes progressBarFill {
   from {
@@ -722,9 +716,7 @@
   text-align: center;
 }
 
-/* ══════════════════════════════════════
-   CHART CARD SHIMMER ON LOAD
-══════════════════════════════════════ */
+/* CHART CARD SHIMMER ON LOAD*/
 
 @keyframes shimmer {
   0% {

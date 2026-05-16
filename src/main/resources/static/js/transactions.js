@@ -11,7 +11,7 @@ const API = {
   LOGOUT: "/auth/logout",
 };
 
-// ── Shared Fetch Helper ───────────────────────────────────────────────────────
+// Shared Fetch Helper
 async function apiFetch(endpoint, options = {}) {
   const headers = {
     "Content-Type": "application/json",

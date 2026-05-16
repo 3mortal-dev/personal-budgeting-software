@@ -29,6 +29,13 @@ public class ReportController {
     private final ReportService reportService;
     private final UserService userService;
 
+    /**
+     * Generates monthly report data for the authenticated user.
+     *
+     * @param request the report date range
+     * @param userDetails the authenticated principal
+     * @return the monthly report data
+     */
     @PostMapping("/monthly")
     public ResponseEntity<MonthlyReportResponse> getMonthlyReport(
             @RequestBody MonthlyReportRequest request,
@@ -42,6 +49,13 @@ public class ReportController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Generates and downloads a transaction report file for the authenticated user.
+     *
+     * @param request the requested date range and export format
+     * @param userDetails the authenticated principal
+     * @return the generated file resource
+     */
     @PostMapping("/download")
     public ResponseEntity<Resource> downloadReport(
             @RequestBody ReportDownloadRequest request,

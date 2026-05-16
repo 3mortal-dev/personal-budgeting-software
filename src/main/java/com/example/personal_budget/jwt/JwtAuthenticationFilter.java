@@ -34,7 +34,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String jwt = extractJwt(request);
 
-        // No token → continue as anonymous (Spring will decide access)
         if (jwt == null) {
             filterChain.doFilter(request, response);
             return;
@@ -55,7 +54,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        // If already authenticated → skip
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
             filterChain.doFilter(request, response);
             return;
@@ -63,14 +61,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
-        // ✅ STEP 1: JWT signature validation
         boolean isJwtValid = jwtService.isTokenValid(jwt, userDetails);
 
-        // ✅ STEP 2: DB check (safe fallback, NOT mandatory for auth)
         boolean isTokenStoredAndValid = tokenRepository
                 .findByToken(jwt)
                 .map(t -> !t.isExpired() && !t.isRevoked())
-                .orElse(true); // IMPORTANT FIX: default TRUE to avoid accidental 403
+                .orElse(true);
 
         if (isJwtValid && isTokenStoredAndValid) {
 
@@ -101,7 +97,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
      */
     private String extractJwt(HttpServletRequest request) {
 
-        // 1. Cookie (preferred)
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if ("jwt".equals(cookie.getName())) {
@@ -110,7 +105,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
 
-        // 2. Authorization header fallback
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {

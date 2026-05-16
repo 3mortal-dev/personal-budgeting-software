@@ -1,7 +1,5 @@
 package com.example.personal_budget.dto.request;
 
-import com.example.personal_budget.enums.BudgetStatus;
-
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.Data;
@@ -16,5 +14,6 @@ public class CreateBudgetRequest {
     @Min(0)
     @Max(100)
     private Double threshold;
+	LocalDate startDate;
     LocalDate endDate;
 }

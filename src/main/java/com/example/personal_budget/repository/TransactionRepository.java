@@ -12,22 +12,67 @@ import com.example.personal_budget.enums.TransactionType;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-    // Basic — JPA generates from method name
+    /**
+     * Finds all transactions owned by a user.
+     *
+     * @param userId the owner user id
+     * @return transactions for the user
+     */
     List<Transaction> findByUserId(Long userId);
 
+    /**
+     * Finds transactions for a user filtered by transaction type.
+     *
+     * @param userId the owner user id
+     * @param type the transaction type
+     * @return matching transactions
+     */
     List<Transaction> findByUserIdAndType(Long userId, TransactionType type);
 
+    /**
+     * Finds transactions for a user in an inclusive date range.
+     *
+     * @param userId the owner user id
+     * @param start the first included date
+     * @param end the last included date
+     * @return matching transactions
+     */
     List<Transaction> findByUserIdAndDateBetween(Long userId, LocalDate start, LocalDate end);
 
-    List<Transaction> findByUserIdAndDateBetweenAndCategoryId(Long userId, LocalDate start,
-            LocalDate end, Long categoryId);
+    /**
+     * Finds transactions for a user in an inclusive date range and category.
+     *
+     * @param userId the owner user id
+     * @param start the first included date
+     * @param end the last included date
+     * @param categoryId the category id
+     * @return matching transactions
+     */
+    List<Transaction> findByUserIdAndDateBetweenAndCategoryId(Long userId, LocalDate start, LocalDate end, Long categoryId);
 
-    // Dashboard — last 5
+    /**
+     * Finds the five most recent transactions for dashboard display.
+     *
+     * @param userId the owner user id
+     * @return recent transactions ordered by date and id descending
+     */
     List<Transaction> findTop5ByUserIdOrderByDateDescIdDesc(Long userId);
 
+    /**
+     * Counts transactions owned by a user.
+     *
+     * @param userId the owner user id
+     * @return the number of transactions
+     */
     Integer countByUserId(Long userId);
 
-    // Sum income or expense
+    /**
+     * Sums transaction amounts for a user and transaction type.
+     *
+     * @param userId the owner user id
+     * @param type the transaction type
+     * @return the total amount, or zero when none exists
+     */
     @Query("""
             SELECT COALESCE(SUM(t.amount), 0)
             FROM Transaction t
@@ -36,6 +81,15 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             """)
     Double sumByUserIdAndType(@Param("userId") Long userId, @Param("type") TransactionType type);
 
+    /**
+     * Sums transaction amounts for a user, type, and inclusive date range.
+     *
+     * @param userId the owner user id
+     * @param type the transaction type
+     * @param startDate the first included date
+     * @param endDate the last included date
+     * @return the total amount, or zero when none exists
+     */
     @Query("""
             SELECT COALESCE(SUM(t.amount), 0)
             FROM Transaction t
@@ -48,6 +102,38 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
 
+    /**
+     * Sums expense amounts for a user, category, and inclusive date range.
+     *
+     * @param userId the owner user id
+     * @param categoryId the category id
+     * @param startDate the first included date
+     * @param endDate the last included date
+     * @return the total expense amount, or zero when none exists
+     */
+    @Query("""
+			SELECT COALESCE(SUM(t.amount), 0)
+			FROM Transaction t
+			WHERE t.user.id = :userId
+			AND t.type = 'EXPENSE'
+			AND t.category.id = :categoryId
+			AND t.date BETWEEN :startDate AND :endDate
+			""")
+    Double sumExpenseByUserIdAndCategoryIdAndDateBetween(
+            @Param("userId") Long userId,
+            @Param("categoryId") Long categoryId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
+
+    /**
+     * Sums transaction amounts by calendar month for report charts.
+     *
+     * @param userId the owner user id
+     * @param type the transaction type name
+     * @param startDate the first included date
+     * @param endDate the last included date
+     * @return rows containing month number and total amount
+     */
     @Query(value = """
 			SELECT EXTRACT(MONTH FROM date), COALESCE(SUM(amount), 0)
 			FROM transactions
@@ -62,7 +148,13 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
 
-    // Category breakdown — for reports
+    /**
+     * Sums transaction amounts by category for report breakdowns.
+     *
+     * @param userId the owner user id
+     * @param type the transaction type
+     * @return rows containing category name and total amount
+     */
     @Query("""
             SELECT t.category.name, COALESCE(SUM(t.amount), 0)
             FROM Transaction t
@@ -73,7 +165,14 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Object[]> getCategoryAmount(@Param("userId") Long userId,
             @Param("type") TransactionType type);
 
-    // Date range — for reports
+    /**
+     * Finds transactions in an inclusive date range ordered newest first.
+     *
+     * @param userId the owner user id
+     * @param startDate the first included date
+     * @param endDate the last included date
+     * @return matching transactions ordered by date descending
+     */
     @Query("""
             SELECT t FROM Transaction t
             WHERE t.user.id = :userId

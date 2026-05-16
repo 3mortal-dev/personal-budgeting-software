@@ -25,6 +25,11 @@ public class NotificationService {
 
     private final UserService userService;
 
+    /**
+     * Creates and stores a notification from a domain event.
+     *
+     * @param event the notification event containing the user, type, and message data
+     */
     public void createNotification(NotificationEvent event) {
 
         User user = userService.getUserById(event.getUserId());
@@ -41,6 +46,11 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
+    /**
+     * Marks a notification as read.
+     *
+     * @param notificationId the notification id
+     */
     public void markAsRead(Long notificationId) {
 
         Notification notification = notificationRepository.findById(notificationId)
@@ -50,6 +60,11 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
+    /**
+     * Deletes a notification by id.
+     *
+     * @param notificationId the notification id
+     */
     public void deleteNotification(Long notificationId) {
 
         if (!notificationRepository.existsById(notificationId)) {
@@ -59,23 +74,54 @@ public class NotificationService {
         notificationRepository.deleteById(notificationId);
     }
 
+    /**
+     * Deletes every notification owned by a user.
+     *
+     * @param userId the owner user id
+     */
     public void deleteAllNotifications(Long userId) {
         List<Notification> notifications = notificationRepository.findByUserId(userId);
         notificationRepository.deleteAll(notifications);
     }
 
+    /**
+     * Retrieves every notification owned by a user.
+     *
+     * @param userId the owner user id
+     * @return all user notifications
+     */
     public List<Notification> getUserNotifications(Long userId) {
         return notificationRepository.findByUserId(userId);
     }
 
+    /**
+     * Retrieves unread notifications owned by a user.
+     *
+     * @param userId the owner user id
+     * @return unread notifications
+     */
     public List<Notification> getUnreadNotifications(Long userId) {
         return notificationRepository.findByUserIdAndIsReadFalse(userId);
     }
 
+    /**
+     * Retrieves notifications for a user filtered by event type.
+     *
+     * @param userId the owner user id
+     * @param type the event type to filter by
+     * @return matching notifications
+     */
     public List<Notification> getNotificationsByType(Long userId, NotificationEventType type) {
         return notificationRepository.findByUserIdOrType(userId, type);
     }
 
+    /**
+     * Retrieves the most recent notifications for a user.
+     *
+     * @param userId the owner user id
+     * @param limit the maximum number of notifications to return
+     * @return recent notifications ordered newest first
+     */
     public List<Notification> getReceivedNotifications(Long userId, int limit) {
         List<Notification> notifications = notificationRepository.findByUserId(userId);
         return notifications.stream()

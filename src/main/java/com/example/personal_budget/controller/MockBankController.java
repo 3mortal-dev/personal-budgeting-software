@@ -78,6 +78,12 @@ public class MockBankController {
 
     }
 
+    /**
+     * Response returned after bank sync completes.
+     *
+     * @param count the number of imported transactions
+     * @param message a user-facing sync result message
+     */
     public record SyncResponse(int count, String message) {
 
     }
@@ -88,6 +94,9 @@ public class MockBankController {
      * <p>
      * This endpoint is intentionally left <em>unauthenticated</em> to mimic an
      * external bank that pushes data asynchronously.
+     *
+     * @param request the simulated bank transaction payload
+     * @return a creation success message
      */
     @PostMapping("/api/mock-bank/add")
     public ResponseEntity<Map<String, String>> addBankTransaction(
@@ -130,6 +139,9 @@ public class MockBankController {
      * <li>Each record is marked {@code synced = true} after a successful import
      * so it is never imported twice.</li>
      * </ul>
+     *
+     * @param userDetails the authenticated principal
+     * @return the number of imported records and a user-facing message
      */
     @PostMapping("/api/bank/sync")
     public ResponseEntity<SyncResponse> syncBankTransactions(
@@ -176,6 +188,8 @@ public class MockBankController {
      * Returns every bank record that has not yet been synced. Useful during
      * development to verify the simulator is working before triggering a full
      * sync.
+     *
+     * @return unsynced bank transactions
      */
     @GetMapping("/api/mock-bank/pending")
     public ResponseEntity<List<MockBankTransaction>> getPendingTransactions() {

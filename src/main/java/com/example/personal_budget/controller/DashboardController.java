@@ -29,6 +29,12 @@ public class DashboardController {
     private final BudgetService budgetService;
     private final GoalService goalService;
 
+    /**
+     * Builds the dashboard summary for the authenticated user.
+     *
+     * @param userDetails the authenticated principal
+     * @return balances, monthly totals, recent transactions, active budgets, and active goals
+     */
     @GetMapping
     public ResponseEntity<DashboardResponse> getDashboard(@AuthenticationPrincipal UserDetails userDetails) {
         Long userId = userService.getUserId(userDetails);

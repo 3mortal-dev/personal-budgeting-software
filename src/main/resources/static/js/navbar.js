@@ -1,19 +1,8 @@
 "use strict";
 
-/* ══════════════════════════════════════════════════════
-   BudgetWise – Shared Navbar Component
-   ══════════════════════════════════════════════════════
-   HOW TO USE ON ANY PAGE:
-   1. <link> to navbar.css in <head>
-   2. <div id="sidebar-root"></div>  — before <main> in <body>
-   3. <div id="topbar-root"></div>   — first child inside <main>
-   4. <script src="/js/navbar.js"></script> before page scripts
-   ══════════════════════════════════════════════════════ */
 
 (function () {
-  /* ─────────────────────────────────────────────────────
-       1. NAV LINKS  — edit here to update all pages at once
-    ───────────────────────────────────────────────────── */
+
   const NAV_LINKS = [
     { href: "/dashboard", icon: "fa-house", label: "Home" },
     { href: "/transactions", icon: "fa-receipt", label: "Transactions" },
@@ -22,6 +11,7 @@
     { href: "/reports", icon: "fa-chart-bar", label: "Reports" },
     { href: "/notifications", icon: "fa-bell", label: "Notifications" },
     { href: "/userProfile", icon: "fa-user", label: "Profile" },
+	{ href: "/admin", icon: "fa-shield-halved", label: "Admin", adminOnly: true },
   ];
 
   const NOTIF_API = {
@@ -29,24 +19,21 @@
     MARK_READ: (id) => `/notifications/${id}/markRead`,
   };
 
-  /* ─────────────────────────────────────────────────────
-       2. ACTIVE LINK DETECTION
-    ───────────────────────────────────────────────────── */
+
   function isActive(href) {
     return window.location.pathname.startsWith(href);
   }
 
-  /* ─────────────────────────────────────────────────────
-       3. BUILD SIDEBAR HTML
-    ───────────────────────────────────────────────────── */
-  function buildSidebar() {
-    const links = NAV_LINKS.map(({ href, icon, label }) => {
-      const active = isActive(href) ? " sidebar__link--active" : "";
-      return `
-        <a class="sidebar__link${active}" href="${href}">
-          <i class="fa-solid ${icon}"></i><span>${label}</span>
-        </a>`;
-    }).join("");
+  function buildSidebar(isAdmin) {
+    const links = NAV_LINKS
+        .filter(({ adminOnly }) => !adminOnly || isAdmin)
+        .map(({ href, icon, label }) => {
+            const active = isActive(href) ? " sidebar__link--active" : "";
+            return `
+            <a class="sidebar__link${active}" href="${href}">
+              <i class="fa-solid ${icon}"></i><span>${label}</span>
+            </a>`;
+        }).join("");
 
     return `
       <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
@@ -66,9 +53,6 @@
       </aside>`;
   }
 
-  /* ─────────────────────────────────────────────────────
-       4. BUILD TOPBAR HTML
-    ───────────────────────────────────────────────────── */
   function buildTopbar() {
     return `
       <header class="topbar">
@@ -121,9 +105,7 @@
       </header>`;
   }
 
-  /* ─────────────────────────────────────────────────────
-       5. NOTIFICATION HELPERS
-    ───────────────────────────────────────────────────── */
+
   function escapeHtml(str) {
     if (!str) return "";
     return str
@@ -170,9 +152,6 @@
     }
   }
 
-  /* ─────────────────────────────────────────────────────
-       6. NOTIFICATION STATE + RENDER
-    ───────────────────────────────────────────────────── */
   const notifState = { all: [], filter: "all" };
 
   function filteredNotifs() {
@@ -278,9 +257,7 @@
     renderNotifList();
   }
 
-  /* ─────────────────────────────────────────────────────
-       7. TIME-OF-DAY GREETING
-    ───────────────────────────────────────────────────── */
+  // time of day
   function applyTimeOfDay() {
     const h = new Date().getHours();
     const el = document.getElementById("topbarTimeOfDay");
@@ -288,16 +265,14 @@
       el.textContent = h < 12 ? "morning" : h < 17 ? "afternoon" : "evening";
   }
 
-  /* ─────────────────────────────────────────────────────
-       8. FETCH USERNAME & INITIALS
-    ───────────────────────────────────────────────────── */
+  // fetch username
   async function applyUsername() {
     try {
       const res = await fetch("/api/profile", {
         credentials: "include",
         headers: { Accept: "application/json" },
       });
-      if (!res.ok) return;
+      if (!res.ok) return null;
       const data = await res.json();
       const name = data.name || data.username || "";
       const usernameEl = document.getElementById("topbarUsername");
@@ -310,12 +285,11 @@
             ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
             : name.slice(0, 2).toUpperCase() || "U";
       }
-    } catch {}
+      return data.role || null;
+    } catch { return null; }
   }
 
-  /* ─────────────────────────────────────────────────────
-       9. HAMBURGER — mobile sidebar toggle
-    ───────────────────────────────────────────────────── */
+
   function setupHamburger() {
     const btn = document.getElementById("hamburgerBtn");
     const sidebar = document.getElementById("sidebar");
@@ -351,9 +325,7 @@
     });
   }
 
-  /* ─────────────────────────────────────────────────────
-       10. NOTIFICATION DROPDOWN EVENTS
-    ───────────────────────────────────────────────────── */
+  // Notofication
   function setupNotifDropdown() {
     const bell = document.getElementById("bellBtn");
     const dropdown = document.getElementById("notifDropdown");
@@ -388,10 +360,8 @@
     });
   }
 
-  /* ─────────────────────────────────────────────────────
-       11. INJECT & INIT
-    ───────────────────────────────────────────────────── */
-  function inject() {
+  // Init
+  async function inject() {
     const sidebarRoot = document.getElementById("sidebar-root");
     const topbarRoot = document.getElementById("topbar-root");
 
@@ -400,18 +370,17 @@
       return;
     }
     if (!topbarRoot) {
-      console.warn(
-        '[navbar.js] Missing <div id="topbar-root"></div> inside <main>',
-      );
+      console.warn('[navbar.js] Missing <div id="topbar-root"></div> inside <main>');
       return;
     }
 
-    sidebarRoot.innerHTML = buildSidebar();
     topbarRoot.innerHTML = buildTopbar();
 
+    const role = await applyUsername();
+    sidebarRoot.innerHTML = buildSidebar(role === "ADMIN");
+
     applyTimeOfDay();
-    applyUsername();
-    fetchNotifications(); // load badge count immediately
+    fetchNotifications();
     setupHamburger();
     setupNotifDropdown();
   }

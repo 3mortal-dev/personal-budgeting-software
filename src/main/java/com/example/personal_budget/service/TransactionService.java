@@ -34,12 +34,26 @@ public class TransactionService {
     @Getter
     private final UserService userService;
 
+    /**
+     * Loads a transaction by id.
+     *
+     * @param transactionId the transaction id
+     * @return the matching transaction
+     */
     public Transaction getById(Long transactionId) {
 
         return transactionRepo.findById(transactionId).orElseThrow(
                 () -> new TransactionNotFoundException(transactionId));
     }
 
+    /**
+     * Creates a transaction for a user and updates the related budget when the
+     * transaction is an expense.
+     *
+     * @param userId the owner of the new transaction
+     * @param request the transaction details
+     * @return the saved transaction
+     */
     @Transactional
     public Transaction addTransaction(
             Long userId,
@@ -64,10 +78,24 @@ public class TransactionService {
         return transactionRepo.save(transaction);
     }
 
+    /**
+     * Retrieves all transactions owned by a user.
+     *
+     * @param contextUserId the user id used as the data access context
+     * @return the user's transactions
+     */
     public List<Transaction> getAllTransactions(Long contextUserId) {
         return transactionRepo.findByUserId(contextUserId);
     }
 
+    /**
+     * Updates a transaction after verifying that it belongs to the user.
+     *
+     * @param transactionId the transaction to update
+     * @param userId the authenticated user's id
+     * @param request the replacement transaction details
+     * @return the updated transaction
+     */
     @Transactional
     public Transaction updateTransaction(
             Long transactionId,
@@ -100,6 +128,13 @@ public class TransactionService {
         return transactionRepo.save(transaction);
     }
 
+    /**
+     * Deletes a transaction after verifying ownership and reverses any related
+     * budget spending impact.
+     *
+     * @param transactionId the transaction to delete
+     * @param userId the authenticated user's id
+     */
     @Transactional
     public void deleteTransaction(
             Long transactionId,
@@ -119,22 +154,54 @@ public class TransactionService {
         transactionRepo.delete(transaction);
     }
 
+    /**
+     * Retrieves income transactions for a user.
+     *
+     * @param contextUserId the user id used as the data access context
+     * @return income transactions for the user
+     */
     public List<Transaction> getIncomeTransactions(Long contextUserId) {
         return transactionRepo.findByUserIdAndType(contextUserId, TransactionType.INCOME);
     }
 
+    /**
+     * Retrieves expense transactions for a user.
+     *
+     * @param contextUserId the user id used as the data access context
+     * @return expense transactions for the user
+     */
     public List<Transaction> getExpenseTransactions(Long contextUserId) {
         return transactionRepo.findByUserIdAndType(contextUserId, TransactionType.EXPENSE);
     }
 
+    /**
+     * Calculates all-time income for a user.
+     *
+     * @param contextUserId the user id used as the data access context
+     * @return the user's total income, or zero when no income exists
+     */
     public Double getTotalIncome(Long contextUserId) {
         return transactionRepo.sumByUserIdAndType(contextUserId, TransactionType.INCOME);
     }
 
+    /**
+     * Calculates all-time expenses for a user.
+     *
+     * @param contextUserId the user id used as the data access context
+     * @return the user's total expenses, or zero when no expenses exist
+     */
     public Double getTotalExpense(Long contextUserId) {
         return transactionRepo.sumByUserIdAndType(contextUserId, TransactionType.EXPENSE);
     }
 
+    /**
+     * Calculates income within a date range for a user.
+     *
+     * @param contextUserId the user id used as the data access context
+     * @param startDate the first date included in the calculation
+     * @param endDate the last date included in the calculation
+     * @return total income in the range, or zero when no income exists
+     */
     public Double getMonthlyIncome(
             Long contextUserId,
             LocalDate startDate,
@@ -143,6 +210,14 @@ public class TransactionService {
                 endDate);
     }
 
+    /**
+     * Calculates expenses within a date range for a user.
+     *
+     * @param contextUserId the user id used as the data access context
+     * @param startDate the first date included in the calculation
+     * @param endDate the last date included in the calculation
+     * @return total expenses in the range, or zero when no expenses exist
+     */
     public Double getMonthlyExpense(
             Long contextUserId,
             LocalDate startDate,
@@ -151,10 +226,24 @@ public class TransactionService {
                 endDate);
     }
 
+    /**
+     * Counts transactions owned by a user.
+     *
+     * @param contextUserId the user id used as the data access context
+     * @return the number of stored transactions
+     */
     public Integer getNumberOfTransactions(Long contextUserId) {
         return transactionRepo.countByUserId(contextUserId);
     }
 
+    /**
+     * Filters a user's transactions by the date and category fields supplied in
+     * the request.
+     *
+     * @param userId the user whose history should be filtered
+     * @param request the filtering criteria
+     * @return transactions matching the filter
+     */
     public List<Transaction> filterHistory(
             Long userId,
             @NonNull TransactionFilterRequest request) {
@@ -163,6 +252,14 @@ public class TransactionService {
                 request.getEndDate(), request.getCategoryId());
     }
 
+    /**
+     * Builds a month-to-total map for report charts.
+     *
+     * @param userId the user whose transactions are included
+     * @param request the report date range
+     * @param type the transaction type to aggregate
+     * @return ordered monthly totals keyed by month
+     */
     public Map<Month, Double> getMonthlyTotal(
             Long userId,
             @NonNull MonthlyReportRequest request,
@@ -174,6 +271,13 @@ public class TransactionService {
                         (a, b) -> a, LinkedHashMap::new));
     }
 
+    /**
+     * Builds a category-to-total map for a user's transactions of the given type.
+     *
+     * @param contextId the user id used as the data access context
+     * @param type the transaction type to aggregate
+     * @return totals grouped by category name
+     */
     public Map<String, Double> getCategoryMap(
             Long contextId,
             TransactionType type) {
@@ -183,6 +287,14 @@ public class TransactionService {
                         LinkedHashMap::new));
     }
 
+    /**
+     * Retrieves transactions in an inclusive date range.
+     *
+     * @param contextUserId the user id used as the data access context
+     * @param startDate the first date included in the result
+     * @param end the last date included in the result
+     * @return transactions in the requested range
+     */
     public List<Transaction> getTransactionsByDateRange(
             Long contextUserId,
             LocalDate startDate,
@@ -190,6 +302,12 @@ public class TransactionService {
         return transactionRepo.findByUserIdAndDateBetween(contextUserId, startDate, end);
     }
 
+    /**
+     * Retrieves the five most recent transactions for a user.
+     *
+     * @param contextUserId the user id used as the data access context
+     * @return recent transactions ordered newest first
+     */
     public List<Transaction> getRecentTransactions(Long contextUserId) {
         return transactionRepo.findTop5ByUserIdOrderByDateDescIdDesc(contextUserId);
     }

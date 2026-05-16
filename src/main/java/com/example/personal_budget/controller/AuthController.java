@@ -22,10 +22,17 @@ public class AuthController {
 
     private final AuthenticationService authenticationService;
 
+    /**
+     * Registers a new account and stores the issued JWT in an HTTP-only cookie.
+     *
+     * @param request the registration details
+     * @param response the servlet response used to add the JWT cookie
+     * @return a success message or validation error message
+     */
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> register(
             @RequestBody RegisterRequest request,
-            HttpServletResponse response   // ← ADD THIS
+            HttpServletResponse response 
     ) 
     
     {
@@ -36,30 +43,35 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Registered successfully"));
 
     } catch (RuntimeException e) {
-        // ─── Send error message back to frontend ──────────
         return ResponseEntity.badRequest()
                .body(Map.of("message", e.getMessage()));
     }
     }
 
+    /**
+     * Authenticates a user and stores the issued JWT in an HTTP-only cookie.
+     *
+     * @param request the login credentials
+     * @param response the servlet response used to add the JWT cookie
+     * @return a login success message
+     */
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> authenticate(
             @RequestBody AuthenticationRequest request,
-            HttpServletResponse response   // ← ADD THIS
+            HttpServletResponse response
     ) {
-        String token = authenticationService.authenticate(request);  // ← now returns String
+        String token = authenticationService.authenticate(request);
         addJwtCookie(response, token);
         return ResponseEntity.ok(Map.of("message", "Login successful"));
     }
 
-    // ── Cookie builder ──────────────────────────────────────────
     private void addJwtCookie(HttpServletResponse response, String token) {
         ResponseCookie cookie = ResponseCookie.from("jwt", token)
-                .httpOnly(true)       // JS cannot read it — XSS proof
-                .secure(true)         // HTTPS only (set false for localhost dev)
-                .path("/")            // sent on every request
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
                 .maxAge(Duration.ofDays(1))
-                .sameSite("Strict")   // CSRF protection
+                .sameSite("Strict")
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }

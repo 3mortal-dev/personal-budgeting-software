@@ -1,6 +1,4 @@
-/* ============================================================
-   BudgetWise — style.css
-   ============================================================ */
+/* BudgetWise — style.css */
 
 /* ── Variables ── */
 :root {
@@ -29,9 +27,7 @@ body {
 }
 a { text-decoration: none; }
 
-/* ============================================================
-   HERO
-   ============================================================ */
+/* HERO */
 .hero {
   min-height: 100vh;
   display: grid;
@@ -134,9 +130,7 @@ a { text-decoration: none; }
   transform: translateY(-3px);
 }
 
-/* ============================================================
-   RIGHT: IMAGE PANEL
-   ============================================================ */
+/* RIGHT: IMAGE PANEL */
 .hero__image-wrap {
   position: relative;
   height: 100vh;
@@ -216,9 +210,7 @@ a { text-decoration: none; }
   transform: translateY(-3px);
 }
 
-/* ============================================================
-   SCROLL-REVEAL MESSAGE CARD
-   ============================================================ */
+/* SCROLL-REVEAL MESSAGE CARD */
 .scroll-message {
   position: absolute;
   top: 50%;
@@ -326,9 +318,7 @@ a { text-decoration: none; }
   left: -80px;
 }
 
-/* ============================================================
-   FEATURES STRIP
-   ============================================================ */
+/* FEATURES STRIP */
 .features-strip {
   display: flex;
   justify-content: center;
@@ -367,9 +357,7 @@ a { text-decoration: none; }
   font-size: 20px;
 }
 
-/* ============================================================
-   ANIMATIONS
-   ============================================================ */
+/* ANIMATIONS */
 @keyframes fadeDown {
   from { opacity: 0; transform: translateY(-22px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -390,9 +378,7 @@ a { text-decoration: none; }
   50%       { transform: translateY(-7px); }
 }
 
-/* ============================================================
-   RESPONSIVE
-   ============================================================ */
+/* RESPONSIVE */
 @media (max-width: 900px) {
   .hero {
     grid-template-columns: 1fr;
