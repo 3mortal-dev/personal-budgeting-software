@@ -47,6 +47,21 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate);
 
+	// Sum expense in a specific category
+    @Query("""
+			SELECT COALESCE(SUM(t.amount), 0)
+			FROM Transaction t
+			WHERE t.user.id = :userId
+			AND t.type = 'EXPENSE'
+			AND t.category.id = :categoryId
+			AND t.date BETWEEN :startDate AND :endDate
+			""")
+    Double sumExpenseByUserIdAndCategoryIdAndDateBetween(
+            @Param("userId") Long userId,
+            @Param("categoryId") Long categoryId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
+
     @Query(value = """
 			SELECT EXTRACT(MONTH FROM date), COALESCE(SUM(amount), 0)
 			FROM transactions

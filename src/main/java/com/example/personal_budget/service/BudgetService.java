@@ -13,14 +13,13 @@ import com.example.personal_budget.dto.request.BudgetExceededLimitEvent;
 import com.example.personal_budget.dto.request.BudgetNearLimitEvent;
 import com.example.personal_budget.dto.request.CreateBudgetRequest;
 import com.example.personal_budget.dto.request.NotificationEvent;
-import com.example.personal_budget.dto.request.TransactionFilterRequest;
 import com.example.personal_budget.entity.Budget;
 import com.example.personal_budget.entity.Category;
-import com.example.personal_budget.entity.Transaction;
 import com.example.personal_budget.entity.User;
 import com.example.personal_budget.enums.BudgetStatus;
 import com.example.personal_budget.repository.BudgetRepository;
 import com.example.personal_budget.repository.CategoryRepository;
+import com.example.personal_budget.repository.TransactionRepository;
 import com.example.personal_budget.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
@@ -35,7 +34,7 @@ public class BudgetService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
-	private final TransactionService transactionService;
+    private final TransactionRepository transactionRepository;
 
     public List<Budget> getAllBudgets(Long userID) {
         return budgetRepository.findByUserId(userID);
@@ -90,23 +89,17 @@ public class BudgetService {
             }
         }
 
-		TransactionFilterRequest filterRequest = new TransactionFilterRequest();
-		
-		filterRequest.setStartDate(request.getStartDate());
-		filterRequest.setEndDate(request.getEndDate());
-		filterRequest.setCategoryId(request.getCategoryId());
-
-		Double totalSpent = 0.0;
-		List<Transaction> transactions = transactionService.filterHistory(userID, filterRequest);
-	
-		for (Transaction t : transactions) {
-			totalSpent += t.getAmount();
-		}
+        Double totalSpent = transactionRepository.sumExpenseByUserIdAndCategoryIdAndDateBetween(
+                userID,
+                request.getCategoryId(),
+                request.getStartDate(),
+                request.getEndDate()
+        );
 
         Budget budget = Budget.builder()
                 .user(user)
                 .category(category)
-				.spentAmount(totalSpent)
+                .spentAmount(totalSpent)
                 .spendingLimit(0.0)
                 .threshold(request.getThreshold())
                 .startDate(request.getStartDate())
@@ -122,9 +115,9 @@ public class BudgetService {
         Budget budget = budgetRepository.findByIdAndUserId(budgetID, userID)
                 .orElseThrow(() -> new RuntimeException("Budget not found"));
 
-		budgetRepository.delete(budget);
+        budgetRepository.delete(budget);
 
-		return addBudget(userID, request);
+        return addBudget(userID, request);
     }
 
     public void deleteAllBudgets(Long userID) {
