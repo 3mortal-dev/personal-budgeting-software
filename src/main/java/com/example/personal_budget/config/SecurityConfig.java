@@ -1,7 +1,5 @@
 package com.example.personal_budget.config;
 
-import com.example.personal_budget.jwt.JwtAuthenticationFilter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -9,12 +7,15 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 
-import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+import com.example.personal_budget.jwt.JwtAuthenticationFilter;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
@@ -32,15 +33,14 @@ public class SecurityConfig {
         "/configuration/security",
         "/swagger-ui/**",
         "/webjars/**",
-        
         // bank simulator
         "/bank-simulator",
         "/api/mock-bank/add",
         "/api/mock-bank/pending",
-
         "/swagger-ui.html",
         "/login",
-        "/register"};
+        "/register",
+        "/h2-console/**"};  // ← H2 console
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final LogoutHandler logoutHandler;
@@ -50,6 +50,7 @@ public class SecurityConfig {
 
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .headers(headers -> headers.frameOptions(frame -> frame.disable())) // ← H2 console uses iframes
                 .sessionManagement(session
                         -> session.sessionCreationPolicy(STATELESS)
                 )
