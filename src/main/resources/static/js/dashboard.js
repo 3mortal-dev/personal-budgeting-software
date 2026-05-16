@@ -419,7 +419,7 @@ function renderTransactions(transactions) {
       const type = (tx.type || "").toString().toUpperCase();
       const isIncome = type === "INCOME";
       const label =
-        tx.description || tx.source || `Category #${tx.categoryId ?? "N/A"}`;
+         tx.source || `${tx.categoryName ?? "N/A"}` || tx.description;
       const signedAmount = `${isIncome ? "+" : "−"}${formatCurrency(tx.amount)}`;
       return `
       <div class="tx-item">
