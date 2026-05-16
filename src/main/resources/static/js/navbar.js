@@ -1,19 +1,8 @@
 "use strict";
 
-/* ══════════════════════════════════════════════════════
-   BudgetWise – Shared Navbar Component
-   ══════════════════════════════════════════════════════
-   HOW TO USE ON ANY PAGE:
-   1. <link> to navbar.css in <head>
-   2. <div id="sidebar-root"></div>  — before <main> in <body>
-   3. <div id="topbar-root"></div>   — first child inside <main>
-   4. <script src="/js/navbar.js"></script> before page scripts
-   ══════════════════════════════════════════════════════ */
 
 (function () {
-  /* ─────────────────────────────────────────────────────
-       1. NAV LINKS  — edit here to update all pages at once
-    ───────────────────────────────────────────────────── */
+
   const NAV_LINKS = [
     { href: "/dashboard", icon: "fa-house", label: "Home" },
     { href: "/transactions", icon: "fa-receipt", label: "Transactions" },
@@ -30,16 +19,11 @@
     MARK_READ: (id) => `/notifications/${id}/markRead`,
   };
 
-  /* ─────────────────────────────────────────────────────
-       2. ACTIVE LINK DETECTION
-    ───────────────────────────────────────────────────── */
+
   function isActive(href) {
     return window.location.pathname.startsWith(href);
   }
 
-  /* ─────────────────────────────────────────────────────
-       3. BUILD SIDEBAR HTML
-    ───────────────────────────────────────────────────── */
   function buildSidebar(isAdmin) {
     const links = NAV_LINKS
         .filter(({ adminOnly }) => !adminOnly || isAdmin)
@@ -69,9 +53,6 @@
       </aside>`;
   }
 
-  /* ─────────────────────────────────────────────────────
-       4. BUILD TOPBAR HTML
-    ───────────────────────────────────────────────────── */
   function buildTopbar() {
     return `
       <header class="topbar">
@@ -124,9 +105,7 @@
       </header>`;
   }
 
-  /* ─────────────────────────────────────────────────────
-       5. NOTIFICATION HELPERS
-    ───────────────────────────────────────────────────── */
+
   function escapeHtml(str) {
     if (!str) return "";
     return str
@@ -173,9 +152,6 @@
     }
   }
 
-  /* ─────────────────────────────────────────────────────
-       6. NOTIFICATION STATE + RENDER
-    ───────────────────────────────────────────────────── */
   const notifState = { all: [], filter: "all" };
 
   function filteredNotifs() {
@@ -281,9 +257,7 @@
     renderNotifList();
   }
 
-  /* ─────────────────────────────────────────────────────
-       7. TIME-OF-DAY GREETING
-    ───────────────────────────────────────────────────── */
+  // time of day
   function applyTimeOfDay() {
     const h = new Date().getHours();
     const el = document.getElementById("topbarTimeOfDay");
@@ -291,9 +265,7 @@
       el.textContent = h < 12 ? "morning" : h < 17 ? "afternoon" : "evening";
   }
 
-  /* ─────────────────────────────────────────────────────
-       8. FETCH USERNAME & INITIALS
-    ───────────────────────────────────────────────────── */
+  // fetch username
   async function applyUsername() {
     try {
       const res = await fetch("/api/profile", {
@@ -317,9 +289,7 @@
     } catch { return null; }
   }
 
-  /* ─────────────────────────────────────────────────────
-       9. HAMBURGER — mobile sidebar toggle
-    ───────────────────────────────────────────────────── */
+
   function setupHamburger() {
     const btn = document.getElementById("hamburgerBtn");
     const sidebar = document.getElementById("sidebar");
@@ -355,9 +325,7 @@
     });
   }
 
-  /* ─────────────────────────────────────────────────────
-       10. NOTIFICATION DROPDOWN EVENTS
-    ───────────────────────────────────────────────────── */
+  // Notofication
   function setupNotifDropdown() {
     const bell = document.getElementById("bellBtn");
     const dropdown = document.getElementById("notifDropdown");
@@ -392,9 +360,7 @@
     });
   }
 
-  /* ─────────────────────────────────────────────────────
-       11. INJECT & INIT
-    ───────────────────────────────────────────────────── */
+  // Init
   async function inject() {
     const sidebarRoot = document.getElementById("sidebar-root");
     const topbarRoot = document.getElementById("topbar-root");
@@ -408,10 +374,8 @@
       return;
     }
 
-    // Inject topbar first so username/avatar can be populated
     topbarRoot.innerHTML = buildTopbar();
 
-    // Fetch role then build sidebar
     const role = await applyUsername();
     sidebarRoot.innerHTML = buildSidebar(role === "ADMIN");
 

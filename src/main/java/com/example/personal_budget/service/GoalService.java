@@ -16,11 +16,6 @@ public class GoalService {
     private final GoalRepository goalRepository;
     private final UserService userService;
 
-    // ─────────────────────────────────────────────────────────────
-    // Status helper — single source of truth for status calculation.
-    // Used by addGoal, editGoal, and updateProgress so they all
-    // apply identical thresholds.
-    // ─────────────────────────────────────────────────────────────
     private GoalStatus calculateStatus(double saved, double target) {
         if (target <= 0) {
             return GoalStatus.ONTRACK;
@@ -35,9 +30,7 @@ public class GoalService {
         return GoalStatus.ONTRACK;
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // Ownership guard — reused in every mutating method.
-    // ─────────────────────────────────────────────────────────────
+
     private void assertOwner(Goal goal, long userId) {
         if (!goal.getUser().getId().equals(userId)) {
             throw new RuntimeException("Unauthorized");
@@ -83,9 +76,6 @@ public class GoalService {
         goal.setIconClass(request.getIconClass());
         goal.setIconColor(request.getIconColor());
 
-        // FIX: recalculate status whenever amounts change.
-        // Previously status was never updated on edit, so a goal
-        // edited to 100% would still show ONTRACK in the response.
         goal.setStatus(calculateStatus(saved, target));
 
         return goalRepository.save(goal);
@@ -125,9 +115,6 @@ public class GoalService {
         return goalRepository.findByUserId(userId);
     }
 
-    // FIX: count both ONTRACK and NEARLIMIT as "active".
-    // NEARLIMIT goals (80–99%) are not completed — they are active.
-    // Previously only ONTRACK was counted, so the summary badge was wrong.
     public Integer getActiveGoalsCount(long userId) {
         return goalRepository.countByUserIdAndStatusIn(
                 userId,

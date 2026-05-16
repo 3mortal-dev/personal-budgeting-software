@@ -45,7 +45,7 @@ public class AuthenticationService {
         userRepository.save(user);
         String jwtToken = jwtService.generateToken(user);
         saveUserToken(user, jwtToken);
-        return jwtToken;   // ← return String, not AuthenticationResponse
+        return jwtToken;   
     }
 
     public String authenticate(AuthenticationRequest request) {
@@ -62,7 +62,7 @@ public class AuthenticationService {
         revokeAllUserTokens(user);
         String jwtToken = jwtService.generateToken(user);
         saveUserToken(user, jwtToken);
-        return jwtToken;   // ← return String, not AuthenticationResponse
+        return jwtToken; 
     }
 
     private void revokeAllUserTokens(User user) {

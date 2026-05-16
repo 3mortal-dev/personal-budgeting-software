@@ -1,15 +1,11 @@
-/* ═══════════════════════════════════════════════
-   RESET
-═══════════════════════════════════════════════ */
+/* RESET */
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
-/* ═══════════════════════════════════════════════
-   DESIGN TOKENS
-═══════════════════════════════════════════════ */
+/* DESIGN TOKENS  */
 :root {
 
     --brand: #10b981;
@@ -91,14 +87,10 @@
     --sidebar: 240px;
 }
 
-/* ═══════════════════════════════════════════════
-   GOOGLE FONTS
-═══════════════════════════════════════════════ */
+/* GOOGLE FONTS */
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
 
-/* ═══════════════════════════════════════════════
-   BASE
-═══════════════════════════════════════════════ */
+/* BASE */
 body {
     font-family: var(--font-body);
     background: var(--bg);
@@ -107,9 +99,7 @@ body {
     min-height: 100vh;
 }
 
-/* ═══════════════════════════════════════════════
-   SIDEBAR
-═══════════════════════════════════════════════ */
+/* SIDEBAR  */
 .sidebar {
     width: 260px;
     min-height: 100vh;
@@ -293,9 +283,7 @@ nav {
     transform: translateX(4px);
 }
 
-/* ═══════════════════════════════════════════════
-   MAIN LAYOUT
-═══════════════════════════════════════════════ */
+/* MAIN LAYOUT */
 .main {
     margin-left: 260px;
     flex: 1;
@@ -303,9 +291,7 @@ nav {
     flex-direction: column;
 }
 
-/* ═══════════════════════════════════════════════
-   TOPBAR
-═══════════════════════════════════════════════ */
+/* TOPBAR */
 .topbar {
     height: 68px;
     background: var(--sidebar-bg);
@@ -1689,9 +1675,7 @@ nav {
     }
 }
 
-/* ═══════════════════════════════════════════════
-   LOADABLE BUTTON STATE
-═══════════════════════════════════════════════ */
+/* LOADABLE BUTTON STATE */
 .btn-loadable {
     display: flex;
     align-items: center;

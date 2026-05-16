@@ -23,7 +23,6 @@ public class LogoutService implements LogoutHandler {
             HttpServletRequest request,
             HttpServletResponse response,
             Authentication authentication) {
-        // ── Invalidate the token in DB (support both cookie and header) ──
         String jwt = extractJwtFromCookie(request);
 
         if (jwt == null) {
@@ -42,7 +41,7 @@ public class LogoutService implements LogoutHandler {
             }
         }
 
-        // ── Clear the httpOnly cookie from browser ────────────────────
+        // Clear the httpOnly cookie from browser
         ResponseCookie clearCookie = ResponseCookie.from("jwt", "").httpOnly(true).secure(true).path("/").maxAge(
                         0)          // ← maxAge(0) tells browser to delete it
                 .sameSite("Strict").build();

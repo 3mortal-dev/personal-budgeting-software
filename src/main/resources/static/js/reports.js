@@ -1,11 +1,3 @@
-/* ═══════════════════════════════════════════════════
-   BudgetWise – Reports JavaScript
-   ReportController Frontend Integration
-═══════════════════════════════════════════════════ */
-
-/* ═══════════════════════════════════════════════════
-   TOAST NOTIFICATION SYSTEM
-═══════════════════════════════════════════════════ */
 
 const Toast = (() => {
   let container = null;
@@ -78,25 +70,16 @@ const Toast = (() => {
   };
 })();
 
-/* ═══════════════════════════════════════════════════
-   API CONFIGURATION
-═══════════════════════════════════════════════════ */
 
 const API = {
   MONTHLY: "/api/reports/monthly",
   DOWNLOAD: "/api/reports/download",
 };
 
-/* ═══════════════════════════════════════════════════
-   CHART INSTANCES
-═══════════════════════════════════════════════════ */
 
 let monthlyChart = null;
 let categoryChart = null;
 
-/* ═══════════════════════════════════════════════════
-   MONTH HELPERS
-═══════════════════════════════════════════════════ */
 
 const MONTH_ORDER = [
   "JANUARY",
@@ -128,10 +111,6 @@ const MONTH_SHORT = [
   "Dec",
 ];
 
-/* ═══════════════════════════════════════════════════
-   FETCH HELPER
-   Uses httpOnly JWT cookie automatically
-═══════════════════════════════════════════════════ */
 
 async function apiFetch(url, options = {}) {
   const token = localStorage.getItem("token"); // ← add this
@@ -147,14 +126,12 @@ async function apiFetch(url, options = {}) {
       },
     });
 
-    /* ───── Unauthorized ───── */
 
     if (response.status === 401) {
       window.location.href = "/login";
       return null;
     }
 
-    /* ───── Generic Error ───── */
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -162,7 +139,6 @@ async function apiFetch(url, options = {}) {
       throw new Error(errorText || `HTTP ${response.status}`);
     }
 
-    /* ───── Content Type ───── */
 
     const contentType = response.headers.get("content-type");
 
@@ -181,9 +157,6 @@ async function apiFetch(url, options = {}) {
   }
 }
 
-/* ═══════════════════════════════════════════════════
-   BASIC HELPERS
-═══════════════════════════════════════════════════ */
 
 function $(id) {
   return document.getElementById(id);
@@ -287,9 +260,6 @@ function shortMonthLabel(key) {
   return MONTH_SHORT[idx];
 }
 
-/* ═══════════════════════════════════════════════════
-   CHART DESTROYERS
-═══════════════════════════════════════════════════ */
 
 function destroyMonthlyChart() {
   if (monthlyChart) {
@@ -305,9 +275,6 @@ function destroyCategoryChart() {
   }
 }
 
-/* ═══════════════════════════════════════════════════
-   CHARTS
-═══════════════════════════════════════════════════ */
 
 function renderMonthlyChart(labels, expenseSeries, incomeSeries) {
   const canvas = $("monthlyBarChart");
@@ -515,10 +482,8 @@ function parseFilename(disposition) {
   return null;
 }
 
-/* ═══════════════════════════════════════════════════
-   LOAD REPORT
-═══════════════════════════════════════════════════ */
 
+// Load Report
 async function loadMonthlyReport() {
   const errEl = $("reportError");
 
@@ -592,10 +557,9 @@ async function loadMonthlyReport() {
   Toast.success("Report loaded successfully.", { title: "Done" });
 }
 
-/* ═══════════════════════════════════════════════════
-   DOWNLOAD REPORT
-═══════════════════════════════════════════════════ */
 
+
+// DOWNLOAD REPORT
 async function downloadReport() {
   const errEl = $("downloadError");
 
@@ -684,7 +648,6 @@ async function downloadReport() {
       throw new Error(txt || `HTTP ${response.status}`);
     }
 
-    // Fill to 90% while blob is processing
     if (fill) fill.style.width = "90%";
     if (progressLabel) progressLabel.textContent = "Processing file…";
 
@@ -714,7 +677,6 @@ async function downloadReport() {
       URL.revokeObjectURL(url);
     }, 1000);
 
-    // Success state on button
     clearTimeout(progressTimer);
     if (downloadBtn) {
       downloadBtn.classList.remove("is-downloading");
@@ -770,9 +732,7 @@ async function downloadReport() {
   }
 }
 
-/* ═══════════════════════════════════════════════════
-   BUTTON RIPPLE EFFECT
-═══════════════════════════════════════════════════ */
+// Button Ripple Effect
 
 function initButtonRipples() {
   document.querySelectorAll(".btn-primary").forEach((btn) => {
@@ -817,9 +777,7 @@ function setLoadReportLoading(on) {
   }
 }
 
-/* ═══════════════════════════════════════════════════
-   INIT
-═══════════════════════════════════════════════════ */
+// Init
 
 document.addEventListener("DOMContentLoaded", async () => {
   loaderInit([

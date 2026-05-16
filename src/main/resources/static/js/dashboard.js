@@ -59,18 +59,14 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  DASHBOARD-SPECIFIC SKELETON HELPERS                         ║
-// ╚══════════════════════════════════════════════════════════════╝
+// DASHBOARD-SPECIFIC SKELETON HELPERS
 
 /** Removes skeleton class from the three stat value elements */
 function clearStatSkeletons() {
   clearSkeletons("statTx", "statBudgets", "statGoals");
 }
 
-// ╔══════════════════════════════════════════════════════════════╗
-// ║  TOAST NOTIFICATIONS                                         ║
-// ╚══════════════════════════════════════════════════════════════╝
+// TOAST NOTIFICATIONS
 
 let toastTimer;
 
@@ -125,7 +121,7 @@ function showInfo(message) {
   showToast(message, "info");
 }
 
-// ── Transactions ──────────────────────────────────────────────────────────────
+// ── Transactions
 
 /**
  * Transaction successfully added.
@@ -149,7 +145,7 @@ function toastSaveFailed(action = "save") {
   );
 }
 
-// ── Dashboard data ────────────────────────────────────────────────────────────
+//Dashboard data
 
 /**
  * Dashboard summary failed to load on page init.
@@ -175,7 +171,7 @@ function toastDashboardRefreshed() {
   showToast("Dashboard updated.", "info", 2400);
 }
 
-// ── Budgets ───────────────────────────────────────────────────────────────────
+// Budgets
 
 /**
  * New budget created successfully.
@@ -220,7 +216,7 @@ function toastBudgetExceeded(categoryName) {
   );
 }
 
-// ── Spending alerts ───────────────────────────────────────────────────────────
+// Spending alerts
 
 /**
  * High overall spending ratio (≥ 80 % of monthly income spent).
@@ -247,7 +243,7 @@ function toastSpendingIncreased(increasePct) {
   );
 }
 
-// ── Notifications ─────────────────────────────────────────────────────────────
+// Notifications
 
 /**
  * Notifications failed to load (badge / dropdown unavailable).
@@ -266,7 +262,7 @@ function toastNotificationsMarkedRead() {
   showToast("All notifications marked as read.", "info", 2400);
 }
 
-// ── Profile / session ─────────────────────────────────────────────────────────
+// Profile / session
 
 /**
  * Profile couldn't be fetched (greeting falls back to "there").
@@ -285,7 +281,7 @@ function toastSessionExpired() {
   showToast("Your session has expired. Please log in again.", "error", 6000);
 }
 
-// ── Categories ────────────────────────────────────────────────────────────────
+// Categories
 
 /**
  * Category list failed to load (affects budget + transaction modals).
@@ -294,7 +290,7 @@ function toastCategoriesLoadFailed() {
   showToast("Categories couldn't be loaded. Try refreshing the page.", "error");
 }
 
-// ── Generic helpers ───────────────────────────────────────────────────────────
+// Generic helpers
 
 /**
  * Generic network / connectivity error (fallback when action is unknown).
@@ -783,7 +779,7 @@ function closeBudgetModal() {
   clearBudgetFormErrors();
 }
 
-// ── Transaction form validation ───────────────────────────────────────────────
+// Transaction form validation
 
 function setTxFieldError(inputId, message) {
   const input = document.getElementById(inputId);
@@ -895,7 +891,7 @@ async function addTransaction(event) {
   }
 }
 
-// ── Budget form validation helpers ───────────────────────────────────────────
+// Budget form validation helpers 
 
 function clearBudgetFormErrors() {
   [

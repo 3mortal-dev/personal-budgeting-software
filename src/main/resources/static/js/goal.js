@@ -1,16 +1,13 @@
 "use strict";
 
-/* ═══════════════════════════════════════════════════
-   CONFIG
-   ═══════════════════════════════════════════════════ */
+// CONFIG
 const API_BASE = "/api/goals";
 const NOTIF_BASE = "/api/notifications/all";
 
-/* ═══════════════════════════════════════════════════
-   CSRF
-   1. <meta name="_csrf">  (Thymeleaf / HttpSessionCsrfTokenRepository)
-   2. XSRF-TOKEN cookie    (CookieCsrfTokenRepository.withHttpOnlyFalse())
-   ═══════════════════════════════════════════════════ */
+// CSRF
+// 1. <meta name="_csrf">  (Thymeleaf / HttpSessionCsrfTokenRepository)
+// 2. XSRF-TOKEN cookie    (CookieCsrfTokenRepository.withHttpOnlyFalse())
+
 function getCsrfToken() {
   const metaVal = document.querySelector('meta[name="_csrf"]')?.content;
   if (metaVal) return metaVal;
@@ -34,12 +31,7 @@ function csrfHeaders(extra = {}) {
   return h;
 }
 
-/* ═══════════════════════════════════════════════════
-   USERNAME
-   Spring Security does NOT set a username cookie.
-   We fetch /api/profile (already used by the profile page)
-   to get the display name, then populate the topbar.
-   ═══════════════════════════════════════════════════ */
+
 async function applyUsername() {
   const usernameEl = document.getElementById("topbarUsername");
   const avatarEl = document.getElementById("topbarAvatar");
@@ -64,9 +56,6 @@ async function applyUsername() {
   }
 }
 
-/* ═══════════════════════════════════════════════════
-   ICON CATALOGUE
-   ═══════════════════════════════════════════════════ */
 const ICON_PRESETS = [
   "fa-bullseye",
   "fa-house",
@@ -133,18 +122,15 @@ const COLOR_HEX = {
   gray: "#4b5563",
 };
 
-/* ═══════════════════════════════════════════════════
-   STATE
-   ═══════════════════════════════════════════════════ */
+
+// state
 let goals = [];
 let notifications = [];
 let deleteTargetId = null;
 let progressGoalId = null;
 let activeNotifTab = "all";
 
-/* ═══════════════════════════════════════════════════
-   DOM REFS
-   ═══════════════════════════════════════════════════ */
+// Dom REF
 
 const progressOverlay = document.getElementById("progressOverlay");
 const progressAmount = document.getElementById("progressAmount");
@@ -188,9 +174,8 @@ const markAllReadBtn = document.getElementById("markAllReadBtn");
 const toast = document.getElementById("toast");
 const searchInput = document.getElementById("searchInput");
 
-/* ═══════════════════════════════════════════════════
-   INIT
-   ═══════════════════════════════════════════════════ */
+// INIT
+
 document.addEventListener("DOMContentLoaded", async () => {
   loaderInit([
     { pct: 20, label: "Loading your profile…" },
@@ -228,9 +213,8 @@ function applyDeadlineMin() {
   if (deadlineInput) deadlineInput.min = getCurrentMonthValue();
 }
 
-/* ═══════════════════════════════════════════════════
-   EVENT LISTENERS
-   ═══════════════════════════════════════════════════ */
+// EVENT LISTENERS
+
 function attachEventListeners() {
   saveProgressBtn?.addEventListener("click", saveProgress);
 
@@ -294,9 +278,8 @@ function attachEventListeners() {
   markAllReadBtn?.addEventListener("click", markAllNotificationsRead);
 }
 
-/* ═══════════════════════════════════════════════════
-   ICON PICKER
-   ═══════════════════════════════════════════════════ */
+// ICON PICKER
+
 function initIconPicker() {
   if (!iconGrid) return;
   buildIconGrid();
@@ -390,9 +373,7 @@ function loadIconPickerForEdit(iconClass, iconColor) {
   buildIconGrid();
 }
 
-/* ═══════════════════════════════════════════════════
-   NOTIFICATIONS
-   ═══════════════════════════════════════════════════ */
+// NOTIFICATIONS
 
 async function loadNotifications() {
   try {
@@ -492,9 +473,8 @@ async function markAllNotificationsRead() {
   showToast("All notifications marked as read", "success");
 }
 
-/* ═══════════════════════════════════════════════════
-   API — GOALS
-   ═══════════════════════════════════════════════════ */
+
+// API — GOALS
 async function loadGoals(silent = false) {
   try {
     const res = await fetch(`${API_BASE}/user`, {
@@ -510,15 +490,7 @@ async function loadGoals(silent = false) {
   }
 }
 
-/*
-  normalizeGoal — maps server field names to what the UI expects.
 
-  GoalResponse sends:
-    name         (= goal.getGoalName())
-    savedAmount  (= goal.getCurrentAmount())
-    completed    (= status == EXCEEDED || savedAmount >= targetAmount)
-    status, iconClass, iconColor — all correct field names
-*/
 function normalizeGoal(g) {
   return {
     ...g,
@@ -581,9 +553,8 @@ async function fetchGoalById(id) {
   return found;
 }
 
-/* ═══════════════════════════════════════════════════
-   RENDER — GOALS
-   ═══════════════════════════════════════════════════ */
+
+// Render Goals
 function renderGoals(list) {
   goalsGrid.innerHTML = "";
   emptyState.style.display = !list || !list.length ? "block" : "none";
@@ -739,9 +710,7 @@ async function saveProgress() {
   }
 }
 
-/* ═══════════════════════════════════════════════════
-   MODAL — ADD / EDIT
-   ═══════════════════════════════════════════════════ */
+// Modal - Add/Edit
 function openAddModal() {
   modalTitle.textContent = "Add New Goal";
   goalForm.reset();
@@ -767,7 +736,6 @@ window.openEditModal = async function (id) {
   goalNameInput.value = goal.name || "";
   targetAmountInput.value = goal.targetAmount ?? 0;
 
-  // FIX: deadline from server is "YYYY-MM-DD"; <input type="month"> needs "YYYY-MM"
   deadlineInput.value = goal.deadline ? String(goal.deadline).slice(0, 7) : "";
 
   loadIconPickerForEdit(goal.iconClass, goal.iconColor);
@@ -787,12 +755,6 @@ async function handleFormSubmit(e) {
   e.preventDefault();
   if (!validateForm()) return;
 
-  /*
-      FIX: deadline — <input type="month"> sends "YYYY-MM".
-      Spring's LocalDate deserializer requires "YYYY-MM-DD".
-      We append "-01" (first of month) before sending.
-      The backend stores the full date; we slice it back to "YYYY-MM" on edit.
-    */
   const rawDeadline = deadlineInput.value;
   const deadline = rawDeadline ? rawDeadline + "-01" : null;
 
@@ -861,9 +823,7 @@ function validateForm() {
   return true;
 }
 
-/* ═══════════════════════════════════════════════════
-   DELETE
-   ═══════════════════════════════════════════════════ */
+// Delete
 function openDeleteModal(id) {
   deleteTargetId = id;
   deleteOverlay.classList.add("is-open");
@@ -897,9 +857,7 @@ function closeDeleteModal() {
 
 window.deleteGoal = openDeleteModal;
 
-/* ═══════════════════════════════════════════════════
-   SEARCH
-   ═══════════════════════════════════════════════════ */
+// Search
 function handleSearch() {
   const q = searchInput.value.toLowerCase().trim();
   if (!q) {
@@ -909,9 +867,8 @@ function handleSearch() {
   renderGoals(goals.filter((g) => (g.name || "").toLowerCase().includes(q)));
 }
 
-/* ═══════════════════════════════════════════════════
-   TOAST
-   ═══════════════════════════════════════════════════ */
+
+// Toast
 let toastTimer;
 
 function showToast(msg, type = "success") {
@@ -922,17 +879,13 @@ function showToast(msg, type = "success") {
   toastTimer = setTimeout(() => toast.classList.remove("show"), 3200);
 }
 
-/* ═══════════════════════════════════════════════════
-   HELPERS
-   ═══════════════════════════════════════════════════ */
+
+// Helper
 function formatMoney(n) {
   return "$" + Number(n || 0).toLocaleString("en-US");
 }
 
-/*
-  formatDeadline — server returns "YYYY-MM-DD" (LocalDate ISO string).
-  We display only month + year: "Feb 2026".
-*/
+
 function formatDeadline(iso) {
   if (!iso) return "—";
   const [year, month] = String(iso).split("-");

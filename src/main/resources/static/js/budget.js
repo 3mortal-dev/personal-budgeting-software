@@ -6,11 +6,11 @@ const API = {
   OVER_LIMIT: "/api/budgets/Exeeded-limit",
   EXPIRED: "/api/budgets/expired",
   BY_ID: (id) => `/api/budgets/${id}`,
-  CATEGORIES: "/api/categories", // GET → [{ id, name }, ...]
+  CATEGORIES: "/api/categories",
   NOTIFICATIONS_UNREAD: "/api/notifications/unread",
 };
 
-// ── Shared fetch helper (mirrors dashboard.js pattern) ────────────────────────
+// Shared fetch helper
 let lastApiError = "";
 
 async function apiFetch(endpoint, options = {}) {
@@ -39,19 +39,14 @@ async function apiFetch(endpoint, options = {}) {
 }
 
 const state = {
-  budgets: [], // Budget[] from server
-  categories: [], // Category[] from server — { id, name }
+  budgets: [], 
+  categories: [],
   profile: null,
   activeFilter: "all",
-  pendingDelete: null, // id of budget pending confirmation
+  pendingDelete: null,
 };
 
-/**
- * GET /api/budgets
- * Returns Budget[] – each has:
- *   id, userId, categoryId, spendingLimit,
- *   spentAmount, threshold, startDate, endDate, status (BudgetStatus)
- */
+
 async function loadBudgets() {
   renderSkeletons();
 
@@ -61,7 +56,7 @@ async function loadBudgets() {
     renderAll();
   } else {
     showError("Failed to load budgets. Please refresh the page.");
-    renderGrid([]); // clear skeletons
+    renderGrid([]);
   }
 }
 
@@ -75,11 +70,7 @@ async function loadProfile() {
   renderProfile(data);
 }
 
-/**
- * GET /api/categories
- * Returns Category[] — { id, name }
- * Populates the category <select> in the modal.
- */
+
 async function loadCategories() {
   const data = await apiFetch(API.CATEGORIES);
   if (!data) return;
@@ -88,7 +79,6 @@ async function loadCategories() {
   const select = document.getElementById("budgetCategorySelect");
   if (!select) return;
 
-  // Keep the placeholder option, then add one <option> per category
   select.innerHTML =
     `<option value="" disabled selected>Select a category…</option>` +
     data
@@ -165,7 +155,6 @@ function categoryMeta(name = "") {
       bg: "#e8f8f0",
       icon: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>`,
     };
-  // Default fallback
   return {
     color: "#6b7280",
     bg: "#f3f4f6",
@@ -223,7 +212,7 @@ function escapeHtml(str) {
     .replace(/'/g, "&#039;");
 }
 
-// ── Skeleton loader ───────────────────────────────────────────────────────────
+// Skeleton loader
 function renderSkeletons() {
   const grid = document.getElementById("budgetGrid");
   if (!grid) return;
@@ -248,7 +237,7 @@ function renderSkeletons() {
   ).join("");
 }
 
-// ── Build a single budget card ────────────────────────────────────────────────
+// Build a single budget card
 function buildCard(b) {
   const status = deriveStatus(b);
   const cat = state.categories.find((c) => c.id === b.categoryId);
@@ -314,7 +303,7 @@ function buildCard(b) {
     </div>`;
 }
 
-// ── Render the grid from filtered state ───────────────────────────────────────
+// Render the grid from filtered state
 function renderGrid(budgets) {
   const grid = document.getElementById("budgetGrid");
   if (!grid) return;
@@ -336,7 +325,6 @@ function renderGrid(budgets) {
       New Budget
     </div>`;
 
-  // Animate progress bars after paint
   requestAnimationFrame(() => {
     document.querySelectorAll(".bc-progress-fill").forEach((el) => {
       // Width is already set inline; trigger CSS transition
@@ -345,7 +333,7 @@ function renderGrid(budgets) {
   });
 }
 
-// ── Stats + tab counts ────────────────────────────────────────────────────────
+// Stats + tab counts
 function renderStats() {
   const all = state.budgets;
   const statuses = all.map(deriveStatus);
@@ -369,13 +357,13 @@ function renderStats() {
   setText("tabExpired", count("EXPIRED"));
 }
 
-// ── Full re-render ────────────────────────────────────────────────────────────
+// Full re-render
 function renderAll() {
   renderStats();
   applyFilter();
 }
 
-// ── Filter ────────────────────────────────────────────────────────────────────
+// Filter
 function setFilter(filter) {
   state.activeFilter = filter;
   document.querySelectorAll(".filter-tab").forEach((btn) => {
@@ -421,7 +409,6 @@ function openEditModal(id) {
     .querySelector(".btn-label").textContent = "Save Changes";
   document.getElementById("editBudgetId").value = id;
 
-  // Pre-select the category and lock it — category cannot be changed on edit
   const select = document.getElementById("budgetCategorySelect");
   if (select && b.categoryId != null) {
     select.value = String(b.categoryId);
@@ -460,12 +447,7 @@ function clearModalFields() {
   });
 }
 
-// ── Submit (create or update) ─────────────────────────────────────────────────
-/**
- * POST /api/budgets
- * PUT  /api/budgets/{id}
- * Body: CreateBudgetRequest { categoryId, spendingLimit, threshold, endDate }
- */
+
 async function submitBudget() {
   const btn = document.getElementById("budgetSubmitBtn");
   const selectEl = document.getElementById("budgetCategorySelect");
@@ -475,7 +457,6 @@ async function submitBudget() {
   const endDateEl = document.getElementById("budgetEndDate");
   const editId = document.getElementById("editBudgetId").value;
 
-  // Clear previous errors
   [selectEl, limitEl, threshEl, startDateEl, endDateEl].forEach(clearFieldError);
   hideBanner("budgetFormError");
 
@@ -589,9 +570,7 @@ function askDelete(id) {
   openModal("confirmModal");
 }
 
-/**
- * DELETE /api/budgets/{budgetID}
- */
+
 async function confirmDelete() {
   const id = state.pendingDelete;
   if (!id) return;
@@ -716,7 +695,7 @@ function setButtonLoading(btn, loading) {
   btn.classList.toggle("is-loading", loading);
 }
 
-// ── Form validation helpers ───────────────────────────────────────────────────
+// Form validation helpers
 function setFieldError(el, msg) {
   el.classList.add("error");
   const errEl = document.getElementById(el.id + "Err");
@@ -743,7 +722,7 @@ function hideBanner(id) {
   el.classList.remove("show");
 }
 
-// ── Toast ─────────────────────────────────────────────────────────────────────
+// Toast
 let toastTimer;
 
 function showToast(msg) {
@@ -755,7 +734,7 @@ function showToast(msg) {
   toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
 }
 
-// ── Error banner ──────────────────────────────────────────────────────────────
+// Error banner
 function showError(msg) {
   const el = document.getElementById("errorMsg");
   const text = document.getElementById("errorText");
@@ -765,7 +744,7 @@ function showError(msg) {
   }
 }
 
-// ── Utility ───────────────────────────────────────────────────────────────────
+// Utility
 function setText(id, val) {
   const el = document.getElementById(id);
   if (el) el.textContent = val;
@@ -815,7 +794,7 @@ function setActiveNav() {
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
-  // ── Page loader ───────────────────────────────────────────────
+  // Page loader
   loaderInit([
     { pct: 25, label: "Loading your profile…" },
     { pct: 55, label: "Loading categories…" },
@@ -830,18 +809,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   setActiveNav();
 
-  loaderAdvance(); // → profile + categories
+  loaderAdvance();
   await Promise.all([loadProfile(), loadCategories()]);
 
-  loaderAdvance(); // → budgets
+  loaderAdvance();
   await loadBudgets();
 
-  loaderAdvance(); // → 100 %
+  loaderAdvance();
   loaderHide();
 
-  loadNotifBadge(); // non-blocking — badge loads after overlay is gone
+  loadNotifBadge();
 
-  // ── Modal: close on overlay click ────────────────────────────
+  // Modal: close on overlay click
   ["budgetModal", "confirmModal"].forEach((id) => {
     const modal = document.getElementById(id);
     if (!modal) return;
@@ -852,7 +831,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
-  // ── Escape key ────────────────────────────────────────────────
+  // Escape key
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
     if (document.getElementById("budgetModal")?.classList.contains("is-open")) {
@@ -868,14 +847,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("notifDropdown")?.classList.remove("is-open");
   });
 
-  // ── Close notif dropdown on outside click ─────────────────────
+  // Close notif dropdown on outside click
   document.addEventListener("click", (e) => {
     const wrapper = document.getElementById("notifWrapper");
     if (wrapper && !wrapper.contains(e.target))
       document.getElementById("notifDropdown")?.classList.remove("is-open");
   });
 
-  // ── Live validation: clear errors as user types ───────────────
+  // Live validation: clear errors as user types
   document.querySelectorAll(".form-control").forEach((el) => {
     el.addEventListener("input", () => {
       if (el.classList.contains("error")) clearFieldError(el);
