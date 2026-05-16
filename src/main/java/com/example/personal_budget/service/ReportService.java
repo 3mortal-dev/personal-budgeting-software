@@ -26,7 +26,13 @@ public class ReportService {
     }
 
 
-    // 1. Generate monthly report for a user for visual representation
+    /**
+     * Generates monthly income, expense, and category breakdown data for reports.
+     *
+     * @param contextUserId the user id used as the data access context
+     * @param request the report date range
+     * @return the monthly report data used by the UI
+     */
     public MonthlyReportResponse generateMonthlyReport (Long contextUserId, MonthlyReportRequest request) {
 
         Map<Month, Double> expenseMap = transactionService.getMonthlyTotal(contextUserId, request,
@@ -42,7 +48,13 @@ public class ReportService {
     }
 
 
-    // 2. Generate a file with the all transaction when user request it (csv, excel, pdf) with a data range
+    /**
+     * Generates a downloadable transaction report file in the requested format.
+     *
+     * @param contextUserId the user id used as the data access context
+     * @param request the requested date range and export format
+     * @return the generated report file
+     */
     public File generateTransactionReport (Long contextUserId, ReportDownloadRequest request) {
         List<Transaction> transactions = transactionService.getTransactionsByDateRange(contextUserId,
                                                                                        request.getStartDate(),

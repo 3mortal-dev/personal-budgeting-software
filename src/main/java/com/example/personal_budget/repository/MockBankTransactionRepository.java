@@ -15,6 +15,8 @@ public interface MockBankTransactionRepository extends JpaRepository<MockBankTra
     /**
      * Returns every record that has not yet been imported into the main
      * transactions table.
+     *
+     * @return unsynced bank transactions
      */
     List<MockBankTransaction> findBySyncedFalse();
 }

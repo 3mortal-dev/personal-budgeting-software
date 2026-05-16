@@ -18,6 +18,10 @@ public class GoalReminderScheduler {
     private final GoalRepository goalRepository;
     private final NotificationService notificationService;
 
+    /**
+     * Sends reminder notifications for goals whose deadlines are three days away.
+     * Runs every day at 9:00 AM according to the application's scheduler timezone.
+     */
     @Scheduled(cron = "0 0 9 * * *")
     public void sendGoalReminders() {
 

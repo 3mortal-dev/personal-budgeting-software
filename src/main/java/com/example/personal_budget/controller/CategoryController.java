@@ -43,30 +43,60 @@ public class CategoryController {
                 .toList();
     }
 
+    /**
+     * Lists categories available to the authenticated user.
+     *
+     * @param userDetails the authenticated principal
+     * @return built-in and custom categories
+     */
     @GetMapping
     public ResponseEntity<List<CategoryResponse>> getAllCategories(@AuthenticationPrincipal UserDetails userDetails) {
         List<CategoryResponse> categories = toResponseList(categoryService.getAllCategories(userService.getUserId(userDetails)));
         return ResponseEntity.ok(categories);
     }
 
+    /**
+     * Lists globally available built-in categories.
+     *
+     * @return built-in categories
+     */
     @GetMapping("/built-in")
     public ResponseEntity<List<CategoryResponse>> getBuiltInCategories() {
         List<CategoryResponse> categories = toResponseList(categoryService.getBuiltInCategories());
         return ResponseEntity.ok(categories);
     }
 
+    /**
+     * Lists custom categories owned by the authenticated user.
+     *
+     * @param userDetails the authenticated principal
+     * @return custom categories
+     */
     @GetMapping("/custom")
     public ResponseEntity<List<CategoryResponse>> getCustomCategories(@AuthenticationPrincipal UserDetails userDetails) {
         List<CategoryResponse> categories = toResponseList(categoryService.getCustomCategories(userService.getUserId(userDetails)));
         return ResponseEntity.ok(categories);
     }
 
+    /**
+     * Creates a custom category for the authenticated user.
+     *
+     * @param userDetails the authenticated principal
+     * @param request the category details
+     * @return the created category
+     */
     @PostMapping
     public ResponseEntity<CategoryResponse> addCustomCategory(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody CreateCategoryRequest request) {
         CategoryResponse category = toResponse(categoryService.addCustomCategory(userService.getUserId(userDetails), request));
         return ResponseEntity.status(HttpStatus.CREATED).body(category);
     }
 
+    /**
+     * Creates a built-in category. Requires an administrator account.
+     *
+     * @param request the category details
+     * @return the created built-in category
+     */
     @PostMapping("/built-in")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CategoryResponse> addBuiltInCategory(@Valid @RequestBody CreateCategoryRequest request) {
@@ -74,12 +104,27 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.CREATED).body(category);
     }
 
+    /**
+     * Updates a custom category owned by the authenticated user.
+     *
+     * @param userDetails the authenticated principal
+     * @param categoryID the category id
+     * @param request the replacement category details
+     * @return the updated category
+     */
     @PutMapping("/{categoryID}")
     public ResponseEntity<CategoryResponse> editCustomCategory(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long categoryID, @Valid @RequestBody CreateCategoryRequest request) {
         CategoryResponse category = toResponse(categoryService.editCustomCategory(userService.getUserId(userDetails), categoryID, request));
         return ResponseEntity.ok(category);
     }
 
+    /**
+     * Deletes a custom category owned by the authenticated user.
+     *
+     * @param userDetails the authenticated principal
+     * @param categoryID the category id
+     * @return an empty no-content response
+     */
     @DeleteMapping ("/{categoryID}")
     public ResponseEntity<?> deleteCustomCategory(@AuthenticationPrincipal UserDetails userDetails,
                                                    @PathVariable Long categoryID) {

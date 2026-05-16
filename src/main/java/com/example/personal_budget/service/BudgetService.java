@@ -36,39 +36,96 @@ public class BudgetService {
     private final NotificationService notificationService;
     private final TransactionRepository transactionRepository;
 
+    /**
+     * Retrieves every budget owned by a user.
+     *
+     * @param userID the owner user id
+     * @return all budgets for the user
+     */
     public List<Budget> getAllBudgets(Long userID) {
         return budgetRepository.findByUserId(userID);
     }
 
+    /**
+     * Retrieves budgets whose end date has not passed.
+     *
+     * @param userID the owner user id
+     * @return active budgets for the user
+     */
     public List<Budget> getActiveBudgets(Long userID) {
         return budgetRepository.findByUserIdAndEndDateGreaterThanEqual(userID, LocalDate.now());
     }
 
+    /**
+     * Retrieves budgets currently marked as near their spending limit.
+     *
+     * @param userID the owner user id
+     * @return near-limit budgets
+     */
     public List<Budget> getNearLimitBudgets(Long userID) {
         return budgetRepository.findByUserIdAndStatus(userID, BudgetStatus.NEAR_LIMIT);
     }
 
+    /**
+     * Retrieves budgets currently marked as over their spending limit.
+     *
+     * @param userID the owner user id
+     * @return exceeded-limit budgets
+     */
     public List<Budget> getExeededLimitBudgets(Long userID) {
         return budgetRepository.findByUserIdAndStatus(userID, BudgetStatus.EXCEEDED_LIMIT);
     }
 
+    /**
+     * Retrieves budgets whose end date has passed.
+     *
+     * @param userID the owner user id
+     * @return expired budgets
+     */
     public List<Budget> getExpiredBudgets(Long userID) {
         return budgetRepository.findByUserIdAndEndDateLessThan(userID, LocalDate.now());
     }
 
+    /**
+     * Counts active budgets for a user.
+     *
+     * @param userID the owner user id
+     * @return the number of active budgets
+     */
     public Long countActiveBudgets(Long userID) {
         return budgetRepository.countByUserIdAndEndDateGreaterThanEqual(userID, LocalDate.now());
     }
 
+    /**
+     * Counts expired budgets for a user.
+     *
+     * @param userID the owner user id
+     * @return the number of expired budgets
+     */
     public Long countExpiredBudgets(Long userID) {
         return budgetRepository.countByUserIdAndEndDateLessThan(userID, LocalDate.now());
     }
 
+    /**
+     * Loads a budget by id while enforcing user ownership.
+     *
+     * @param userID the owner user id
+     * @param budgetID the budget id
+     * @return the matching budget
+     */
     public Budget getBudgetById(Long userID, Long budgetID) {
         return budgetRepository.findByIdAndUserId(budgetID, userID)
                 .orElseThrow(() -> new RuntimeException("Budget not found"));
     }
 
+    /**
+     * Creates a budget for a category and initializes its spent amount from
+     * existing expenses in the requested date range.
+     *
+     * @param userID the owner user id
+     * @param request the budget creation details
+     * @return the saved budget
+     */
     public Budget addBudget(Long userID, CreateBudgetRequest request) {
 
         User user = userRepository.findById(userID)
@@ -110,6 +167,14 @@ public class BudgetService {
         return updateBudgetSpending(budget, totalSpent);
     }
 
+    /**
+     * Replaces an existing user budget with new budget details.
+     *
+     * @param userID the owner user id
+     * @param budgetID the budget to edit
+     * @param request the replacement budget details
+     * @return the saved replacement budget
+     */
     public Budget editBudget(Long userID, Long budgetID, CreateBudgetRequest request) {
 
         Budget budget = budgetRepository.findByIdAndUserId(budgetID, userID)
@@ -120,16 +185,32 @@ public class BudgetService {
         return addBudget(userID, request);
     }
 
+    /**
+     * Deletes every budget owned by a user.
+     *
+     * @param userID the owner user id
+     */
     public void deleteAllBudgets(Long userID) {
         List<Budget> budgets = budgetRepository.findByUserId(userID);
         budgetRepository.deleteAll(budgets);
     }
 
+    /**
+     * Deletes expired budgets owned by a user.
+     *
+     * @param userID the owner user id
+     */
     public void deleteExpiredBudgets(Long userID) {
         List<Budget> budgets = budgetRepository.findByUserIdAndEndDateLessThan(userID, LocalDate.now());
         budgetRepository.deleteAll(budgets);
     }
 
+    /**
+     * Deletes a single budget after verifying user ownership.
+     *
+     * @param userID the owner user id
+     * @param budgetID the budget to delete
+     */
     public void deleteBudgetById(Long userID, Long budgetID) {
 
         Budget budget = budgetRepository.findByIdAndUserId(budgetID, userID)
@@ -138,6 +219,14 @@ public class BudgetService {
         budgetRepository.delete(budget);
     }
 
+    /**
+     * Applies a new expense amount to the matching active budget, when one exists.
+     *
+     * @param userID the owner user id
+     * @param categoryID the transaction category id
+     * @param amount the expense amount to add
+     * @param transactionDate the transaction date used to check the budget range
+     */
     public void onTransactionAdded(Long userID, Long categoryID, Double amount, LocalDate transactionDate) {
 
         if (categoryID == null) {
@@ -161,6 +250,14 @@ public class BudgetService {
         updateBudgetSpending(budget, newSpentAmount);
     }
 
+    /**
+     * Reverses an expense amount from the matching active budget, when one exists.
+     *
+     * @param userID the owner user id
+     * @param categoryID the transaction category id
+     * @param amount the expense amount to subtract
+     * @param transactionDate the transaction date used to check the budget range
+     */
     public void onTransactionDeleted(Long userID, Long categoryID, Double amount, LocalDate transactionDate) {
 
         if (categoryID == null) {
@@ -218,6 +315,13 @@ public class BudgetService {
         return budgetRepository.save(budget);
     }
 
+    /**
+     * Retrieves a limited page of active budgets ordered by soonest end date.
+     *
+     * @param userId the owner user id
+     * @param limit the maximum number of budgets to return
+     * @return active budgets for dashboard display
+     */
     public List<Budget> getActiveBudgets(Long userId, int limit) {
 
         return budgetRepository.findByUserIdAndEndDateGreaterThanEqual(

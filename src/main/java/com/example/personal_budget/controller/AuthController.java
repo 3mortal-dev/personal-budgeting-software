@@ -22,6 +22,13 @@ public class AuthController {
 
     private final AuthenticationService authenticationService;
 
+    /**
+     * Registers a new account and stores the issued JWT in an HTTP-only cookie.
+     *
+     * @param request the registration details
+     * @param response the servlet response used to add the JWT cookie
+     * @return a success message or validation error message
+     */
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> register(
             @RequestBody RegisterRequest request,
@@ -41,6 +48,13 @@ public class AuthController {
     }
     }
 
+    /**
+     * Authenticates a user and stores the issued JWT in an HTTP-only cookie.
+     *
+     * @param request the login credentials
+     * @param response the servlet response used to add the JWT cookie
+     * @return a login success message
+     */
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> authenticate(
             @RequestBody AuthenticationRequest request,

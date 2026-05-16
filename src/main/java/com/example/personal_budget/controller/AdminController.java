@@ -44,6 +44,11 @@ public class AdminController {
     private final GoalRepository goalRepository;
     private final CategoryRepository categoryRepository;
 
+    /**
+     * Returns aggregate counts used by the admin dashboard.
+     *
+     * @return system-wide user, transaction, budget, goal, and category counts
+     */
     @GetMapping("/stats")
     public ResponseEntity<AdminStatsResponse> getStats() {
         return ResponseEntity.ok(new AdminStatsResponse(
@@ -56,6 +61,11 @@ public class AdminController {
         ));
     }
 
+    /**
+     * Lists all users for administrative management.
+     *
+     * @return all users as admin response DTOs
+     */
     @GetMapping("/users")
     public ResponseEntity<List<AdminUserResponse>> getAllUsers() {
         List<AdminUserResponse> users = StreamSupport.stream(userService.getAllUsers().spliterator(), false)
@@ -64,11 +74,25 @@ public class AdminController {
         return ResponseEntity.ok(users);
     }
 
+    /**
+     * Retrieves a single user for administrative management.
+     *
+     * @param id the user id
+     * @return the matching user
+     */
     @GetMapping("/users/{id}")
     public ResponseEntity<AdminUserResponse> getUserById(@PathVariable Long id) {
         return ResponseEntity.ok(new AdminUserResponse(userService.getUserById(id)));
     }
 
+    /**
+     * Updates a user's role, preventing admins from changing their own role.
+     *
+     * @param id the target user id
+     * @param request the requested role change
+     * @param userDetails the authenticated admin principal
+     * @return the updated user
+     */
     @PatchMapping("/users/{id}/role")
     public ResponseEntity<AdminUserResponse> updateUserRole(
             @PathVariable Long id,
@@ -83,6 +107,13 @@ public class AdminController {
         return ResponseEntity.ok(new AdminUserResponse(userService.saveUser(user)));
     }
 
+    /**
+     * Deletes a user account, preventing admins from deleting their own account.
+     *
+     * @param id the target user id
+     * @param userDetails the authenticated admin principal
+     * @return an empty no-content response
+     */
     @DeleteMapping("/users/{id}")
     public ResponseEntity<Void> deleteUser(
             @PathVariable Long id,
@@ -95,6 +126,12 @@ public class AdminController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Lists transactions owned by a specific user for admin review.
+     *
+     * @param id the target user id
+     * @return the user's transactions
+     */
     @GetMapping("/users/{id}/transactions")
     public ResponseEntity<List<TransactionResponse>> getUserTransactions(@PathVariable Long id) {
         userService.getUserById(id);

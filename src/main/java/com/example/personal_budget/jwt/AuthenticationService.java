@@ -31,6 +31,13 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
 
+    /**
+     * Registers a new user, stores their first valid JWT token, and returns that
+     * token for cookie-based authentication.
+     *
+     * @param request the registration details
+     * @return a signed JWT for the new user
+     */
     public String register(RegisterRequest request) {
          if (userService.userExistsByEmail(request.email())) {
         throw new RuntimeException("Email already in use");
@@ -48,6 +55,12 @@ public class AuthenticationService {
         return jwtToken;   
     }
 
+    /**
+     * Authenticates a user, revokes previous active tokens, and issues a fresh JWT.
+     *
+     * @param request the login credentials
+     * @return a signed JWT for the authenticated user
+     */
     public String authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(

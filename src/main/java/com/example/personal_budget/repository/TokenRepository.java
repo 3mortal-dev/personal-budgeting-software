@@ -9,6 +9,12 @@ import com.example.personal_budget.entity.Token;
 
 public interface TokenRepository extends JpaRepository<Token, Integer> {
 
+  /**
+   * Finds non-expired or non-revoked tokens for a user.
+   *
+   * @param id the user id
+   * @return valid tokens for the user
+   */
   @Query(value = """
       select t from Token t inner join User u\s
       on t.user.id = u.id\s
@@ -16,5 +22,11 @@ public interface TokenRepository extends JpaRepository<Token, Integer> {
       """)
   List<Token> findAllValidTokenByUser(Long id);
 
+  /**
+   * Finds a stored token record by its token string.
+   *
+   * @param token the JWT token value
+   * @return the matching token when present
+   */
   Optional<Token> findByToken(String token);
 }

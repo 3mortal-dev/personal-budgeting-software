@@ -30,6 +30,12 @@ public class NotificationController {
 
     private final UserService userService;
 
+    /**
+     * Lists all notifications for the authenticated user.
+     *
+     * @param userDetails the authenticated principal
+     * @return all user notifications
+     */
     @GetMapping("/all")
     public ResponseEntity<List<NotificationResponse>> getAllNotifications(@AuthenticationPrincipal UserDetails userDetails) {
         Long userId = userService.getUserId(userDetails);
@@ -38,6 +44,13 @@ public class NotificationController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Lists the most recent notifications for the authenticated user.
+     *
+     * @param limit the maximum number of notifications to return
+     * @param userDetails the authenticated principal
+     * @return recent notifications
+     */
     @GetMapping("/recent")
     public ResponseEntity<List<NotificationResponse>> getRecentNotifications(
             @RequestParam int limit,
@@ -48,6 +61,12 @@ public class NotificationController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Lists unread notifications for the authenticated user.
+     *
+     * @param userDetails the authenticated principal
+     * @return unread notifications
+     */
     @GetMapping("/unread")
     public ResponseEntity<List<NotificationResponse>> getUnreadNotifications(@AuthenticationPrincipal UserDetails userDetails) {
         Long userId = userService.getUserId(userDetails);
@@ -56,6 +75,13 @@ public class NotificationController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Lists notifications for the authenticated user filtered by event type.
+     *
+     * @param type the notification type to filter by
+     * @param userDetails the authenticated principal
+     * @return matching notifications
+     */
     @GetMapping("/type")
     public ResponseEntity<List<NotificationResponse>> getNotificationsByType(
             @RequestParam NotificationEventType type,
@@ -70,18 +96,36 @@ public class NotificationController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Marks a notification as read.
+     *
+     * @param id the notification id
+     * @return an empty success response
+     */
     @PutMapping("{id}/markRead")
     public ResponseEntity markAsRead(@PathVariable Long id) {
         notificationService.markAsRead(id);
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Deletes a notification by id.
+     *
+     * @param id the notification id
+     * @return an empty success response
+     */
     @DeleteMapping("{id}/delete")
     public ResponseEntity deleteNotification(@PathVariable Long id) {
         notificationService.deleteNotification(id);
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Deletes all notifications for the authenticated user.
+     *
+     * @param userDetails the authenticated principal
+     * @return an empty success response
+     */
     @DeleteMapping("/deleteAll")
     public ResponseEntity deleteAllNotifications(@AuthenticationPrincipal UserDetails userDetails) {
         Long userId = userService.getUserId(userDetails);

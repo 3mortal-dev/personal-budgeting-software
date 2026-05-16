@@ -22,23 +22,54 @@ public class CategoryService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
 
+    /**
+     * Retrieves all categories available to a user, including built-in categories.
+     *
+     * @param userID the user id
+     * @return accessible categories for the user
+     */
     public List<Category> getAllCategories(Long userID) {
         return categoryRepository.findByUserIdOrType(userID, CategoryType.BUILT_IN);
     }
 
+    /**
+     * Retrieves built-in categories shared by all users.
+     *
+     * @return built-in categories
+     */
     public List<Category> getBuiltInCategories() {
         return categoryRepository.findByType(CategoryType.BUILT_IN);
     }
 
+    /**
+     * Retrieves custom categories owned by a user.
+     *
+     * @param userID the owner user id
+     * @return custom categories for the user
+     */
     public List<Category> getCustomCategories(Long userID) {
         return categoryRepository.findByUserId(userID);
     }
 
+    /**
+     * Loads a category that is either owned by the user or globally built in.
+     *
+     * @param userID the requesting user id
+     * @param categoryID the category id
+     * @return the accessible category
+     */
     public Category getCategoryById(Long userID, Long categoryID) {
         return categoryRepository.findAccessibleCategory(categoryID, userID)
                 .orElseThrow(() -> new RuntimeException("Category not found"));
     }
 
+    /**
+     * Creates a custom category for a user after validating name uniqueness.
+     *
+     * @param userID the owner user id
+     * @param request the category creation details
+     * @return the saved custom category
+     */
     public Category addCustomCategory(Long userID, CreateCategoryRequest request) {
 
         User user = userRepository.findById(userID).orElseThrow(() -> new RuntimeException("User not found"));
@@ -56,6 +87,14 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
+    /**
+     * Updates a custom category owned by a user.
+     *
+     * @param userID the owner user id
+     * @param categoryID the category to update
+     * @param request the requested category changes
+     * @return the updated category
+     */
     public Category editCustomCategory(Long userID, Long categoryID, CreateCategoryRequest request) {
 
         Category category = categoryRepository.findByIdAndUserId(categoryID, userID).orElseThrow(
@@ -75,6 +114,12 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
+    /**
+     * Deletes a custom category owned by a user.
+     *
+     * @param userID the owner user id
+     * @param categoryID the category to delete
+     */
     public void deleteCustomCategory(Long userID, Long categoryID) {
 
         Category category = categoryRepository.findByIdAndUserId(categoryID, userID).orElseThrow(
@@ -86,6 +131,12 @@ public class CategoryService {
         categoryRepository.delete(category);
     }
 
+    /**
+     * Creates a built-in category available to all users.
+     *
+     * @param request the category creation details
+     * @return the saved built-in category
+     */
     public Category addBuiltInCategory(CreateCategoryRequest request) {
         String normalizedName = normalizeName(request.getName());
 
