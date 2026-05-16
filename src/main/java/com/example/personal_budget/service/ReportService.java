@@ -4,9 +4,9 @@ import com.example.personal_budget.dto.request.MonthlyReportRequest;
 import com.example.personal_budget.dto.request.ReportDownloadRequest;
 import com.example.personal_budget.dto.response.MonthlyReportResponse;
 import com.example.personal_budget.entity.Transaction;
+import com.example.personal_budget.enums.ReportFormat;
 import com.example.personal_budget.enums.TransactionType;
 import com.example.personal_budget.util.ExporterFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -61,7 +61,7 @@ public class ReportService {
                                                                                        request.getEndDate());
 
         String fileName = "transaction_report_" + System.currentTimeMillis();
-        String fileExtension = getFileExtension(request.getFormat().toString());
+        String fileExtension = getFileExtension(request.getFormat());
         String filePath = fileName + fileExtension;
 
         try {
@@ -71,12 +71,11 @@ public class ReportService {
         }
     }
 
-    private String getFileExtension (String format) {
-        return switch (format.toUpperCase()) {
-            case "PDF" -> ".pdf";
-            case "EXCEL" -> ".xlsx";
-            case "CSV" -> ".csv";
-            default -> ".txt";
+    private String getFileExtension (ReportFormat format) {
+        return switch (format) {
+            case PDF -> ".pdf";
+            case EXCEL -> ".xlsx";
+            case CSV -> ".csv";
         };
     }
 
