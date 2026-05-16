@@ -22,6 +22,7 @@
     { href: "/reports", icon: "fa-chart-bar", label: "Reports" },
     { href: "/notifications", icon: "fa-bell", label: "Notifications" },
     { href: "/userProfile", icon: "fa-user", label: "Profile" },
+	{ href: "/admin", icon: "fa-shield-halved", label: "Admin", adminOnly: true },
   ];
 
   const NOTIF_API = {
@@ -39,14 +40,16 @@
   /* ─────────────────────────────────────────────────────
        3. BUILD SIDEBAR HTML
     ───────────────────────────────────────────────────── */
-  function buildSidebar() {
-    const links = NAV_LINKS.map(({ href, icon, label }) => {
-      const active = isActive(href) ? " sidebar__link--active" : "";
-      return `
-        <a class="sidebar__link${active}" href="${href}">
-          <i class="fa-solid ${icon}"></i><span>${label}</span>
-        </a>`;
-    }).join("");
+  function buildSidebar(isAdmin) {
+    const links = NAV_LINKS
+        .filter(({ adminOnly }) => !adminOnly || isAdmin)
+        .map(({ href, icon, label }) => {
+            const active = isActive(href) ? " sidebar__link--active" : "";
+            return `
+            <a class="sidebar__link${active}" href="${href}">
+              <i class="fa-solid ${icon}"></i><span>${label}</span>
+            </a>`;
+        }).join("");
 
     return `
       <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
@@ -297,7 +300,7 @@
         credentials: "include",
         headers: { Accept: "application/json" },
       });
-      if (!res.ok) return;
+      if (!res.ok) return null;
       const data = await res.json();
       const name = data.name || data.username || "";
       const usernameEl = document.getElementById("topbarUsername");
@@ -310,7 +313,8 @@
             ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
             : name.slice(0, 2).toUpperCase() || "U";
       }
-    } catch {}
+      return data.role || null;
+    } catch { return null; }
   }
 
   /* ─────────────────────────────────────────────────────
@@ -391,7 +395,7 @@
   /* ─────────────────────────────────────────────────────
        11. INJECT & INIT
     ───────────────────────────────────────────────────── */
-  function inject() {
+  async function inject() {
     const sidebarRoot = document.getElementById("sidebar-root");
     const topbarRoot = document.getElementById("topbar-root");
 
@@ -400,18 +404,19 @@
       return;
     }
     if (!topbarRoot) {
-      console.warn(
-        '[navbar.js] Missing <div id="topbar-root"></div> inside <main>',
-      );
+      console.warn('[navbar.js] Missing <div id="topbar-root"></div> inside <main>');
       return;
     }
 
-    sidebarRoot.innerHTML = buildSidebar();
+    // Inject topbar first so username/avatar can be populated
     topbarRoot.innerHTML = buildTopbar();
 
+    // Fetch role then build sidebar
+    const role = await applyUsername();
+    sidebarRoot.innerHTML = buildSidebar(role === "ADMIN");
+
     applyTimeOfDay();
-    applyUsername();
-    fetchNotifications(); // load badge count immediately
+    fetchNotifications();
     setupHamburger();
     setupNotifDropdown();
   }
