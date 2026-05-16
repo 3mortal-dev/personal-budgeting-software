@@ -432,6 +432,8 @@ function openEditModal(id) {
 
   document.getElementById("budgetLimit").value = b.spendingLimit ?? "";
   document.getElementById("budgetThreshold").value = b.threshold ?? 80;
+  document.getElementById("budgetStartDate").value = 
+  	b.startDate?.split("T")[0] ?? b.startDate ?? "";
   document.getElementById("budgetEndDate").value =
     b.endDate?.split("T")[0] ?? b.endDate ?? "";
   openModal("budgetModal");
@@ -452,7 +454,7 @@ function closeAddModal() {
 function clearModalFields() {
   const select = document.getElementById("budgetCategorySelect");
   if (select) select.value = "";
-  ["budgetLimit", "budgetThreshold", "budgetEndDate"].forEach((id) => {
+  ["budgetLimit", "budgetThreshold", "budgetStartDate", "budgetEndDate"].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.value = "";
   });
@@ -469,15 +471,15 @@ async function submitBudget() {
   const selectEl = document.getElementById("budgetCategorySelect");
   const limitEl = document.getElementById("budgetLimit");
   const threshEl = document.getElementById("budgetThreshold");
+  const startDateEl = document.getElementById("budgetStartDate");
   const endDateEl = document.getElementById("budgetEndDate");
   const editId = document.getElementById("editBudgetId").value;
 
   // Clear previous errors
-  [selectEl, limitEl, threshEl, endDateEl].forEach(clearFieldError);
+  [selectEl, limitEl, threshEl, startDateEl, endDateEl].forEach(clearFieldError);
   hideBanner("budgetFormError");
 
   const isEdit = !!editId;
-  // In edit mode the select is disabled; retrieve categoryId from state instead
   const originalBudget = isEdit
     ? state.budgets.find((b) => b.id === parseInt(editId, 10))
     : null;
@@ -486,6 +488,7 @@ async function submitBudget() {
     : parseInt(selectEl.value, 10);
   const spendingLimit = parseFloat(limitEl.value);
   const threshold = parseFloat(threshEl.value);
+  const startDate = startDateEl.value;
   const endDate = endDateEl.value;
   let hasError = false;
 
@@ -501,12 +504,16 @@ async function submitBudget() {
     setFieldError(threshEl, "Threshold must be between 0 and 100.");
     hasError = true;
   }
+  if (!startDate) {
+    setFieldError(startDateEl, "Please select a start date.");
+    hasError = true;
+  }
   if (!endDate) {
     setFieldError(endDateEl, "Please select an end date.");
     hasError = true;
   }
-  if (endDate && new Date(endDate) <= new Date()) {
-    setFieldError(endDateEl, "End date must be in the future.");
+  if (startDate && endDate && new Date(startDate) >= new Date(endDate)) {
+    setFieldError(endDateEl, "End date must be after start date.");
     hasError = true;
   }
 
@@ -516,9 +523,7 @@ async function submitBudget() {
     return;
   }
 
-  // Build the CreateBudgetRequest payload the backend expects
-  const payload = { categoryId, spendingLimit, threshold, endDate };
-  // isEdit already declared above
+  const payload = { categoryId, spendingLimit, threshold, startDate, endDate };
   const endpoint = isEdit ? API.BY_ID(editId) : API.ALL;
   const method = isEdit ? "PUT" : "POST";
 

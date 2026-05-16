@@ -406,16 +406,18 @@
                             id="budgetThresholdErr"></span>
                     </div>
 
-                    <div class="form-group">
-                        <label class="form-label"
-                            for="budgetEnd">End Date <span
-                                style="color:var(--danger,#e84040)">*</span></label>
-                        <input id="budgetEnd" type="date"
-                            class="form-control" />
-                        <small class="field-hint">Required — sets when this
-                            budget period ends.</small>
-                        <span class="field-error" id="budgetEndErr"></span>
-                    </div>
+                    <div class="form-row">
+						<div class="form-group">
+							<label class="form-label" for="budgetStart">Start Date </label>
+							<input id="budgetStart" type="date" class="form-control" />
+							<span class="field-error" id="budgetStartErr"></span>
+						</div>
+						<div class="form-group">
+							<label class="form-label" for="budgetEnd">End Date </label>
+							<input id="budgetEnd" type="date" class="form-control" />
+							<span class="field-error" id="budgetEndErr"></span>
+						</div>
+					</div>
 
                     <button class="btn-submit" id="addBudgetBtn"
                         onclick="addBudget()">

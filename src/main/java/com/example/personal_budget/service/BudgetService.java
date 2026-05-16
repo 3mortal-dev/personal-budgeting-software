@@ -99,15 +99,15 @@ public class BudgetService {
         Budget budget = Budget.builder()
                 .user(user)
                 .category(category)
-                .spentAmount(totalSpent)
-                .spendingLimit(0.0)
+                .spentAmount(0.0)
+                .spendingLimit(request.getSpendingLimit())
                 .threshold(request.getThreshold())
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
                 .status(BudgetStatus.ON_TRACK)
                 .build();
 
-        return updateBudgetSpending(budget, request.getSpendingLimit());
+        return updateBudgetSpending(budget, totalSpent);
     }
 
     public Budget editBudget(Long userID, Long budgetID, CreateBudgetRequest request) {
@@ -151,7 +151,9 @@ public class BudgetService {
 
         Budget budget = budgetOpt.get();
 
-        if (budget.getEndDate().isBefore(LocalDate.now()) || (transactionDate.isBefore(budget.getStartDate()) || transactionDate.isAfter(budget.getEndDate()))) {
+        if (budget.getEndDate().isBefore(LocalDate.now())
+                || transactionDate.isBefore(budget.getStartDate())
+                || transactionDate.isAfter(budget.getEndDate())) {
             return;
         }
 
@@ -172,7 +174,9 @@ public class BudgetService {
 
         Budget budget = budgetOpt.get();
 
-        if (budget.getEndDate().isBefore(LocalDate.now()) || transactionDate.isBefore(budget.getStartDate())) {
+        if (budget.getEndDate().isBefore(LocalDate.now())
+                || transactionDate.isBefore(budget.getStartDate())
+                || transactionDate.isAfter(budget.getEndDate())) {
             return;
         }
 

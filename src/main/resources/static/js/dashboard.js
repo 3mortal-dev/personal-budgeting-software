@@ -895,10 +895,11 @@ async function addTransaction(event) {
 
 function clearBudgetFormErrors() {
   [
-    "budgetCategoryErr",
-    "budgetAmountErr",
-    "budgetThresholdErr",
-    "budgetEndErr",
+	"budgetCategoryErr", 
+	"budgetAmountErr", 
+	"budgetThresholdErr", 
+	"budgetStartErr", 
+	"budgetEndErr"
   ].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.textContent = "";
@@ -920,7 +921,7 @@ function setBudgetFormError(message) {
 /**
  * Returns true when all fields are valid, false otherwise (also populates inline errors).
  */
-function validateBudgetForm(categoryId, spendingLimit, threshold, endDate) {
+function validateBudgetForm(categoryId, spendingLimit, threshold, startDate, endDate) {
   let valid = true;
 
   // 1. Category: must be selected
@@ -967,7 +968,16 @@ function validateBudgetForm(categoryId, spendingLimit, threshold, endDate) {
     }
   }
 
-  // 5. End date: required
+    // 5. Start date: required
+  if (!startDate) {
+      setBudgetFieldError("budgetStartErr", "A start date is required.");
+      valid = false;
+  } else if (endDate && new Date(startDate) >= new Date(endDate)) {
+      setBudgetFieldError("budgetStartErr", "Start date must be before the end date.");
+      valid = false;
+  }
+  
+  // 6. End date: required
   if (!endDate) {
     setBudgetFieldError(
       "budgetEndErr",
@@ -997,9 +1007,10 @@ async function addBudget() {
   const threshold = Number(
     document.getElementById("budgetThreshold")?.value || 0,
   );
+  const startDate = document.getElementById("budgetStart")?.value || null;
   const endDate = document.getElementById("budgetEnd")?.value || null;
 
-  if (!validateBudgetForm(categoryId, spendingLimit, threshold, endDate)) {
+  if (!validateBudgetForm(categoryId, spendingLimit, threshold, startDate, endDate)) {
     // Scroll to the first visible error inside the modal body
     const firstErr = document.querySelector(".field-error:not(:empty)");
     if (firstErr)
@@ -1008,7 +1019,7 @@ async function addBudget() {
   }
 
   btnStartLoading("addBudgetBtn");
-  const payload = { categoryId, spendingLimit, threshold, endDate };
+  const payload = { categoryId, spendingLimit, threshold, startDate, endDate };
   const result = await apiFetch(API.BUDGETS, {
     method: "POST",
     body: JSON.stringify(payload),
