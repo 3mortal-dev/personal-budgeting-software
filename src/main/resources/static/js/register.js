@@ -94,7 +94,7 @@ form.addEventListener('submit', async function (e) {
 
     if (!response.ok) {
         const err = await response.json().catch(() => ({}));
-        showError(err.message || "Registration failed. Try again.");
+        alert(err.message || "Registration failed. Try again.");
         return;
     }
 
