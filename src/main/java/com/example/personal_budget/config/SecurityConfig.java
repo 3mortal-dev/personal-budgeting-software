@@ -56,10 +56,12 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> auth
                 .requestMatchers(WHITE_LIST_URL).permitAll()
-                .requestMatchers("/", "/home", "/index", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
-                .requestMatchers("/admin").hasRole("ADMIN")
+                .requestMatchers("/", "/home", "/index", "/static/**", "/css/**", "/js/**", "/images/**",
+                    "/dashboard", "/transactions", "/budget", "/goals",
+                    "/reports", "/notifications", "/userProfile", "/admin").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
+                .requestMatchers("/api/**").authenticated()
+                .anyRequest().permitAll()
                 )
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

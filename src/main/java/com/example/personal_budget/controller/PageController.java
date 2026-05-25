@@ -1,135 +1,95 @@
 package com.example.personal_budget.controller;
 
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 
 
 @Controller
 public class PageController {
 
+    private boolean isAuthenticated() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) return false;
+        if (auth instanceof AnonymousAuthenticationToken) return false;
+        return auth.isAuthenticated();
+    }
+
     // ─── Auth Pages ─────────────────────────────────────────────
-    /**
-     * Displays the login page.
-     *
-     * @return the login template name
-     */
-    @GetMapping("/login") // html fileName ya 3mortal
-    public String loginPage() {return "login";}
+    @GetMapping("/login")
+    public String loginPage() {
+        if (isAuthenticated()) return "redirect:/dashboard";
+        return "login";
+    }
 
-    /**
-     * Displays the registration page.
-     *
-     * @return the registration template name
-     */
     @GetMapping("/register")
-    public String registerPage() {return "register";}
+    public String registerPage() {
+        if (isAuthenticated()) return "redirect:/dashboard";
+        return "register";
+    }
 
-    /**
-     * Displays the user profile page.
-     *
-     * @return the profile template name
-     */
     @GetMapping("/userProfile")
-    public String profilePage() {return "userProfile";}
+    public String profilePage() {
+        if (!isAuthenticated()) return "redirect:/login";
+        return "userProfile";
+    }
 
-    /**
-     * Displays the home page.
-     *
-     * @return the index template name
-     */
-    @GetMapping("/index")
-    public String indexPage() {return "index";}
+    @GetMapping({"/", "/index"})
+    public String indexPage() {
+        if (isAuthenticated()) return "redirect:/dashboard";
+        return "index";
+    }
 
-    /**
-     * Displays the goals page.
-     *
-     * @return the goals template name
-     */
     @GetMapping("/goals")
-    public String goalsPage() {return "goals";}
+    public String goalsPage() {
+        if (!isAuthenticated()) return "redirect:/login";
+        return "goals";
+    }
 
-    /**
-     * Displays the budgets page.
-     *
-     * @return the budget template name
-     */
     @GetMapping("/budget")
-    public String budgetPage() { return "budget"; }
+    public String budgetPage() {
+        if (!isAuthenticated()) return "redirect:/login";
+        return "budget";
+    }
 
-    /**
-     * Displays the transactions page.
-     *
-     * @return the transactions template name
-     */
     @GetMapping("/transactions")
-    public String transactionsPage() {return "transactions";}
+    public String transactionsPage() {
+        if (!isAuthenticated()) return "redirect:/login";
+        return "transactions";
+    }
 
-    /**
-     * Displays the dashboard page.
-     *
-     * @return the dashboard template name
-     */
     @GetMapping("/dashboard")
-    public String dashboardPage() { return "dashboard"; }
+    public String dashboardPage() {
+        if (!isAuthenticated()) return "redirect:/login";
+        return "dashboard";
+    }
 
-    /**
-     * Displays the notifications page.
-     *
-     * @return the notifications template name
-     */
     @GetMapping("/notifications")
     public String notificationPage() {
+        if (!isAuthenticated()) return "redirect:/login";
         return "notifications";
     }
 
-    /**
-     * Displays the reports page.
-     *
-     * @return the reports template name
-     */
     @GetMapping("/reports")
     public String reportsPage() {
+        if (!isAuthenticated()) return "redirect:/login";
         return "reports";
     }
 
-    /**
-     * Displays the admin page.
-     *
-     * @return the admin template name
-     */
     @GetMapping("/admin")
-    @PreAuthorize("hasRole('ADMIN')")
     public String adminPage() {
+        if (!isAuthenticated()) return "redirect:/login";
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = auth.getAuthorities().stream()
+            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (!isAdmin) return "redirect:/dashboard";
         return "admin";
     }
-    
-    /**
-     * Displays the bank simulator page.
-     *
-     * @return the bank simulator template name
-     */
+
     @GetMapping("/bank-simulator")
     public String bankSimulator() {
         return "bankSimulator";
     }
-
-    
-
-
-    // // ─── Main Pages ──────────────────────────────────────────────
-    // @GetMapping("/profile")
-    // public String profilePage() { return "profile"; }
-
-    // @GetMapping("/goals")
-    // public String goalsPage() { return "goals"; }
-
-    // @GetMapping("/budget")
-    // public String budgetPage() { return "budget"; }
-
-    // @GetMapping("/transactions")
-    // public String transactionsPage() { return "transactions"; }
-
-    // @GetMapping("/dashboard")
-    // public String dashboardPage() { return "dashboard"; }
 }
