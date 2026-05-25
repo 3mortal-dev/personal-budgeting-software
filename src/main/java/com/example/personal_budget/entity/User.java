@@ -47,6 +47,10 @@ public class User implements UserDetails {
     @Default
     private boolean goalProgressAlertEnabled = true;
 
+    @Default
+    @Column(length = 3)
+    private String currency = "USD";
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));

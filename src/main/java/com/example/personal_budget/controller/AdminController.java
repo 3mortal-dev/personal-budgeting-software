@@ -11,6 +11,8 @@ import com.example.personal_budget.repository.CategoryRepository;
 import com.example.personal_budget.repository.GoalRepository;
 import com.example.personal_budget.repository.TransactionRepository;
 import com.example.personal_budget.repository.UserRepository;
+import com.example.personal_budget.entity.User;
+import com.example.personal_budget.service.CurrencyService;
 import com.example.personal_budget.service.TransactionService;
 import com.example.personal_budget.service.UserService;
 import jakarta.validation.Valid;
@@ -43,6 +45,7 @@ public class AdminController {
     private final BudgetRepository budgetRepository;
     private final GoalRepository goalRepository;
     private final CategoryRepository categoryRepository;
+    private final CurrencyService currencyService;
 
     /**
      * Returns aggregate counts used by the admin dashboard.
@@ -134,10 +137,14 @@ public class AdminController {
      */
     @GetMapping("/users/{id}/transactions")
     public ResponseEntity<List<TransactionResponse>> getUserTransactions(@PathVariable Long id) {
-        userService.getUserById(id);
+        User targetUser = userService.getUserById(id);
         List<TransactionResponse> transactions = transactionService.getAllTransactions(id)
                 .stream()
-                .map(TransactionResponse::new)
+                .map(t -> {
+                    TransactionResponse tr = new TransactionResponse(t, targetUser.getCurrency());
+                    tr.setAmount(currencyService.convert(t.getAmount(), t.getCurrency(), targetUser.getCurrency()));
+                    return tr;
+                })
                 .toList();
         return ResponseEntity.ok(transactions);
     }

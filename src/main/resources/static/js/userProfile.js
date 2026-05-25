@@ -530,7 +530,7 @@ function closeCurrencyDropdown() {
   document.getElementById("currency-chevron").classList.remove("open");
 }
 
-function selectCurrency(optionEl) {
+async function selectCurrency(optionEl) {
   const value = optionEl.dataset.value;
 
   document
@@ -540,6 +540,16 @@ function selectCurrency(optionEl) {
 
   setCurrencyDisplay(value);
   state.prefs.currency = value;
+
+  try {
+    await apiFetch("/api/profile/currency", {
+      method: "PUT",
+      body: JSON.stringify({ currency: value }),
+    });
+  } catch (err) {
+    console.error("Failed to save currency preference:", err);
+  }
+
   closeCurrencyDropdown();
 }
 

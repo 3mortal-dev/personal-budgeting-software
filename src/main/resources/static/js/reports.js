@@ -196,14 +196,14 @@ function yearStartISO() {
   return `${d.getFullYear()}-01-01`;
 }
 
-function formatMoney(value) {
+function formatMoney(value, currencyCode) {
   if (value == null || Number.isNaN(value)) {
     return "—";
   }
 
   return new Intl.NumberFormat(undefined, {
     style: "currency",
-    currency: "EGP",
+    currency: currencyCode || "USD",
   }).format(value);
 }
 
@@ -404,10 +404,9 @@ function applyReportData(data) {
   }
 
   const expenseRaw = data.monthlyExpense || {};
-
   const incomeRaw = data.monthlyIncome || {};
-
   const expenseByCategory = data.expenseByCategory || {};
+  const currency = data.currency || "USD";
 
   const expenseMap = normalizeMonthMap(expenseRaw);
 
@@ -435,11 +434,11 @@ function applyReportData(data) {
 
   const net = totalIncome - totalExpense;
 
-  setText("sumExpense", formatMoney(totalExpense));
+  setText("sumExpense", formatMoney(totalExpense, currency));
 
-  setText("sumIncome", formatMoney(totalIncome));
+  setText("sumIncome", formatMoney(totalIncome, currency));
 
-  setText("sumNet", formatMoney(net));
+  setText("sumNet", formatMoney(net, currency));
 
   const netEl = $("sumNet");
 

@@ -50,6 +50,7 @@ const state = {
   transactions: [],
   categories: [],
   notifications: [],
+  currency: "USD",
   currentFilter: {
     type: "all",
     categoryId: "all",
@@ -191,6 +192,7 @@ async function loadUserProfile() {
   const data = await apiFetch(API.PROFILE);
   if (data) {
     state.user = data;
+    state.currency = data.currency || "USD";
   }
 }
 
@@ -247,7 +249,7 @@ function renderTransactions() {
       <td>${transaction.description || "-"}</td>
       <td class="col-source" >${transaction.source || "-"}</td>
       <td class="amount ${transaction.type.toLowerCase()}">
-        ${transaction.type === "INCOME" ? "+" : "-"}$${transaction.amount.toFixed(2)}
+        ${transaction.type === "INCOME" ? "+" : "-"}${formatCurrency(transaction.amount, transaction.currency)}
       </td>
       <td class="actions">
         <button class="btn-icon-small" onclick="editTransaction(${transaction.id})" title="Edit">
@@ -685,7 +687,7 @@ function showError(message) {
  */
 function toastTransactionAdded(type, amount, label) {
   const sign = type === "INCOME" ? "+" : "−";
-  const money = formatCurrency(amount);
+  const money = formatCurrency(amount, state.currency);
   const detail = label ? ` · ${label}` : "";
   const verb = type === "INCOME" ? "Income recorded" : "Expense logged";
   showToast(`${verb}: ${sign}${money}${detail}`, "success");
@@ -696,7 +698,7 @@ function toastTransactionAdded(type, amount, label) {
  */
 function toastTransactionUpdated(type, amount) {
   const sign = type === "INCOME" ? "+" : "−";
-  const money = formatCurrency(amount);
+  const money = formatCurrency(amount, state.currency);
   showToast(`Transaction updated — ${sign}${money}`, "success");
 }
 
@@ -725,10 +727,10 @@ function toastLoadFailed() {
 }
 
 /** Format currency without the Intl overhead for toast strings */
-function formatCurrency(amount) {
+function formatCurrency(amount, currencyCode) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "USD",
+    currency: currencyCode || state.currency || "USD",
     minimumFractionDigits: 2,
   }).format(amount ?? 0);
 }

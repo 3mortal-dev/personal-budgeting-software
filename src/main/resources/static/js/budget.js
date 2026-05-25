@@ -45,6 +45,7 @@ const state = {
   activeFilter: "all",
   pendingDelete: null,
   searchQuery: "",
+  currency: "USD",
 };
 
 
@@ -68,6 +69,7 @@ async function loadProfile() {
   if (!data) return;
 
   state.profile = data;
+  state.currency = data.currency || "USD";
   renderProfile(data);
 }
 
@@ -198,7 +200,7 @@ function formatDate(str) {
 function fmt(n) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "USD",
+    currency: state.currency || "USD",
     minimumFractionDigits: 2,
   }).format(n ?? 0);
 }

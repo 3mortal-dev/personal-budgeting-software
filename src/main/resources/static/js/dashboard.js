@@ -13,6 +13,7 @@ const state = {
   notifications: [],
   categories: [],
   searchQuery: "",
+  currency: "USD",
 };
 
 async function apiFetch(endpoint, options = {}) {
@@ -36,7 +37,7 @@ function formatCurrency(amount) {
   const value = Number(amount || 0);
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "USD",
+    currency: state.currency || "USD",
     minimumFractionDigits: 2,
   }).format(value);
 }
@@ -558,6 +559,7 @@ async function loadDashboardData() {
     return;
   }
   state.dashboard = data;
+  state.currency = data.currency || "USD";
   renderDashboard();
 }
 

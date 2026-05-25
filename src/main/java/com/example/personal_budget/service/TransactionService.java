@@ -5,6 +5,7 @@ import com.example.personal_budget.dto.request.MonthlyReportRequest;
 import com.example.personal_budget.dto.request.TransactionFilterRequest;
 import com.example.personal_budget.entity.Category;
 import com.example.personal_budget.entity.Transaction;
+import com.example.personal_budget.entity.User;
 import com.example.personal_budget.enums.TransactionType;
 import com.example.personal_budget.exception.TransactionNotFoundException;
 import com.example.personal_budget.repository.TransactionRepository;
@@ -71,9 +72,17 @@ public class TransactionService {
             budgetService.onTransactionAdded(userId, request.getCategoryId(), request.getAmount(), request.getDate());
         }
 
-        Transaction transaction = Transaction.builder().user(userService.getUserById(userId)).amount(
-                request.getAmount()).type(request.getType()).date(request.getDate()).category(category).source(
-                request.getSource()).description(request.getDescription()).build();
+        User user = userService.getUserById(userId);
+        Transaction transaction = Transaction.builder()
+                .user(user)
+                .amount(request.getAmount())
+                .type(request.getType())
+                .date(request.getDate())
+                .category(category)
+                .source(request.getSource())
+                .description(request.getDescription())
+                .currency(user.getCurrency())
+                .build();
 
         return transactionRepo.save(transaction);
     }

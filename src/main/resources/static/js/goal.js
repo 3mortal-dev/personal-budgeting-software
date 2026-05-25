@@ -42,6 +42,7 @@ async function applyUsername() {
     if (!res.ok) return;
     const data = await res.json();
     const name = data.name || data.username || "";
+    userCurrency = data.currency || "USD";
     if (usernameEl) usernameEl.textContent = name;
     if (avatarEl) {
       const parts = name.split(" ").filter(Boolean);
@@ -129,6 +130,7 @@ let notifications = [];
 let deleteTargetId = null;
 let progressGoalId = null;
 let activeNotifTab = "all";
+let userCurrency = "USD";
 
 // Dom REF
 
@@ -887,7 +889,11 @@ function showToast(msg, type = "success") {
 
 // Helper
 function formatMoney(n) {
-  return "$" + Number(n || 0).toLocaleString("en-US");
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: userCurrency || "USD",
+    minimumFractionDigits: 0,
+  }).format(n || 0);
 }
 
 
