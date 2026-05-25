@@ -488,7 +488,7 @@ async function onNotifTransactionsChange(enabled) {
   state.prefs.notifTransactions = enabled;
 
   try {
-    const response = await apiFetch("/api/profile/api/notifications", {
+    const response = await apiFetch("/api/profile/notifications", {
       method: "PUT",
       body: JSON.stringify({
         budgetAlerts: enabled,

@@ -103,7 +103,7 @@ public class NotificationController {
      * @return an empty success response
      */
     @PutMapping("{id}/markRead")
-    public ResponseEntity markAsRead(@PathVariable Long id) {
+    public ResponseEntity<Void> markAsRead(@PathVariable Long id) {
         notificationService.markAsRead(id);
         return ResponseEntity.ok().build();
     }
@@ -115,7 +115,7 @@ public class NotificationController {
      * @return an empty success response
      */
     @DeleteMapping("{id}/delete")
-    public ResponseEntity deleteNotification(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteNotification(@PathVariable Long id) {
         notificationService.deleteNotification(id);
         return ResponseEntity.ok().build();
     }
@@ -127,7 +127,7 @@ public class NotificationController {
      * @return an empty success response
      */
     @DeleteMapping("/deleteAll")
-    public ResponseEntity deleteAllNotifications(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Void> deleteAllNotifications(@AuthenticationPrincipal UserDetails userDetails) {
         Long userId = userService.getUserId(userDetails);
         notificationService.deleteAllNotifications(userId);
         return ResponseEntity.ok().build();
