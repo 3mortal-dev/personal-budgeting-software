@@ -80,14 +80,14 @@
                 </button>
 
                 <button class="filter-btn"
-                  data-filter="BUDGET_ALERT"
-                  onclick="setFilter('BUDGET_ALERT')">
+                  data-filter="budget"
+                  onclick="setFilter('budget')">
                   Budget Alerts
                 </button>
 
                 <button class="filter-btn"
-                  data-filter="GOAL_REACHED"
-                  onclick="setFilter('GOAL_REACHED')">
+                  data-filter="goals"
+                  onclick="setFilter('goals')">
                   Goals
                 </button>
               </div>
@@ -118,6 +118,38 @@
               <div>
                 <div class="notif-stat-label">Total</div>
                 <div class="notif-stat-val" id="statTotal">—</div>
+              </div>
+            </div>
+            <div class="notif-stat-card">
+              <div class="notif-stat-icon" style="background:#fef2f2;">
+                <svg viewBox="0 0 24 24" stroke="var(--red)"><path
+                    d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path
+                    d="M13.73 21a2 2 0 0 1-3.46 0" /><line x1="1" y1="1" x2="23" y2="23" /></svg>
+              </div>
+              <div>
+                <div class="notif-stat-label">Unread</div>
+                <div class="notif-stat-val" id="statUnread">—</div>
+              </div>
+            </div>
+            <div class="notif-stat-card">
+              <div class="notif-stat-icon" style="background:#fffbeb;">
+                <svg viewBox="0 0 24 24" stroke="var(--yellow)"><path
+                    d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /><line
+                    x1="12" y1="9" x2="12" y2="13" /></svg>
+              </div>
+              <div>
+                <div class="notif-stat-label">Budget Alerts</div>
+                <div class="notif-stat-val" id="statAlerts">—</div>
+              </div>
+            </div>
+            <div class="notif-stat-card">
+              <div class="notif-stat-icon" style="background:#f0fdf4;">
+                <svg viewBox="0 0 24 24" stroke="var(--green)"><polyline
+                    points="22 12 18 12 15 21 9 3 6 12 2 12" /></svg>
+              </div>
+              <div>
+                <div class="notif-stat-label">Goals</div>
+                <div class="notif-stat-val" id="statGoals">—</div>
               </div>
             </div>
           </div>

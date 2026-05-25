@@ -122,12 +122,6 @@ function renderEverything() {
   renderList();
 
   renderStats();
-
-  renderFilterCounts();
-
-  updateTopNavBadge();
-
-  renderDropdownList();
 }
 
 // Filtering
@@ -137,6 +131,12 @@ function getFilteredNotifications() {
 
   if (state.activeFilter === "unread") {
     filtered = filtered.filter((n) => !n.read);
+  } else if (state.activeFilter === "budget") {
+    filtered = filtered.filter(
+      (n) => n.type === "BUDGET_NEAR_LIMIT" || n.type === "BUDGET_EXCEEDED",
+    );
+  } else if (state.activeFilter === "goals") {
+    filtered = filtered.filter((n) => n.type === "GOAL_REMINDER");
   } else if (state.activeFilter !== "all") {
     filtered = filtered.filter((n) => n.type === state.activeFilter);
   }
@@ -248,11 +248,11 @@ function renderStats() {
   const unread = visibleNotifications.filter((n) => !n.read).length;
 
   const alerts = visibleNotifications.filter(
-    (n) => n.type === "BUDGET_ALERT",
+    (n) => n.type === "BUDGET_NEAR_LIMIT" || n.type === "BUDGET_EXCEEDED",
   ).length;
 
   const goals = visibleNotifications.filter(
-    (n) => n.type === "GOAL_REACHED" || n.type === "GOAL_REMINDER",
+    (n) => n.type === "GOAL_REMINDER",
   ).length;
 
   setText("statTotal", total);
@@ -262,77 +262,6 @@ function renderStats() {
   setText("statAlerts", alerts);
 
   setText("statGoals", goals);
-}
-
-function renderFilterCounts() {
-  setText("countAll", state.notifications.length);
-
-  setText("countUnread", state.notifications.filter((n) => !n.read).length);
-}
-
-// Top Nav
-
-function updateTopNavBadge() {
-  const badge = document.getElementById("notifBadge");
-
-  if (!badge) return;
-
-  const unread = state.notifications.filter((n) => !n.read).length;
-
-  badge.textContent = unread > 0 ? unread : "";
-
-  badge.classList.toggle("has-unread", unread > 0);
-}
-
-// Drop Down
-
-function renderDropdownList() {
-  const list = document.getElementById("notifDropdownList");
-
-  if (!list) return;
-
-  const recent = state.notifications.slice(0, 5);
-
-  if (!recent.length) {
-    list.innerHTML = `
-      <div class="notif-empty">
-        No notifications
-      </div>
-    `;
-
-    return;
-  }
-
-  list.innerHTML = recent
-    .map(
-      (notification) => `
-
-      <div
-        class="notif-item ${!notification.read ? "unread" : ""}"
-        onclick="markRead(${notification.id})"
-      >
-
-        <div class="notif-item-body">
-
-          <div class="notif-item-title">
-            ${formatNotificationType(notification.type)}
-          </div>
-
-          <div class="notif-item-msg">
-            ${escapeHtml(notification.message)}
-          </div>
-
-          <div class="notif-item-time">
-            ${formatTime(notification.createdAt)}
-          </div>
-
-        </div>
-
-      </div>
-
-    `,
-    )
-    .join("");
 }
 
 // Actions
@@ -482,11 +411,11 @@ function formatTime(dateString) {
 
 function formatNotificationType(type) {
   switch (type) {
-    case "BUDGET_ALERT":
-      return "Budget Alert";
+    case "BUDGET_NEAR_LIMIT":
+      return "Budget Near Limit";
 
-    case "GOAL_REACHED":
-      return "Goal Reached";
+    case "BUDGET_EXCEEDED":
+      return "Budget Exceeded";
 
     case "GOAL_REMINDER":
       return "Goal Reminder";
@@ -494,12 +423,6 @@ function formatNotificationType(type) {
     default:
       return type;
   }
-}
-
-// Drop down
-
-function toggleNotifDropdown() {
-  document.getElementById("notifDropdown")?.classList.toggle("is-open");
 }
 
 // Error state
@@ -547,14 +470,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   loaderAdvance(); // → 100%
   loaderHide();
-
-  document.addEventListener("click", (e) => {
-    const wrapper = document.getElementById("notifWrapper");
-
-    if (wrapper && !wrapper.contains(e.target)) {
-      document.getElementById("notifDropdown")?.classList.remove("is-open");
-    }
-  });
 
   // Navbar search
   document.addEventListener("app-search", (e) => {

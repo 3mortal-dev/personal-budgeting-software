@@ -24,7 +24,7 @@
 
   const NOTIF_API = {
     ALL: "/api/notifications/all",
-    MARK_READ: (id) => `/notifications/${id}/markRead`,
+    MARK_READ: (id) => `/api/notifications/${id}/markRead`,
   };
 
 
@@ -140,11 +140,10 @@
 
   function typeIcon(type) {
     switch (type) {
-      case "GOAL_REACHED":
-        return { cls: "notif-icon--goal", icon: "fa-bullseye" };
       case "GOAL_REMINDER":
-        return { cls: "notif-icon--goal", icon: "fa-flag" };
-      case "BUDGET_ALERT":
+        return { cls: "notif-icon--goal", icon: "fa-bullseye" };
+      case "BUDGET_NEAR_LIMIT":
+      case "BUDGET_EXCEEDED":
         return { cls: "notif-icon--budget", icon: "fa-chart-pie" };
       default:
         return { cls: "notif-icon--info", icon: "fa-circle-info" };
@@ -153,10 +152,10 @@
 
   function typeLabel(type) {
     switch (type) {
-      case "BUDGET_ALERT":
-        return "Budget Alert";
-      case "GOAL_REACHED":
-        return "Goal Reached";
+      case "BUDGET_NEAR_LIMIT":
+        return "Budget Near Limit";
+      case "BUDGET_EXCEEDED":
+        return "Budget Exceeded";
       case "GOAL_REMINDER":
         return "Goal Reminder";
       default:
@@ -172,7 +171,7 @@
     if (filter === "goals")
       return all.filter((n) => n.type?.startsWith("GOAL"));
     if (filter === "budget")
-      return all.filter((n) => n.type === "BUDGET_ALERT");
+      return all.filter((n) => n.type === "BUDGET_NEAR_LIMIT" || n.type === "BUDGET_EXCEEDED");
     return all;
   }
 
@@ -236,8 +235,8 @@
       if (!res.ok) return;
       notifState.all = await res.json();
       renderNotifList();
-    } catch {
-      /* badge stays hidden */
+    } catch (e) {
+      console.error("[navbar] fetchNotifications failed:", e);
     }
   }
 
@@ -250,7 +249,9 @@
       const n = notifState.all.find((x) => x.id === id);
       if (n) n.read = true;
       renderNotifList();
-    } catch {}
+    } catch (e) {
+      console.error("[navbar] markOneRead failed:", e);
+    }
   }
 
   async function markAllRead() {

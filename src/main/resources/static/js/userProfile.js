@@ -169,7 +169,7 @@ async function loadNotifications() {
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .map((n) => ({
         id: n.id,
-        type: n.type?.includes("GOAL") ? "goal" : "transaction",
+        type: n.type === "GOAL_REMINDER" ? "goal" : "budget",
         title: formatNotificationType(n.type),
         message: n.message,
         time: formatRelativeTime(n.createdAt),
@@ -314,10 +314,10 @@ function showToast(message, type = "success") {
 
 function formatNotificationType(type) {
   switch (type) {
-    case "BUDGET_ALERT":
-      return "Budget Alert";
-    case "GOAL_REACHED":
-      return "Goal Reached 🎯";
+    case "BUDGET_NEAR_LIMIT":
+      return "Budget Near Limit";
+    case "BUDGET_EXCEEDED":
+      return "Budget Exceeded";
     case "GOAL_REMINDER":
       return "Goal Reminder";
     default:

@@ -5,9 +5,8 @@ const API = {
   PROFILE: "/profile",
   TRANSACTIONS: "/transactions",
   CATEGORIES: "/categories",
-  NOTIFICATIONS: "/notifications",
-  MARK_ALL_READ: "/notifications/mark-all-read",
-  MARK_READ: (id) => `/notifications/${id}/read`,
+  NOTIFICATIONS: "/notifications/all",
+  MARK_READ: (id) => `/notifications/${id}/markRead`,
   LOGOUT: "/auth/logout",
 };
 
@@ -320,24 +319,42 @@ function filterTransactions() {
 
 async function addTransaction(event) {
   event.preventDefault();
-  btnStartLoading("addTransactionBtn");
 
   const type = document.getElementById("transactionType").value;
+  const amount = parseFloat(document.getElementById("transactionAmount").value);
+  const date = document.getElementById("transactionDate").value;
+  const categoryId =
+    type === "INCOME"
+      ? null
+      : parseInt(document.getElementById("transactionCategory").value);
+  const source =
+    type === "INCOME"
+      ? document.getElementById("transactionSource").value
+      : null;
+  const description = document.getElementById("transactionDescription").value;
 
-  const formData = {
-    type: type,
-    amount: parseFloat(document.getElementById("transactionAmount").value),
-    date: document.getElementById("transactionDate").value,
-    categoryId:
-      type === "INCOME"
-        ? null
-        : parseInt(document.getElementById("transactionCategory").value),
-    source:
-      type === "INCOME"
-        ? document.getElementById("transactionSource").value
-        : null,
-    description: document.getElementById("transactionDescription").value,
-  };
+  document.querySelectorAll("#addTransactionForm .field-error").forEach((el) => (el.textContent = ""));
+  let hasError = false;
+  if (!amount || isNaN(amount) || amount <= 0) {
+    const err = document.getElementById("amountErr");
+    if (err) err.textContent = "Enter an amount greater than $0.";
+    hasError = true;
+  }
+  if (!date) {
+    const err = document.getElementById("dateErr");
+    if (err) err.textContent = "Date is required.";
+    hasError = true;
+  }
+  if (type === "EXPENSE" && (!categoryId || isNaN(categoryId))) {
+    const err = document.getElementById("categoryErr");
+    if (err) err.textContent = "Select a category.";
+    hasError = true;
+  }
+  if (hasError) return;
+
+  btnStartLoading("addTransactionBtn");
+
+  const formData = { type, amount, date, categoryId, source, description };
 
   const result = await apiFetch(API.TRANSACTIONS, {
     method: "POST",
@@ -519,11 +536,14 @@ function toggleNotifications() {
 }
 
 async function markAllRead() {
-  await apiFetch(API.MARK_ALL_READ, { method: "PUT" });
-  state.notifications.forEach((n) => (n.read = true));
+  const unread = state.notifications.filter((n) => !n.read);
+  await Promise.all(
+    unread.map((n) =>
+      apiFetch(API.MARK_READ(n.id), { method: "PUT" }),
+    ),
+  );
+  unread.forEach((n) => (n.read = true));
   updateNotificationBadge();
-  // Reload notifications to update UI
-  await loadNotifications();
 }
 
 // Render UI

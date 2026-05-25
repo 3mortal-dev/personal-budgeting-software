@@ -5,7 +5,7 @@ const API = {
   CATEGORIES: "/api/categories",
   BUDGETS: "/api/budgets",
   NOTIFICATIONS: "/api/notifications/all",
-  MARK_READ: (id) => `/api/notifications/${id}/read`,
+  MARK_READ: (id) => `/api/notifications/${id}/markRead`,
 };
 
 const state = {
@@ -619,27 +619,12 @@ function renderNotificationList() {
       icon: "🚨",
       cls: "notif--error",
     },
-    BUDGET_WARNING: {
-      label: "Budget Warning",
+    BUDGET_NEAR_LIMIT: {
+      label: "Budget Near Limit",
       icon: "⚠️",
       cls: "notif--warning",
     },
-    HIGH_SPENDING: {
-      label: "High Spending",
-      icon: "📈",
-      cls: "notif--warning",
-    },
-    SPENDING_UP: {
-      label: "Spending Increase",
-      icon: "📊",
-      cls: "notif--warning",
-    },
-    GOAL_REACHED: { label: "Goal Reached", icon: "🎯", cls: "notif--success" },
-    TRANSACTION_ADDED: {
-      label: "Transaction Added",
-      icon: "💳",
-      cls: "notif--info",
-    },
+    GOAL_REMINDER: { label: "Goal Reminder", icon: "🎯", cls: "notif--success" },
     INFO: { label: "Info", icon: "ℹ️", cls: "notif--info" },
   };
   list.innerHTML = state.notifications
