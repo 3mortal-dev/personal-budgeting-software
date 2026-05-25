@@ -1,9 +1,6 @@
-// Budget - login page
-
 (function () {
     'use strict';
 
-    /* ── DOM refs ── */
     const form = document.getElementById('loginForm');
     const emailInput = document.getElementById('email');
     const pwInput = document.getElementById('password');
@@ -14,16 +11,14 @@
     const eyeOpen = togglePwBtn.querySelector('.eye-open');
     const eyeClosed = togglePwBtn.querySelector('.eye-closed');
 
-    /* ── Helpers ── */
-
     function showError(inputEl, errorEl, message) {
-        inputEl.closest('.input-wrap').classList.add('error');
+        inputEl.closest('.field-input-wrap').classList.add('error');
         errorEl.textContent = message;
         errorEl.classList.add('visible');
     }
 
     function clearError(inputEl, errorEl) {
-        inputEl.closest('.input-wrap').classList.remove('error');
+        inputEl.closest('.field-input-wrap').classList.remove('error');
         errorEl.textContent = '';
         errorEl.classList.remove('visible');
     }
@@ -31,8 +26,6 @@
     function isValidEmail(val) {
         return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val.trim());
     }
-
-    /* ── Live validation (on blur) ── */
 
     emailInput.addEventListener('blur', function () {
         if (!this.value.trim()) {
@@ -62,8 +55,6 @@
         if (this.value.length >= 6) clearError(this, pwError);
     });
 
-    /* ── Toggle password visibility ── */
-
     togglePwBtn.addEventListener('click', function () {
         const isPassword = pwInput.type === 'password';
         pwInput.type = isPassword ? 'text' : 'password';
@@ -71,14 +62,11 @@
         eyeClosed.classList.toggle('hidden', !isPassword);
     });
 
-    /* ── Form submit ── */
-
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
 
         let valid = true;
 
-        /* Validate email */
         if (!emailInput.value.trim()) {
             showError(emailInput, emailError, 'Email address is required.');
             valid = false;
@@ -89,7 +77,6 @@
             clearError(emailInput, emailError);
         }
 
-        /* Validate password */
         if (!pwInput.value) {
             showError(pwInput, pwError, 'Password is required.');
             valid = false;
@@ -102,58 +89,33 @@
 
         if (!valid) return;
 
-        /* Simulate async login */
         submitBtn.classList.add('loading');
         submitBtn.disabled = true;
+
         try {
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: emailInput.value.trim(),
-                    password: pwInput.value
-                })
-
+                    password: pwInput.value,
+                }),
             });
-
-            // setTimeout(function () {
-            //   submitBtn.classList.remove('loading');
-            //   submitBtn.disabled = false;
-
-            //   /* ── Replace with real auth logic ── */
-            //   alert('Login successful! Redirecting to dashboard…');
-            // }, 1800);
 
             if (response.ok) {
                 window.location.href = '/dashboard';
-
             } else if (response.status === 401 || response.status === 403) {
                 showError(emailInput, emailError, 'Invalid email or password.');
                 showError(pwInput, pwError, 'Invalid email or password.');
-
             } else {
                 showError(pwInput, pwError, 'Something went wrong. Please try again.');
             }
-
         } catch (err) {
             console.error(err);
             showError(pwInput, pwError, 'Server error. Please try again.');
-
         } finally {
             submitBtn.classList.remove('loading');
             submitBtn.disabled = false;
         }
     });
-
-    /* Slide dots (decorative cycling) */
-
-    const dots = document.querySelectorAll('.dot');
-    let current = 0;
-
-    setInterval(function () {
-        dots[current].classList.remove('active');
-        current = (current + 1) % dots.length;
-        dots[current].classList.add('active');
-    }, 3000);
-
 })();

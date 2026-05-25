@@ -1,0 +1,64 @@
+/* ── BG ORBS ── */
+.bg-orbs {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: .18;
+}
+
+.orb1 {
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(circle, #1db954, #17a348);
+  top: -120px;
+  left: -100px;
+  animation: drift1 12s ease-in-out infinite alternate;
+}
+
+.orb2 {
+  width: 440px;
+  height: 440px;
+  background: radial-gradient(circle, #10b981, #1db954);
+  bottom: -100px;
+  right: -80px;
+  animation: drift2 14s ease-in-out infinite alternate;
+}
+
+.orb3 {
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, #1db954, #059669);
+  top: 50%;
+  left: 50%;
+  animation: drift3 16s ease-in-out infinite alternate;
+}
+
+@keyframes drift1 {
+  to { transform: translate(60px, 40px); }
+}
+
+@keyframes drift2 {
+  to { transform: translate(-50px, -30px); }
+}
+
+@keyframes drift3 {
+  to { transform: translate(-40px, 60px); }
+}
+
+/* ── DARK MODE ── */
+html.dark .orb1 {
+  background: radial-gradient(circle, #34d399, #10b981);
+}
+html.dark .orb2 {
+  background: radial-gradient(circle, #10b981, #34d399);
+}
+html.dark .orb3 {
+  background: radial-gradient(circle, #34d399, #059669);
+}
