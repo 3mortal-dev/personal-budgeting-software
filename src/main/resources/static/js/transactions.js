@@ -55,6 +55,7 @@ const state = {
     categoryId: "all",
     dateFrom: "",
     dateTo: "",
+    searchQuery: "",
   },
 };
 
@@ -132,6 +133,12 @@ function setupEventListeners() {
     .addEventListener("change", (e) => {
       updateFormFieldsVisibility(e.target.value, "edit");
     });
+
+  // Navbar search
+  document.addEventListener("app-search", (e) => {
+    state.currentFilter.searchQuery = e.detail.query;
+    renderTransactions();
+  });
 }
 
 // Show/hide category and source based on transaction type
@@ -257,7 +264,7 @@ function renderTransactions() {
 
 function filterTransactionsData() {
   return state.transactions.filter((transaction) => {
-    const { type, categoryId, dateFrom, dateTo } = state.currentFilter;
+    const { type, categoryId, dateFrom, dateTo, searchQuery } = state.currentFilter;
 
     // Type filter
     if (type !== "all" && transaction.type.toLowerCase() !== type) {
@@ -277,7 +284,25 @@ function filterTransactionsData() {
     if (dateFrom && transactionDate < new Date(dateFrom)) {
       return false;
     }
-    return !(dateTo && transactionDate > new Date(dateTo));
+    if (dateTo && transactionDate > new Date(dateTo)) {
+      return false;
+    }
+
+    // Text search
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const matchesDescription = (transaction.description || "").toLowerCase().includes(q);
+      const matchesSource = (transaction.source || "").toLowerCase().includes(q);
+      const matchesType = transaction.type.toLowerCase().includes(q);
+      const category = state.categories.find((c) => c.id === transaction.categoryId);
+      const matchesCategory = (category?.name || "").toLowerCase().includes(q);
+      const matchesAmount = String(transaction.amount).includes(q);
+      if (!matchesDescription && !matchesSource && !matchesType && !matchesCategory && !matchesAmount) {
+        return false;
+      }
+    }
+
+    return true;
   });
 }
 

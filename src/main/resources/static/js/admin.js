@@ -317,6 +317,14 @@ document.addEventListener('DOMContentLoaded', () => {
         renderUsers();
     });
 
+    // Navbar search - keep synced with local userSearch input
+    document.addEventListener('app-search', (e) => {
+        state.query = e.detail.query;
+        const localSearch = document.getElementById('userSearch');
+        if (localSearch) localSearch.value = e.detail.query;
+        renderUsers();
+    });
+
     document.getElementById('usersTableBody')?.addEventListener('change', event => {
         if (!event.target.matches('.role-select')) return;
         updateRole(Number(event.target.dataset.userId), event.target.value);

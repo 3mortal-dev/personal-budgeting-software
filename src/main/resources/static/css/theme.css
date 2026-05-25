@@ -1,0 +1,562 @@
+/* ═══════════════════════════════════════════════════════
+   DARK MODE — Theme Overrides
+   ═══════════════════════════════════════════════════════ */
+
+/* ── CSS Variable Palette ── */
+:root.dark {
+  --bg: #0a0e1a;
+  --bg-page: #0a0e1a;
+  --body-bg: #0a0e1a;
+  --sidebar-bg: #0b1120;
+  --surface: #111827;
+  --card-bg: #1a2332;
+  --white: #1a2332;
+  --gray-soft: #1a2332;
+  --navy: #070d15;
+  --navy-mid: #0f1b2d;
+
+  --text: #e8edf4;
+  --text-primary: #e8edf4;
+  --text-dark: #e8edf4;
+  --text2: #94a3b8;
+  --text-secondary: #94a3b8;
+  --text-body: #94a3b8;
+  --text-gray: #94a3b8;
+  --text-muted: #64748b;
+  --text3: #64748b;
+  --text-muted-side: #64748b;
+
+  --green: #34d399;
+  --green-dark: #10b981;
+  --green-light: #042f2e;
+  --green-mid: #0f3a3a;
+  --brand: #34d399;
+  --brand-dark: #10b981;
+  --brand-light: #042f2e;
+  --brand-glow: rgba(52, 211, 153, 0.08);
+  --green-primary: #10b981;
+  --accent-green: #34d399;
+  --green-btn: #10b981;
+  --green-btn-h: #059669;
+
+  --border: #1e293b;
+  --border-color: #1e293b;
+
+  --red: #f87171;
+  --error-red: #f87171;
+  --red-light: #2d1515;
+  --danger: #f87171;
+  --orange: #fbbf24;
+  --warning: #fbbf24;
+  --blue: #60a5fa;
+  --blue-mid: #1e3a5f;
+  --blue-card: #1e3a5f;
+  --primary-blue: #60a5fa;
+  --secondary-blue: #3b82f6;
+  --info: #60a5fa;
+
+  --gray-text: #8a9aaa;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.6);
+  --shadow-brand: 0 8px 30px rgba(52, 211, 153, 0.1);
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.4);
+  --shadow-hover: 0 6px 24px rgba(0, 0, 0, 0.5);
+}
+
+/* ═══════════════════ NAVBAR ════════════════════════════ */
+.dark .topbar {
+  background: var(--surface);
+}
+.dark .topbar__name {
+  color: var(--text);
+}
+.dark .sidebar__logo-text {
+  color: var(--text);
+}
+.dark .sidebar__logo-icon {
+  box-shadow: 0 4px 16px rgba(52, 211, 153, 0.3);
+}
+.dark .notif-dropdown {
+  background: var(--card-bg);
+}
+.dark .notif-item {
+  border-bottom-color: var(--border);
+}
+.dark .notif-item:hover {
+  background: var(--bg);
+}
+.dark .notif-item--unread {
+  background: var(--green-light);
+}
+.dark .notif-item--unread:hover {
+  background: var(--green-mid);
+}
+.dark .notif-icon--goal {
+  background: var(--green-light);
+  color: var(--green);
+}
+.dark .notif-icon--budget {
+  background: var(--blue-mid);
+  color: var(--blue);
+}
+.dark .notif-icon--warn {
+  background: #422006;
+  color: var(--orange);
+}
+.dark .notif-icon--info {
+  background: var(--surface);
+  color: var(--text-muted);
+}
+.dark .sidebar-backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+/* ═══════════════════ MODALS ════════════════════════════ */
+.dark .modal-overlay,
+.dark .tx-modal,
+.dark .admin-modal-overlay {
+  background: rgba(0, 0, 0, 0.6);
+}
+.dark .modal,
+.dark .modal-box,
+.dark .tx-modal-content,
+.dark .admin-modal {
+  background: var(--card-bg);
+}
+.dark .modal-close {
+  background: var(--surface);
+}
+.dark .modal-close:hover {
+  background: var(--red-light);
+}
+.dark .field-input-wrap {
+  background: var(--surface);
+}
+.dark .field-input-wrap:focus-within {
+  box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.12);
+}
+
+/* ═══════════════════ FORMS ═════════════════════════════ */
+.dark .form-control {
+  background: var(--surface);
+  color: var(--text);
+}
+.dark .form-control:focus {
+  box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.12);
+}
+.dark .form-control.error {
+  box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.12);
+}
+.dark .filter-group select,
+.dark .role-select {
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* ═══════════════════ BUTTONS ═══════════════════════════ */
+.dark .btn-cancel {
+  background: var(--surface);
+}
+.dark .btn-cancel:hover {
+  border-color: var(--text-muted);
+}
+.dark .btn-add,
+.dark .btn-submit,
+.dark .btn-save,
+.dark .btn-primary,
+.dark .btn-confirm-del,
+.dark .admin-refresh,
+.dark .admin-add-category,
+.dark .admin-btn--primary,
+.dark .filter-tab.active,
+.dark .filter-btn.active,
+.dark .category-add-btn {
+  color: #fff;
+}
+.dark .bc-btn.danger:hover,
+.dark .btn-cat-action.delete:hover,
+.dark .logout:hover {
+  background: var(--red-light);
+}
+.dark .btn-confirm-del:hover {
+  background: #b91c1c;
+}
+.dark .btn-danger:hover {
+  background: #b91c1c;
+}
+
+/* ═══════════════════ STAT CARDS ════════════════════════ */
+.dark .stat-icon--blue {
+  background: var(--blue-mid);
+}
+.dark .stat-icon--blue svg {
+  stroke: var(--blue) !important;
+}
+.dark .stat-icon--yellow {
+  background: #422006;
+}
+.dark .stat-icon--yellow svg {
+  stroke: var(--orange) !important;
+}
+.dark .stat-icon--green {
+  background: var(--green-light);
+}
+.dark .stat-icon--green svg {
+  stroke: var(--green) !important;
+}
+.dark .badge-orange {
+  background: #422006;
+  color: var(--orange);
+}
+
+/* ═══════════════════ BALANCE CARD ══════════════════════ */
+.dark .balance-card {
+  background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 60%, #1d4ed8 100%);
+}
+.dark .balance-card .metric-bar {
+  background: rgba(255, 255, 255, 0.15);
+}
+.dark .balance-card .metric + .metric {
+  border-left-color: rgba(255, 255, 255, 0.1);
+}
+.dark .dot-green {
+  background: var(--green);
+}
+.dark .dot-red {
+  background: var(--red);
+}
+.dark .metric-fill--income {
+  background: var(--green);
+}
+.dark .metric-fill--expense {
+  background: var(--red);
+}
+
+/* ═══════════════════ STATUS BADGES ═════════════════════ */
+.dark .status--EXPIRED {
+  background: var(--surface);
+}
+.dark .status--EXCEEDED {
+  background: var(--red-light);
+}
+.dark .status--NEAR_LIMIT {
+  background: #422006;
+  color: var(--orange);
+}
+.dark .badge-expense {
+  background: var(--red-light);
+  color: var(--red);
+}
+.dark .badge-income {
+  background: var(--green-light);
+  color: var(--green);
+}
+
+/* ═══════════════════ ERROR / ALERT STATES ══════════════ */
+.dark .error-msg,
+.dark .alert-card,
+.dark .form-error-banner {
+  background: var(--red-light);
+  border-color: #4a1a1a;
+  color: var(--red);
+}
+.dark .alert-icon {
+  background: #2d1515;
+}
+.dark .alert-icon svg {
+  stroke: var(--red);
+}
+.dark .alert-title {
+  color: var(--red);
+}
+.dark .alert-msg {
+  color: #fca5a5;
+}
+.dark .field-error {
+  color: var(--red);
+}
+
+/* ═══════════════════ TOASTS ═════════════════════════════ */
+.dark .toast,
+.dark #toast {
+  color: #fff;
+}
+.dark .toast--info {
+  border-left-color: var(--blue);
+}
+.dark .toast--info .toast__icon {
+  color: var(--blue);
+}
+
+/* ═══════════════════ NOTIFICATION COMPONENTS ════════════ */
+.dark .notif-item.unread {
+  background: var(--green-light);
+}
+.dark .notif-item.unread:hover {
+  background: var(--green-mid);
+}
+.dark .notif-page-item.unread {
+  background: var(--green-light);
+}
+.dark .notif-page-item.unread:hover {
+  background: var(--green-mid);
+}
+.dark .notif-icon--alert {
+  background: var(--red-light);
+  color: var(--red);
+}
+.dark .notif-icon--info-page {
+  background: var(--surface);
+}
+.dark .notif-icon--warning {
+  background: #422006;
+  color: var(--orange);
+}
+.dark .bsi--blue {
+  background: #0f1b2d;
+}
+.dark .bsi--orange {
+  background: #422006;
+}
+.dark .bsi--red {
+  background: #2d1515;
+}
+.dark .alert-btn.active {
+  background: #0f1b2d;
+}
+
+/* ═══════════════════ TABLE ════════════════════════════════ */
+.dark table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* ═══════════════════ ADMIN ════════════════════════════════ */
+.dark .admin-btn {
+  background: var(--surface);
+}
+.dark .alert-pill--off {
+  background: var(--surface);
+}
+
+/* ═══════════════════ SKELETON / LOADING ══════════════════ */
+.dark .skeleton-light {
+  background: linear-gradient(90deg, #1a2332 25%, #1e293b 50%, #1a2332 75%) !important;
+}
+.dark .skeleton-greeting {
+  background: linear-gradient(90deg, #1a2332 25%, #1e293b 50%, #1a2332 75%) !important;
+}
+.dark .chart-card.is-loading {
+  background: linear-gradient(90deg, #1a2332 25%, #1e293b 50%, #1a2332 75%);
+}
+
+/* ═══════════════════ GOALS ════════════════════════════════ */
+.dark .page-title {
+  color:var(--text-primary);
+}
+
+.dark .goal-card__icon-wrap--blue {
+  background: #0f1b2d;
+  color: var(--blue);
+}
+.dark .goal-card__icon-wrap--orange {
+  background: #422006;
+  color: var(--orange);
+}
+.dark .goal-card__icon-wrap--purple {
+  background: #1f0b2e;
+  color: #a78bfa;
+}
+.dark .goal-card__icon-wrap--red {
+  background: #2d1515;
+  color: var(--red);
+}
+.dark .goal-card__icon-wrap--yellow {
+  background: #422006;
+  color: var(--orange);
+}
+.dark .goal-card__icon-wrap--pink {
+  background: #2d1515;
+  color: #f472b6;
+}
+.dark .goal-card__icon-wrap--gray {
+  background: var(--surface);
+  color: var(--text-muted);
+}
+.dark .btn-icon--progress {
+  background: var(--green-light);
+  color: var(--green);
+}
+.dark .btn-icon--progress:hover {
+  background: var(--green-mid);
+  color: var(--green-dark);
+}
+.dark .modal__title {
+  color: var(--text);
+}
+.dark .summary-card__value {
+  color: var(--text);
+}
+.dark .goal-card__name {
+  color: var(--text);
+}
+.dark .goal-card__saved {
+  color: var(--text);
+}
+.dark .form-row input:focus {
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.12);
+}
+
+/* ═══════════════════ USER PROFILE ════════════════════════════ */
+.dark .notif-panel {
+  background: var(--card-bg);
+}
+.dark .notif-btn {
+  background: var(--surface);
+}
+.dark .notif-dot {
+  border-color: var(--card-bg);
+}
+.dark .currency-trigger,
+.dark .currency-dropdown {
+  background: var(--surface);
+}
+.dark .currency-trigger:hover,
+.dark .currency-trigger.open {
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.15);
+}
+.dark .notif-icon-goal {
+  background: var(--green-light);
+}
+.dark .notif-icon-tx {
+  background: var(--blue-mid);
+  color: var(--blue);
+}
+.dark .avatar-btn {
+  background: var(--blue-mid);
+}
+.dark .avatar-edit {
+  border-color: var(--bg);
+}
+.dark .avatar-edit svg {
+  color: var(--text);
+}
+.dark .avatar-main {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+.dark .toggle-thumb {
+  background: var(--text);
+}
+.dark .setting-row[style*="background"],
+.dark .setting-row[style*="background-color"] {
+  background: var(--surface) !important;
+}
+
+/* ═══════════════════ REPORTS ════════════════════════════ */
+.dark .bw-toast {
+  background: #1a1f2e;
+  color: #f1f5f9;
+}
+
+/* ═══════════════════ INDEX PAGE ════════════════════════════ */
+.dark .hero__title {
+  color: var(--text);
+}
+.dark .btn--primary,
+.dark .img-btn--primary {
+  color: #fff;
+}
+.dark .btn--outline {
+  border-color: var(--text);
+  color: var(--text);
+}
+.dark .btn--outline:hover {
+  background: var(--text);
+  color: var(--bg);
+}
+.dark .img-btn--ghost {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.dark .img-btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+.dark .scroll-message {
+  background: rgba(15, 23, 42, 0.92);
+}
+
+/* ═══════════════════ REGISTER PAGE ════════════════════════ */
+.dark .container {
+  background: var(--surface);
+}
+
+/* ═══════════════════ LOGIN PAGE ═══════════════════════════ */
+.dark .form-header h2 {
+  color: var(--text);
+}
+.dark .input-wrap input {
+  background: var(--surface);
+  color: var(--text);
+}
+.dark .input-wrap input:focus {
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.14);
+}
+.dark .input-wrap.error input {
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.12);
+}
+
+/* ═══════════════════ REGISTER PAGE ════════════════════════ */
+.dark .input-wrapper input {
+  background: var(--surface);
+  color: var(--text);
+}
+.dark .input-wrapper input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.14);
+}
+.dark .input-wrapper input.invalid,
+.dark .input-wrapper input.mismatch {
+  background-color: var(--red-light);
+}
+.dark .toggle-password {
+  color: var(--text-muted);
+}
+.dark .btn-submit {
+  background: var(--surface);
+  color: var(--text-muted);
+}
+.dark .btn-submit.active {
+  background: var(--blue-mid) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 15px rgba(96, 165, 250, 0.3);
+}
+.dark .btn-submit.active:hover {
+  background: var(--blue-card) !important;
+}
+
+/* ═══════════════════ AUTOFILL OVERRIDE ═══════════════════ */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--surface) inset !important;
+  -webkit-text-fill-color: var(--text) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ═══════════════════ INPUT PLACEHOLDER ════════════════════ */
+.dark ::-webkit-input-placeholder {
+  color: var(--text-muted);
+}
+.dark ::-moz-placeholder {
+  color: var(--text-muted);
+}
+.dark :-ms-input-placeholder {
+  color: var(--text-muted);
+}
+.dark ::placeholder {
+  color: var(--text-muted);
+}
+

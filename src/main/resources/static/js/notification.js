@@ -20,6 +20,7 @@ const API = {
 const state = {
   notifications: [],
   activeFilter: "all",
+  searchQuery: "",
 };
 
 // Fetch Helper
@@ -132,15 +133,23 @@ function renderEverything() {
 // Filtering
 
 function getFilteredNotifications() {
-  if (state.activeFilter === "all") {
-    return state.notifications;
-  }
+  let filtered = state.notifications;
 
   if (state.activeFilter === "unread") {
-    return state.notifications.filter((n) => !n.read);
+    filtered = filtered.filter((n) => !n.read);
+  } else if (state.activeFilter !== "all") {
+    filtered = filtered.filter((n) => n.type === state.activeFilter);
   }
 
-  return state.notifications.filter((n) => n.type === state.activeFilter);
+  if (state.searchQuery) {
+    const q = state.searchQuery.toLowerCase();
+    filtered = filtered.filter((n) => {
+      return (n.message || "").toLowerCase().includes(q)
+        || (n.type || "").toLowerCase().includes(q);
+    });
+  }
+
+  return filtered;
 }
 
 function setFilter(filter) {
@@ -545,5 +554,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (wrapper && !wrapper.contains(e.target)) {
       document.getElementById("notifDropdown")?.classList.remove("is-open");
     }
+  });
+
+  // Navbar search
+  document.addEventListener("app-search", (e) => {
+    state.searchQuery = e.detail.query;
+    renderEverything();
   });
 });

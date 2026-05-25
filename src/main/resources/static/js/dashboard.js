@@ -12,6 +12,7 @@ const state = {
   dashboard: null,
   notifications: [],
   categories: [],
+  searchQuery: "",
 };
 
 async function apiFetch(endpoint, options = {}) {
@@ -394,8 +395,26 @@ function renderDashboard() {
       : "",
   );
 
-  renderTransactions(data.recentTransactions || []);
-  renderBudgets(data.activeBudgetItems || []);
+  let transactions = data.recentTransactions || [];
+  let budgets = data.activeBudgetItems || [];
+
+  if (state.searchQuery) {
+    const q = state.searchQuery.toLowerCase();
+    transactions = transactions.filter((tx) => {
+      const label = tx.source || tx.categoryName || tx.description || "";
+      return label.toLowerCase().includes(q)
+        || (tx.type || "").toLowerCase().includes(q)
+        || String(tx.amount).includes(q);
+    });
+    budgets = budgets.filter((b) => {
+      const cat = state.categories.find((c) => c.id === b.categoryId);
+      const name = b.categoryName || cat?.name || "";
+      return name.toLowerCase().includes(q);
+    });
+  }
+
+  renderTransactions(transactions);
+  renderBudgets(budgets);
   renderSpendingAlert(data.monthlyIncome, data.monthlyExpense);
   renderMetricBars(data.monthlyIncome, data.monthlyExpense);
   renderTxBadge(Number(data.numberOfTransactions || 0));
@@ -1116,5 +1135,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const wrapper = document.getElementById("notifWrapper");
     if (wrapper && !wrapper.contains(event.target)) closeNotifications();
   });
-  console.log(state.budgets);
+
+  // Navbar search
+  document.addEventListener("app-search", (e) => {
+    state.searchQuery = e.detail.query;
+    renderDashboard();
+  });
 });

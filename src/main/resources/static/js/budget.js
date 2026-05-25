@@ -44,6 +44,7 @@ const state = {
   profile: null,
   activeFilter: "all",
   pendingDelete: null,
+  searchQuery: "",
 };
 
 
@@ -373,10 +374,20 @@ function setFilter(filter) {
 }
 
 function applyFilter() {
-  const filtered =
+  let filtered =
     state.activeFilter === "all"
       ? state.budgets
       : state.budgets.filter((b) => deriveStatus(b) === state.activeFilter);
+
+  if (state.searchQuery) {
+    const q = state.searchQuery.toLowerCase();
+    filtered = filtered.filter((b) => {
+      const cat = state.categories.find((c) => c.id === b.categoryId);
+      const catName = b.categoryName || cat?.name || "";
+      return catName.toLowerCase().includes(q);
+    });
+  }
+
   renderGrid(filtered);
 }
 
@@ -859,5 +870,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     el.addEventListener("input", () => {
       if (el.classList.contains("error")) clearFieldError(el);
     });
+  });
+
+  // Navbar search
+  document.addEventListener("app-search", (e) => {
+    state.searchQuery = e.detail.query;
+    renderAll();
   });
 });

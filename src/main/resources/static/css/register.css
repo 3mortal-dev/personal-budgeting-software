@@ -16,7 +16,7 @@
 }
 
 body {
-    background-color: #f8fafc;
+    background-color: var(--bg-page, #f8fafc);
     display: flex;
     justify-content: center;
     align-items: center;

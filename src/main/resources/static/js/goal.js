@@ -172,7 +172,6 @@ const notifListEl = document.getElementById("notifList");
 const markAllReadBtn = document.getElementById("markAllReadBtn");
 
 const toast = document.getElementById("toast");
-const searchInput = document.getElementById("searchInput");
 
 // INIT
 
@@ -247,7 +246,7 @@ function attachEventListeners() {
     if (e.target === deleteOverlay) closeDeleteModal();
   });
 
-  searchInput?.addEventListener("input", handleSearch);
+  getSearchInput()?.addEventListener("input", handleSearch);
 
   bellBtn?.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -858,8 +857,14 @@ function closeDeleteModal() {
 window.deleteGoal = openDeleteModal;
 
 // Search
+function getSearchInput() {
+  return document.getElementById("searchInput");
+}
+
 function handleSearch() {
-  const q = searchInput.value.toLowerCase().trim();
+  const input = getSearchInput();
+  if (!input) return;
+  const q = input.value.toLowerCase().trim();
   if (!q) {
     renderGoals(goals);
     return;

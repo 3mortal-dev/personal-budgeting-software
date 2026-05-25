@@ -3,6 +3,14 @@
 
 (function () {
 
+  // Apply saved theme before anything renders
+  (function () {
+    const theme = localStorage.getItem("theme");
+    if (theme === "dark" || (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      document.documentElement.classList.add("dark");
+    }
+  })();
+
   const NAV_LINKS = [
     { href: "/dashboard", icon: "fa-house", label: "Home" },
     { href: "/transactions", icon: "fa-receipt", label: "Transactions" },
@@ -71,6 +79,10 @@
             <i class="fa-solid fa-magnifying-glass"></i>
             <input type="text" placeholder="Search…" id="searchInput"/>
           </div>
+
+          <button class="topbar__theme-toggle" id="themeToggle" aria-label="Toggle theme">
+            <i class="fa-regular fa-moon"></i>
+          </button>
 
           <div class="notif-wrap" id="notifWrap">
             <button id="bellBtn" class="topbar__notif" aria-label="Notifications">
@@ -325,6 +337,46 @@
     });
   }
 
+  // Theme toggle
+  function setupThemeToggle() {
+    const toggle = document.getElementById("themeToggle");
+    if (!toggle) return;
+
+    const icon = toggle.querySelector("i");
+    const isDark = document.documentElement.classList.contains("dark");
+    icon.className = isDark ? "fa-solid fa-sun" : "fa-regular fa-moon";
+
+    toggle.addEventListener("click", () => {
+      const html = document.documentElement;
+      const nowDark = !html.classList.contains("dark");
+      html.classList.toggle("dark", nowDark);
+      icon.className = nowDark ? "fa-solid fa-sun" : "fa-regular fa-moon";
+      localStorage.setItem("theme", nowDark ? "dark" : "light");
+    });
+  }
+
+  // Search - dispatch custom event for pages to handle
+  function setupSearch() {
+    const input = document.getElementById("searchInput");
+    if (!input) return;
+    let debounceTimer;
+    function dispatch() {
+      const query = input.value.trim();
+      document.dispatchEvent(new CustomEvent("app-search", { detail: { query } }));
+    }
+    input.addEventListener("input", () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(dispatch, 200);
+    });
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        clearTimeout(debounceTimer);
+        dispatch();
+      }
+    });
+  }
+
   // Notofication
   function setupNotifDropdown() {
     const bell = document.getElementById("bellBtn");
@@ -383,6 +435,8 @@
     fetchNotifications();
     setupHamburger();
     setupNotifDropdown();
+    setupSearch();
+    setupThemeToggle();
   }
 
   if (document.readyState === "loading") {
