@@ -15,4 +15,5 @@ public class DashboardResponse {
     private List<BudgetResponse> activeBudgetItems;
     private Integer activeGoals;
     private Integer numberOfTransactions;
+    private String currency;
 }

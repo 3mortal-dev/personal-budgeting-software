@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.Map;
+
 
 
 @RestController
@@ -69,5 +71,25 @@ public class UserProfileController {
         long userId = userService.getUserId(userDetails);
         userService.updateNotificationSettings(request, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Updates the preferred display currency for the authenticated user.
+     *
+     * @param userDetails the authenticated principal
+     * @param body a map containing the new "currency" code
+     * @return the updated profile
+     */
+    @PutMapping("/currency")
+    public ResponseEntity<UserProfileResponse> updateCurrency(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody Map<String, String> body) {
+        long userId = userService.getUserId(userDetails);
+        String currency = body.get("currency");
+        if (currency == null || currency.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        userService.updateCurrency(userId, currency);
+        return ResponseEntity.ok(userProfileService.getUserProfile(userDetails));
     }
 }

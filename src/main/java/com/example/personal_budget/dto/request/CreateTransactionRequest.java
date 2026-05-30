@@ -24,4 +24,6 @@ public class CreateTransactionRequest {
 
     private String source;
     private String description;
+
+    private String currency;
 }

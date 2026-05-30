@@ -3,6 +3,8 @@ package com.example.personal_budget.controller;
 import com.example.personal_budget.dto.request.MonthlyReportRequest;
 import com.example.personal_budget.dto.request.ReportDownloadRequest;
 import com.example.personal_budget.dto.response.MonthlyReportResponse;
+import com.example.personal_budget.entity.User;
+import com.example.personal_budget.service.CurrencyService;
 import com.example.personal_budget.service.ReportService;
 import com.example.personal_budget.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class ReportController {
 
     private final ReportService reportService;
     private final UserService userService;
+    private final CurrencyService currencyService;
 
     /**
      * Generates monthly report data for the authenticated user.
@@ -40,12 +43,15 @@ public class ReportController {
     public ResponseEntity<MonthlyReportResponse> getMonthlyReport(
             @RequestBody MonthlyReportRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
-        //        if (!trySetUserId(userDetails, request::setUserId)) {
-        //            return ResponseEntity.badRequest().build();
-        //        }
-
-        MonthlyReportResponse response = reportService.generateMonthlyReport(userService.getUserId(userDetails),
-                                                                             request);
+        User user = userService.getUser(userDetails);
+        MonthlyReportResponse response = reportService.generateMonthlyReport(user.getId(), request);
+        response.setCurrency(user.getCurrency());
+        response.getMonthlyExpense().replaceAll((k, v) ->
+                currencyService.convert(v, "USD", user.getCurrency()));
+        response.getMonthlyIncome().replaceAll((k, v) ->
+                currencyService.convert(v, "USD", user.getCurrency()));
+        response.getExpenseByCategory().replaceAll((k, v) ->
+                currencyService.convert(v, "USD", user.getCurrency()));
         return ResponseEntity.ok(response);
     }
 

@@ -51,9 +51,9 @@ public class NotificationService {
      *
      * @param notificationId the notification id
      */
-    public void markAsRead(Long notificationId) {
+    public void markAsRead(Long notificationId, Long userId) {
 
-        Notification notification = notificationRepository.findById(notificationId)
+        Notification notification = notificationRepository.findByIdAndUserId(notificationId, userId)
                 .orElseThrow(() -> new RuntimeException("Notification not found"));
 
         notification.setRead(true);
@@ -112,7 +112,7 @@ public class NotificationService {
      * @return matching notifications
      */
     public List<Notification> getNotificationsByType(Long userId, NotificationEventType type) {
-        return notificationRepository.findByUserIdOrType(userId, type);
+        return notificationRepository.findByUserIdAndType(userId, type);
     }
 
     /**

@@ -12,10 +12,16 @@ public class MonthlyReportResponse {
     private Map<Month, Double> monthlyExpense;
     private Map<Month, Double> monthlyIncome;
     private Map<String, Double> expenseByCategory;
+    private String currency;
 
     public MonthlyReportResponse(Map<Month, Double> monthlyExpense, Map<Month, Double> monthlyIncome, Map<String, Double> expenseByCategory) {
         this.monthlyExpense = monthlyExpense;
         this.monthlyIncome = monthlyIncome;
         this.expenseByCategory = expenseByCategory;
+    }
+
+    public MonthlyReportResponse(Map<Month, Double> monthlyExpense, Map<Month, Double> monthlyIncome, Map<String, Double> expenseByCategory, String currency) {
+        this(monthlyExpense, monthlyIncome, expenseByCategory);
+        this.currency = currency;
     }
 }

@@ -110,4 +110,12 @@ public class UserService {
         userRepository.updateNotificationSettingsById(userId, request.isBudgetAlerts(), request.isGoalReminders());
     }
 
+    @Transactional
+    public void updateCurrency(long userId, String currency) {
+        if (!userRepository.existsById(userId)) {
+            throw new RuntimeException("User not found with id: " + userId);
+        }
+        userRepository.updateCurrencyById(userId, currency.toUpperCase());
+    }
+
 }

@@ -3,7 +3,9 @@ package com.example.personal_budget.controller;
 import com.example.personal_budget.dto.response.BudgetResponse;
 import com.example.personal_budget.dto.response.DashboardResponse;
 import com.example.personal_budget.dto.response.TransactionResponse;
+import com.example.personal_budget.entity.User;
 import com.example.personal_budget.service.BudgetService;
+import com.example.personal_budget.service.CurrencyService;
 import com.example.personal_budget.service.GoalService;
 import com.example.personal_budget.service.TransactionService;
 import com.example.personal_budget.service.UserService;
@@ -28,6 +30,7 @@ public class DashboardController {
     private final UserService userService;
     private final BudgetService budgetService;
     private final GoalService goalService;
+    private final CurrencyService currencyService;
 
     /**
      * Builds the dashboard summary for the authenticated user.
@@ -38,6 +41,8 @@ public class DashboardController {
     @GetMapping
     public ResponseEntity<DashboardResponse> getDashboard(@AuthenticationPrincipal UserDetails userDetails) {
         Long userId = userService.getUserId(userDetails);
+        User user = userService.getUserById(userId);
+        String userCurrency = user.getCurrency();
         LocalDate today = LocalDate.now();
         LocalDate monthStart = today.withDayOfMonth(1);
 
@@ -48,22 +53,34 @@ public class DashboardController {
 
         List<TransactionResponse> recentTransactions = transactionService.getRecentTransactions(userId)
                 .stream()
-                .map(TransactionResponse::new)
+                .map(t -> {
+                    TransactionResponse tr = new TransactionResponse(t, userCurrency);
+                    tr.setAmount(currencyService.convert(t.getAmount(), t.getCurrency(), userCurrency));
+                    return tr;
+                })
                 .toList();
         List<BudgetResponse> activeBudgetItems = budgetService.getActiveBudgets(userId, 2)
                 .stream()
-                .map(BudgetResponse::new)
+                .map(b -> new BudgetResponse(b, userCurrency))
                 .toList();
 
+        double convertedTotalBalance = currencyService.convert(
+                totalIncome - totalExpense, "USD", userCurrency);
+        double convertedMonthlyIncome = currencyService.convert(
+                monthlyIncome, "USD", userCurrency);
+        double convertedMonthlyExpense = currencyService.convert(
+                monthlyExpense, "USD", userCurrency);
+
         DashboardResponse response = new DashboardResponse();
-        response.setTotalBalance(BigDecimal.valueOf(totalIncome).subtract(BigDecimal.valueOf(totalExpense)));
-        response.setMonthlyIncome(BigDecimal.valueOf(monthlyIncome));
-        response.setMonthlyExpense(BigDecimal.valueOf(monthlyExpense));
+        response.setTotalBalance(BigDecimal.valueOf(convertedTotalBalance));
+        response.setMonthlyIncome(BigDecimal.valueOf(convertedMonthlyIncome));
+        response.setMonthlyExpense(BigDecimal.valueOf(convertedMonthlyExpense));
         response.setRecentTransactions(recentTransactions);
         response.setActiveBudgets(Math.toIntExact(budgetService.countActiveBudgets(userId)));
         response.setActiveBudgetItems(activeBudgetItems);
         response.setActiveGoals(goalService.getActiveGoalsCount(userId));
         response.setNumberOfTransactions(transactionService.getNumberOfTransactions(userId));
+        response.setCurrency(userCurrency);
 
         return ResponseEntity.ok(response);
     }

@@ -463,9 +463,11 @@
 .dark .hero__title {
   color: var(--text);
 }
-.dark .btn--primary,
-.dark .img-btn--primary {
+.dark .btn--primary {
   color: #fff;
+}
+.dark .btn--primary::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .12), transparent);
 }
 .dark .btn--outline {
   border-color: var(--text);
@@ -474,68 +476,64 @@
 .dark .btn--outline:hover {
   background: var(--text);
   color: var(--bg);
+  border-color: var(--text);
+  box-shadow: 0 8px 24px rgba(232, 237, 244, .1);
 }
-.dark .img-btn--ghost {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.4);
+.dark .hero__subtitle {
+  color: var(--text-muted);
 }
-.dark .img-btn--ghost:hover {
-  background: rgba(255, 255, 255, 0.22);
+.dark .features {
+  background: #111827;
 }
-.dark .scroll-message {
-  background: rgba(15, 23, 42, 0.92);
-}
-
-/* ═══════════════════ REGISTER PAGE ════════════════════════ */
-.dark .container {
-  background: var(--surface);
+.dark .feature {
+  color: var(--text-muted);
 }
 
-/* ═══════════════════ LOGIN PAGE ═══════════════════════════ */
-.dark .form-header h2 {
-  color: var(--text);
-}
-.dark .input-wrap input {
+/* ═══════════════════ AUTH PAGES (Login / Register) ════════ */
+/* ═══════════════════ AUTH PAGES (Login / Register) ════════ */
+.dark .auth-card {
   background: var(--surface);
+}
+.dark .auth-header h1 {
   color: var(--text);
 }
-.dark .input-wrap input:focus {
+.dark .auth-header p {
+  color: var(--text-muted);
+}
+.dark .auth-logo {
+  color: var(--text);
+}
+.dark .field label {
+  color: var(--text);
+}
+.dark .field-input-wrap input {
+  /*background: var(--surface);*/
+  color: var(--text);
+  border-color: var(--border);
+}
+.dark .field-input-wrap input:focus {
+  border-color: var(--green);
   box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.14);
 }
-.dark .input-wrap.error input {
+.dark .field-input-wrap.error input {
   border-color: var(--red);
   box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.12);
 }
-
-/* ═══════════════════ REGISTER PAGE ════════════════════════ */
-.dark .input-wrapper input {
-  background: var(--surface);
-  color: var(--text);
+.dark .btn-auth {
+  color: #fff;
 }
-.dark .input-wrapper input:focus {
-  border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.14);
+.dark .btn-auth::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .12), transparent);
 }
-.dark .input-wrapper input.invalid,
-.dark .input-wrapper input.mismatch {
-  background-color: var(--red-light);
-}
-.dark .toggle-password {
+.dark .auth-footer {
   color: var(--text-muted);
 }
-.dark .btn-submit {
-  background: var(--surface);
+.dark .toggle-row {
   color: var(--text-muted);
 }
-.dark .btn-submit.active {
-  background: var(--blue-mid) !important;
-  color: #fff !important;
-  box-shadow: 0 4px 15px rgba(96, 165, 250, 0.3);
+.dark .forgot-link {
+  color: var(--green);
 }
-.dark .btn-submit.active:hover {
-  background: var(--blue-card) !important;
-}
-
 /* ═══════════════════ AUTOFILL OVERRIDE ═══════════════════ */
 .dark input:-webkit-autofill,
 .dark input:-webkit-autofill:hover,

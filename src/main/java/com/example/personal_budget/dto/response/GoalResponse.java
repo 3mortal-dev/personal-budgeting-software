@@ -2,25 +2,28 @@ package com.example.personal_budget.dto.response;
 
 import com.example.personal_budget.entity.Goal;
 import com.example.personal_budget.enums.GoalStatus;
-import lombok.Getter;
+import lombok.Data;
 
 import java.time.LocalDate;
 
-@Getter
+@Data
 public class GoalResponse {
 
-    private final Long        id;
-    private final Long        userId;
-    private final String      name;
-    private final double      targetAmount;
-    private final double      savedAmount;
-    private final LocalDate   deadline;
-    private final GoalStatus  status;
-    private final boolean     completed;
-    private final String      iconClass;
-    private final String      iconColor;
+    private Long        id;
+    private Long        userId;
+    private String      name;
+    private double      targetAmount;
+    private double      savedAmount;
+    private LocalDate   deadline;
+    private GoalStatus  status;
+    private boolean     completed;
+    private String      iconClass;
+    private String      iconColor;
+    private String      currency;
 
-    public GoalResponse(Goal goal) {
+    public GoalResponse() {}
+
+    public GoalResponse(Goal goal, String currency) {
         this.id           = goal.getId();
         this.userId       = goal.getUser().getId();
         this.name         = goal.getGoalName();
@@ -30,13 +33,14 @@ public class GoalResponse {
         this.status       = goal.getStatus();
         this.iconClass    = goal.getIconClass();
         this.iconColor    = goal.getIconColor();
+        this.currency     = currency;
 
-        // FIX: previously only EXCEEDED was treated as completed.
-        // Now we also guard against a null status (defensive) and
-        // check the saved/target ratio directly so a goal edited to
-        // >= 100% always shows completed even if status wasn't recalculated.
         this.completed = goal.getStatus() == GoalStatus.EXCEEDED
                 || (goal.getTargetAmount() > 0
                         && goal.getCurrentAmount() >= goal.getTargetAmount());
+    }
+
+    public GoalResponse(Goal goal) {
+        this(goal, "USD");
     }
 }

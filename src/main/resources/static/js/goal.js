@@ -2,7 +2,7 @@
 
 // CONFIG
 const API_BASE = "/api/goals";
-const NOTIF_BASE = "/api/notifications/all";
+const NOTIF_BASE = "/api/notifications";
 
 // CSRF
 // 1. <meta name="_csrf">  (Thymeleaf / HttpSessionCsrfTokenRepository)
@@ -42,6 +42,7 @@ async function applyUsername() {
     if (!res.ok) return;
     const data = await res.json();
     const name = data.name || data.username || "";
+    userCurrency = data.currency || "USD";
     if (usernameEl) usernameEl.textContent = name;
     if (avatarEl) {
       const parts = name.split(" ").filter(Boolean);
@@ -129,6 +130,7 @@ let notifications = [];
 let deleteTargetId = null;
 let progressGoalId = null;
 let activeNotifTab = "all";
+let userCurrency = "USD";
 
 // Dom REF
 
@@ -376,12 +378,13 @@ function loadIconPickerForEdit(iconClass, iconColor) {
 
 async function loadNotifications() {
   try {
-    const res = await fetch(NOTIF_BASE, {
+    const res = await fetch(NOTIF_BASE + "/all", {
       headers: { Accept: "application/json" },
     });
     if (!res.ok) throw new Error();
     notifications = await res.json();
-  } catch {
+  } catch (e) {
+    console.error("[goal.js] loadNotifications failed:", e);
     notifications = [];
   }
   renderNotifList();
@@ -393,9 +396,9 @@ function renderNotifList() {
   let list = [...notifications];
   if (activeNotifTab === "unread") list = list.filter((n) => !n.read);
   else if (activeNotifTab === "goals")
-    list = list.filter((n) => n.type === "goal");
+    list = list.filter((n) => n.type === "GOAL_REMINDER");
   else if (activeNotifTab === "budget")
-    list = list.filter((n) => n.type === "budget");
+    list = list.filter((n) => n.type === "BUDGET_NEAR_LIMIT" || n.type === "BUDGET_EXCEEDED");
   if (!list.length) {
     notifListEl.innerHTML = `
       <div class="notif-empty">
@@ -426,11 +429,10 @@ function buildNotifItem(n) {
 }
 
 function notifIconFor(type) {
-  if (type === "goal") return { cls: "notif-icon--goal", icon: "fa-bullseye" };
-  if (type === "budget")
+  if (type === "GOAL_REMINDER")
+    return { cls: "notif-icon--goal", icon: "fa-bullseye" };
+  if (type === "BUDGET_NEAR_LIMIT" || type === "BUDGET_EXCEEDED")
     return { cls: "notif-icon--budget", icon: "fa-chart-pie" };
-  if (type === "warn")
-    return { cls: "notif-icon--warn", icon: "fa-triangle-exclamation" };
   return { cls: "notif-icon--info", icon: "fa-circle-info" };
 }
 
@@ -445,12 +447,12 @@ async function markNotificationRead(id) {
   const notif = notifications.find((n) => n.id === id);
   if (!notif || notif.read) return;
   try {
-    await fetch(`${NOTIF_BASE}/${id}/read`, {
-      method: "PATCH",
+    await fetch(`${NOTIF_BASE}/${id}/markRead`, {
+      method: "PUT",
       headers: csrfHeaders(),
     });
-  } catch {
-    /* optimistic */
+  } catch (e) {
+    console.error("[goal.js] markNotificationRead failed:", e);
   }
   notif.read = true;
   renderNotifList();
@@ -458,15 +460,16 @@ async function markNotificationRead(id) {
 }
 
 async function markAllNotificationsRead() {
-  try {
-    await fetch(`${NOTIF_BASE}/read-all`, {
-      method: "PATCH",
-      headers: csrfHeaders(),
-    });
-  } catch {
-    /* optimistic */
-  }
-  notifications.forEach((n) => (n.read = true));
+  const unread = notifications.filter((n) => !n.read);
+  await Promise.all(
+    unread.map((n) =>
+      fetch(`${NOTIF_BASE}/${n.id}/markRead`, {
+        method: "PUT",
+        headers: csrfHeaders(),
+      }).catch((e) => console.error("[goal.js] markAllRead item failed:", e)),
+    ),
+  );
+  unread.forEach((n) => (n.read = true));
   renderNotifList();
   updateNotifBadge();
   showToast("All notifications marked as read", "success");
@@ -887,7 +890,11 @@ function showToast(msg, type = "success") {
 
 // Helper
 function formatMoney(n) {
-  return "$" + Number(n || 0).toLocaleString("en-US");
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: userCurrency || "USD",
+    minimumFractionDigits: 0,
+  }).format(n || 0);
 }
 
 

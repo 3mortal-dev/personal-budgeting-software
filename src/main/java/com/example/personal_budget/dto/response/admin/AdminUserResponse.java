@@ -13,6 +13,7 @@ public class AdminUserResponse {
     private final Role role;
     private final boolean budgetAlertEnabled;
     private final boolean goalProgressAlertEnabled;
+    private final String currency;
 
     public AdminUserResponse(User user) {
         this.id = user.getId();
@@ -21,5 +22,6 @@ public class AdminUserResponse {
         this.role = user.getRole();
         this.budgetAlertEnabled = user.isBudgetAlertenabled();
         this.goalProgressAlertEnabled = user.isGoalProgressAlertEnabled();
+        this.currency = user.getCurrency();
     }
 }
