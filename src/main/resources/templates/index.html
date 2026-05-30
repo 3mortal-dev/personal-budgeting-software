@@ -1,70 +1,108 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-  <html lang="en">
-    <head>
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>BudgetWise — Master Your Money</title>
-      <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-      <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap"
-        rel="stylesheet" />
-      <link rel="stylesheet" th:href="@{/css/index.css}"
-        href="../static/css/index.css" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BudgetWise – Master Your Money</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" th:href="@{/css/theme.css}" href="../static/css/theme.css" />
+  <link rel="stylesheet" th:href="@{/css/background.css}" href="../static/css/background.css" />
+  <link rel="stylesheet" th:href="@{/css/index.css}" href="../static/css/index.css" />
+  <script>
+    (function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}})();
+  </script>
+</head>
+<body>
 
-    </head>
-    <body>
+  <div class="bg-orbs">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+  </div>
+  <section class="hero">
+    <div class="hero__content">
+      <div class="hero__badge">Personal Finance</div>
 
-      <!-- HERO -->
-      <section class="hero">
+      <h1 class="hero__title">
+        Master Your<br />
+        Money<br />
+        <span class="hero__title--accent">BudgetWise.</span>
+      </h1>
 
-        <div class="hero__content">
-          <div class="hero__badge">Personal Finance</div>
+      <p class="hero__subtitle">
+        Track expenses, set budgets, and reach your financial goals — all in one
+        simple, beautiful dashboard.
+      </p>
 
-          <h1 class="hero__title">
-            Master Your<br />
-            Money<br />
-            <span class="hero__title--accent">BudgetWise.</span>
-          </h1>
+      <div class="hero__actions">
+        <a href="/register" class="btn btn--primary">
+          Create Your Account
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </a>
+        <a href="/login" class="btn btn--outline">Log In</a>
+      </div>
+    </div>
 
-          <p class="hero__subtitle">
-            A minimalist, powerful budgeting app designed for the modern Arab
-            world.
-            Track expenses, set goals, and gain financial clarity in both
-            English and Arabic.
-          </p>
-
-          <div class="hero__actions">
-            <a href="register" class="btn btn--primary">
-              Create Your Account
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2.5"><path
-                  d="M5 12h14M12 5l7 7-7 7" /></svg>
-            </a>
-            <a href="login" class="btn btn--outline">Log In</a>
+    <div class="hero__image-wrap">
+      <div class="hero__image">
+        <div class="mockup">
+          <div class="mockup__bar">
+            <span class="mockup__dot"></span>
+            <span class="mockup__dot"></span>
+            <span class="mockup__dot"></span>
+            <span class="mockup__line mockup__line--l"></span>
+          </div>
+          <div class="mockup__balance">$12,450</div>
+          <div class="mockup__row">
+            <span class="mockup__label">Income</span>
+            <span class="mockup__value mockup__value--g">+$5,200</span>
+          </div>
+          <div class="mockup__row">
+            <span class="mockup__label">Expenses</span>
+            <span class="mockup__value">-$3,150</span>
+          </div>
+          <div class="mockup__row">
+            <span class="mockup__label">Savings</span>
+            <span class="mockup__value mockup__value--g">$2,050</span>
+          </div>
+          <div class="mockup__card">
+            <span class="mockup__card-line mockup__card-line--g"></span>
+            <span class="mockup__card-line"></span>
+            <span class="mockup__card-line mockup__card-line--w"></span>
+          </div>
+          <div class="mockup__card" style="margin-top:auto">
+            <span class="mockup__label">Budget Progress</span>
+            <span class="mockup__card-line mockup__card-line--g" style="width:65%"></span>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
 
-        <div class="hero__image-wrap">
-          <div class="hero__image" id="heroImage">
+  <div class="features">
+    <div class="feature">
+      <span class="feature__icon">📊</span>
+      Track Expenses
+    </div>
+    <div class="feature">
+      <span class="feature__icon">🎯</span>
+      Set Goals
+    </div>
+    <div class="feature">
+      <span class="feature__icon">🔔</span>
+      Smart Alerts
+    </div>
+    <div class="feature">
+      <span class="feature__icon">🌙</span>
+      Dark Mode
+    </div>
+  </div>
 
-            <div class="scroll-message" id="scrollMessage">
-              <button class="scroll-message__close" id="closeMsg">✕</button>
-              <span class="scroll-message__icon">💰</span>
-              <h3 class="scroll-message__title">Your Financial Future Starts
-                Here</h3>
-              <p class="scroll-message__text">
-                Join thousands who already track smarter, save faster, and live
-                better with BudgetWise.
-              </p>
-              <a href="register.html" class="scroll-message__cta">Start Free
-                Today →</a>
-            </div>
-
-            <div class="deco-ring"></div>
-          </div>
-        </div>
-
-      </section>
-
-    </body>
+</body>
+</html>

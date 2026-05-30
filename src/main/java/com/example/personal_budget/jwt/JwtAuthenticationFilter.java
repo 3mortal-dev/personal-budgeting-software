@@ -7,6 +7,8 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -44,12 +46,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             userEmail = jwtService.extractUsername(jwt);
         } catch (Exception e) {
-            System.out.println("❌ Invalid JWT structure: " + e.getMessage());
+            clearJwtCookie(response);
             filterChain.doFilter(request, response);
             return;
         }
 
         if (userEmail == null) {
+            clearJwtCookie(response);
             filterChain.doFilter(request, response);
             return;
         }
@@ -59,37 +62,49 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+        try {
+            UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
-        boolean isJwtValid = jwtService.isTokenValid(jwt, userDetails);
+            boolean isJwtValid = jwtService.isTokenValid(jwt, userDetails);
 
-        boolean isTokenStoredAndValid = tokenRepository
-                .findByToken(jwt)
-                .map(t -> !t.isExpired() && !t.isRevoked())
-                .orElse(true);
+            boolean isTokenStoredAndValid = tokenRepository
+                    .findByToken(jwt)
+                    .map(t -> !t.isExpired() && !t.isRevoked())
+                    .orElse(false);
 
-        if (isJwtValid && isTokenStoredAndValid) {
+            if (isJwtValid && isTokenStoredAndValid) {
 
-            UsernamePasswordAuthenticationToken authToken =
-                    new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
-                    );
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
 
-            authToken.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
-            );
+                authToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
 
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+                SecurityContextHolder.getContext().setAuthentication(authToken);
 
-        } else {
-            System.out.println("❌ JWT rejected:");
-            System.out.println("   isJwtValid = " + isJwtValid);
-            System.out.println("   isTokenStoredAndValid = " + isTokenStoredAndValid);
+            } else {
+                clearJwtCookie(response);
+            }
+        } catch (Exception e) {
+            clearJwtCookie(response);
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void clearJwtCookie(HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie.from("jwt", "")
+                .httpOnly(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Strict")
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     /**

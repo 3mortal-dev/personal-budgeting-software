@@ -2,6 +2,9 @@ package com.example.personal_budget.controller;
 
 import com.example.personal_budget.dto.request.GoalRequest;
 import com.example.personal_budget.dto.response.GoalResponse;
+import com.example.personal_budget.entity.Goal;
+import com.example.personal_budget.entity.User;
+import com.example.personal_budget.service.CurrencyService;
 import com.example.personal_budget.service.GoalService;
 import com.example.personal_budget.service.UserService;
 
@@ -21,6 +24,14 @@ public class GoalController {
 
     private final GoalService goalService;
     private final UserService userService;
+    private final CurrencyService currencyService;
+
+    private GoalResponse toConvertedGoal(Goal goal, String userCurrency) {
+        GoalResponse gr = new GoalResponse(goal, userCurrency);
+        gr.setTargetAmount(currencyService.convert(goal.getTargetAmount(), "USD", userCurrency));
+        gr.setSavedAmount(currencyService.convert(goal.getCurrentAmount(), "USD", userCurrency));
+        return gr;
+    }
 
     /**
      * Creates a goal for the authenticated user.
@@ -33,8 +44,9 @@ public class GoalController {
     public ResponseEntity<GoalResponse> addGoal(
           @Valid @RequestBody GoalRequest goalRequest,
             @AuthenticationPrincipal UserDetails userDetails) {
-        long userId = userService.getUserId(userDetails);
-        return ResponseEntity.ok(new GoalResponse(goalService.addGoal(goalRequest, userId)));
+        User user = userService.getUser(userDetails);
+        Goal goal = goalService.addGoal(goalRequest, user.getId());
+        return ResponseEntity.ok(toConvertedGoal(goal, user.getCurrency()));
     }
 
     /**
@@ -50,8 +62,9 @@ public class GoalController {
             @PathVariable Long id,
             @Valid @RequestBody GoalRequest goalRequest,
             @AuthenticationPrincipal UserDetails userDetails) {
-        long userId = userService.getUserId(userDetails);
-        return ResponseEntity.ok(new GoalResponse(goalService.editGoal(id, goalRequest, userId)));
+        User user = userService.getUser(userDetails);
+        Goal goal = goalService.editGoal(id, goalRequest, user.getId());
+        return ResponseEntity.ok(toConvertedGoal(goal, user.getCurrency()));
     }
 
     /**
@@ -67,8 +80,9 @@ public class GoalController {
             @PathVariable long id,
             @RequestParam double amount,
             @AuthenticationPrincipal UserDetails userDetails) {
-        long userId = userService.getUserId(userDetails);
-        return ResponseEntity.ok(new GoalResponse(goalService.updateProgress(id, amount, userId)));
+        User user = userService.getUser(userDetails);
+        Goal goal = goalService.updateProgress(id, amount, user.getId());
+        return ResponseEntity.ok(toConvertedGoal(goal, user.getCurrency()));
     }
 
     /**
@@ -96,12 +110,11 @@ public class GoalController {
     @GetMapping("/user")
     public ResponseEntity<List<GoalResponse>> getUserGoals(
             @AuthenticationPrincipal UserDetails userDetails) {
-        long userId = userService.getUserId(userDetails);
-        return ResponseEntity.ok(
-                goalService.getGoalsByUserId(userId)
-                        .stream()
-                        .map(GoalResponse::new)
-                        .toList()
-        );
+        User user = userService.getUser(userDetails);
+        List<GoalResponse> goals = goalService.getGoalsByUserId(user.getId())
+                .stream()
+                .map(g -> toConvertedGoal(g, user.getCurrency()))
+                .toList();
+        return ResponseEntity.ok(goals);
     }
 }

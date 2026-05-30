@@ -3,6 +3,14 @@
 
 (function () {
 
+  // Apply saved theme before anything renders
+  (function () {
+    const theme = localStorage.getItem("theme");
+    if (theme === "dark" || (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+      document.documentElement.classList.add("dark");
+    }
+  })();
+
   const NAV_LINKS = [
     { href: "/dashboard", icon: "fa-house", label: "Home" },
     { href: "/transactions", icon: "fa-receipt", label: "Transactions" },
@@ -16,7 +24,7 @@
 
   const NOTIF_API = {
     ALL: "/api/notifications/all",
-    MARK_READ: (id) => `/notifications/${id}/markRead`,
+    MARK_READ: (id) => `/api/notifications/${id}/markRead`,
   };
 
 
@@ -71,6 +79,10 @@
             <i class="fa-solid fa-magnifying-glass"></i>
             <input type="text" placeholder="Search…" id="searchInput"/>
           </div>
+
+          <button class="topbar__theme-toggle" id="themeToggle" aria-label="Toggle theme">
+            <i class="fa-regular fa-moon"></i>
+          </button>
 
           <div class="notif-wrap" id="notifWrap">
             <button id="bellBtn" class="topbar__notif" aria-label="Notifications">
@@ -128,11 +140,10 @@
 
   function typeIcon(type) {
     switch (type) {
-      case "GOAL_REACHED":
-        return { cls: "notif-icon--goal", icon: "fa-bullseye" };
       case "GOAL_REMINDER":
-        return { cls: "notif-icon--goal", icon: "fa-flag" };
-      case "BUDGET_ALERT":
+        return { cls: "notif-icon--goal", icon: "fa-bullseye" };
+      case "BUDGET_NEAR_LIMIT":
+      case "BUDGET_EXCEEDED":
         return { cls: "notif-icon--budget", icon: "fa-chart-pie" };
       default:
         return { cls: "notif-icon--info", icon: "fa-circle-info" };
@@ -141,10 +152,10 @@
 
   function typeLabel(type) {
     switch (type) {
-      case "BUDGET_ALERT":
-        return "Budget Alert";
-      case "GOAL_REACHED":
-        return "Goal Reached";
+      case "BUDGET_NEAR_LIMIT":
+        return "Budget Near Limit";
+      case "BUDGET_EXCEEDED":
+        return "Budget Exceeded";
       case "GOAL_REMINDER":
         return "Goal Reminder";
       default:
@@ -160,7 +171,7 @@
     if (filter === "goals")
       return all.filter((n) => n.type?.startsWith("GOAL"));
     if (filter === "budget")
-      return all.filter((n) => n.type === "BUDGET_ALERT");
+      return all.filter((n) => n.type === "BUDGET_NEAR_LIMIT" || n.type === "BUDGET_EXCEEDED");
     return all;
   }
 
@@ -224,8 +235,8 @@
       if (!res.ok) return;
       notifState.all = await res.json();
       renderNotifList();
-    } catch {
-      /* badge stays hidden */
+    } catch (e) {
+      console.error("[navbar] fetchNotifications failed:", e);
     }
   }
 
@@ -238,7 +249,9 @@
       const n = notifState.all.find((x) => x.id === id);
       if (n) n.read = true;
       renderNotifList();
-    } catch {}
+    } catch (e) {
+      console.error("[navbar] markOneRead failed:", e);
+    }
   }
 
   async function markAllRead() {
@@ -325,6 +338,46 @@
     });
   }
 
+  // Theme toggle
+  function setupThemeToggle() {
+    const toggle = document.getElementById("themeToggle");
+    if (!toggle) return;
+
+    const icon = toggle.querySelector("i");
+    const isDark = document.documentElement.classList.contains("dark");
+    icon.className = isDark ? "fa-solid fa-sun" : "fa-regular fa-moon";
+
+    toggle.addEventListener("click", () => {
+      const html = document.documentElement;
+      const nowDark = !html.classList.contains("dark");
+      html.classList.toggle("dark", nowDark);
+      icon.className = nowDark ? "fa-solid fa-sun" : "fa-regular fa-moon";
+      localStorage.setItem("theme", nowDark ? "dark" : "light");
+    });
+  }
+
+  // Search - dispatch custom event for pages to handle
+  function setupSearch() {
+    const input = document.getElementById("searchInput");
+    if (!input) return;
+    let debounceTimer;
+    function dispatch() {
+      const query = input.value.trim();
+      document.dispatchEvent(new CustomEvent("app-search", { detail: { query } }));
+    }
+    input.addEventListener("input", () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(dispatch, 200);
+    });
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        clearTimeout(debounceTimer);
+        dispatch();
+      }
+    });
+  }
+
   // Notofication
   function setupNotifDropdown() {
     const bell = document.getElementById("bellBtn");
@@ -383,6 +436,8 @@
     fetchNotifications();
     setupHamburger();
     setupNotifDropdown();
+    setupSearch();
+    setupThemeToggle();
   }
 
   if (document.readyState === "loading") {

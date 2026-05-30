@@ -43,10 +43,10 @@ function escapeHtml(value) {
         .replace(/'/g, '&#039;');
 }
 
-function formatMoney(value) {
+function formatMoney(value, currencyCode) {
     return new Intl.NumberFormat('en-US', {
         style: 'currency',
-        currency: 'USD',
+        currency: currencyCode || 'USD',
         minimumFractionDigits: 2,
     }).format(Number(value || 0));
 }
@@ -269,11 +269,12 @@ function renderTransactions(transactions) {
     list.innerHTML = transactions.map(tx => {
         const type = String(tx.type || '').toLowerCase();
         const category = tx.categoryName || tx.source || 'Uncategorized';
+        const txCurrency = tx.currency || 'USD';
         return `
             <div class="admin-tx admin-tx--${type}">
                 <div class="admin-tx__top">
                     <span>${escapeHtml(category)}</span>
-                    <span class="admin-tx__amount">${formatMoney(tx.amount)}</span>
+                    <span class="admin-tx__amount">${formatMoney(tx.amount, txCurrency)}</span>
                 </div>
                 <div class="admin-tx__meta">${escapeHtml(tx.type)} - ${escapeHtml(formatDate(tx.date))}</div>
                 ${tx.description ? `<div class="admin-tx__meta">${escapeHtml(tx.description)}</div>` : ''}
@@ -314,6 +315,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('userSearch')?.addEventListener('input', event => {
         state.query = event.target.value;
+        renderUsers();
+    });
+
+    // Navbar search - keep synced with local userSearch input
+    document.addEventListener('app-search', (e) => {
+        state.query = e.detail.query;
+        const localSearch = document.getElementById('userSearch');
+        if (localSearch) localSearch.value = e.detail.query;
         renderUsers();
     });
 

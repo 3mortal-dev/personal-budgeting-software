@@ -2,27 +2,29 @@ package com.example.personal_budget.dto.response;
 
 import com.example.personal_budget.entity.Transaction;
 import com.example.personal_budget.enums.TransactionType;
-import lombok.Getter;
+import lombok.Data;
 
 import java.time.LocalDate;
 
-@Getter
+@Data
 public class TransactionResponse {
 
-    private final Long id;
-    private final Long userId;
-    private final Long categoryId;
-    private final String categoryName;
-    private final double amount;
-    private final TransactionType type;
-    private final LocalDate date;
-    private final String source;
-    private final String description;
+    private Long id;
+    private Long userId;
+    private Long categoryId;
+    private String categoryName;
+    private double amount;
+    private TransactionType type;
+    private LocalDate date;
+    private String source;
+    private String description;
+    private String currency;
 
-    public TransactionResponse(Transaction t) {
+    public TransactionResponse() {}
+
+    public TransactionResponse(Transaction t, String displayCurrency) {
         this.id = t.getId();
         this.userId = t.getUser().getId();
-        // TransactionResponse.java
         this.categoryId = t.getCategory() != null ? t.getCategory().getId() : null;
         this.categoryName = t.getCategory() != null ? t.getCategory().getName() : null;
         this.amount = t.getAmount();
@@ -30,5 +32,10 @@ public class TransactionResponse {
         this.date = t.getDate();
         this.source = t.getSource();
         this.description = t.getDescription();
+        this.currency = displayCurrency;
+    }
+
+    public TransactionResponse(Transaction t) {
+        this(t, t.getCurrency());
     }
 }

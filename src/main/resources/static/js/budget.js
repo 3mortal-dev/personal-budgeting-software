@@ -44,6 +44,8 @@ const state = {
   profile: null,
   activeFilter: "all",
   pendingDelete: null,
+  searchQuery: "",
+  currency: "USD",
 };
 
 
@@ -67,6 +69,7 @@ async function loadProfile() {
   if (!data) return;
 
   state.profile = data;
+  state.currency = data.currency || "USD";
   renderProfile(data);
 }
 
@@ -197,7 +200,7 @@ function formatDate(str) {
 function fmt(n) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "USD",
+    currency: state.currency || "USD",
     minimumFractionDigits: 2,
   }).format(n ?? 0);
 }
@@ -373,10 +376,20 @@ function setFilter(filter) {
 }
 
 function applyFilter() {
-  const filtered =
+  let filtered =
     state.activeFilter === "all"
       ? state.budgets
       : state.budgets.filter((b) => deriveStatus(b) === state.activeFilter);
+
+  if (state.searchQuery) {
+    const q = state.searchQuery.toLowerCase();
+    filtered = filtered.filter((b) => {
+      const cat = state.categories.find((c) => c.id === b.categoryId);
+      const catName = b.categoryName || cat?.name || "";
+      return catName.toLowerCase().includes(q);
+    });
+  }
+
   renderGrid(filtered);
 }
 
@@ -610,15 +623,13 @@ async function loadNotifBadge() {
   }
 
   const iconMap = {
-    BUDGET_ALERT: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
-    GOAL_REACHED: `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`,
-    TRANSACTION_ADDED: `<svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2M8 7V5a2 2 0 0 0-4 0v2"/></svg>`,
+    BUDGET_NEAR_LIMIT: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`,
+    GOAL_REMINDER: `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>`,
     BUDGET_EXCEEDED: `<svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>`,
   };
   const clsMap = {
-    BUDGET_ALERT: "notif-icon--alert",
-    GOAL_REACHED: "notif-icon--success",
-    TRANSACTION_ADDED: "notif-icon--info",
+    BUDGET_NEAR_LIMIT: "notif-icon--alert",
+    GOAL_REMINDER: "notif-icon--success",
     BUDGET_EXCEEDED: "notif-icon--warning",
   };
 
@@ -628,7 +639,7 @@ async function loadNotifBadge() {
       (n) => `
     <div class="notif-item ${!n.read ? "unread" : ""}" data-id="${n.id}">
       <div class="notif-item-icon ${clsMap[n.type] || "notif-icon--info"}">
-        ${iconMap[n.type] || iconMap.TRANSACTION_ADDED}
+        ${iconMap[n.type] || iconMap.BUDGET_EXCEEDED}
       </div>
       <div class="notif-item-body">
         <div class="notif-item-msg">${escapeHtml(n.message)}</div>
@@ -637,6 +648,18 @@ async function loadNotifBadge() {
     </div>`,
     )
     .join("");
+
+  list.querySelectorAll(".notif-item[data-id]").forEach((el) => {
+    el.addEventListener("click", () => {
+      const id = Number(el.dataset.id);
+      fetch(`/api/notifications/${id}/markRead`, {
+        method: "PUT",
+        credentials: "include",
+      }).catch((e) => console.error("[budget.js] markRead failed:", e));
+      el.remove();
+      loadNotifBadge();
+    });
+  });
 }
 
 function toggleNotifDropdown() {
@@ -859,5 +882,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     el.addEventListener("input", () => {
       if (el.classList.contains("error")) clearFieldError(el);
     });
+  });
+
+  // Navbar search
+  document.addEventListener("app-search", (e) => {
+    state.searchQuery = e.detail.query;
+    renderAll();
   });
 });

@@ -169,7 +169,7 @@ async function loadNotifications() {
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .map((n) => ({
         id: n.id,
-        type: n.type?.includes("GOAL") ? "goal" : "transaction",
+        type: n.type === "GOAL_REMINDER" ? "goal" : "budget",
         title: formatNotificationType(n.type),
         message: n.message,
         time: formatRelativeTime(n.createdAt),
@@ -314,10 +314,10 @@ function showToast(message, type = "success") {
 
 function formatNotificationType(type) {
   switch (type) {
-    case "BUDGET_ALERT":
-      return "Budget Alert";
-    case "GOAL_REACHED":
-      return "Goal Reached 🎯";
+    case "BUDGET_NEAR_LIMIT":
+      return "Budget Near Limit";
+    case "BUDGET_EXCEEDED":
+      return "Budget Exceeded";
     case "GOAL_REMINDER":
       return "Goal Reminder";
     default:
@@ -488,7 +488,7 @@ async function onNotifTransactionsChange(enabled) {
   state.prefs.notifTransactions = enabled;
 
   try {
-    const response = await apiFetch("/api/profile/api/notifications", {
+    const response = await apiFetch("/api/profile/notifications", {
       method: "PUT",
       body: JSON.stringify({
         budgetAlerts: enabled,
@@ -530,7 +530,7 @@ function closeCurrencyDropdown() {
   document.getElementById("currency-chevron").classList.remove("open");
 }
 
-function selectCurrency(optionEl) {
+async function selectCurrency(optionEl) {
   const value = optionEl.dataset.value;
 
   document
@@ -540,6 +540,16 @@ function selectCurrency(optionEl) {
 
   setCurrencyDisplay(value);
   state.prefs.currency = value;
+
+  try {
+    await apiFetch("/api/profile/currency", {
+      method: "PUT",
+      body: JSON.stringify({ currency: value }),
+    });
+  } catch (err) {
+    console.error("Failed to save currency preference:", err);
+  }
+
   closeCurrencyDropdown();
 }
 

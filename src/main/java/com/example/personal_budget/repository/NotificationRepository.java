@@ -13,13 +13,13 @@ import com.example.personal_budget.enums.NotificationEventType;
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
     /**
-     * Finds notifications owned by a user or matching the supplied event type.
+     * Finds notifications owned by a user and matching the supplied event type.
      *
      * @param id the owner user id
-     * @param type the event type to include
+     * @param type the event type to filter by
      * @return matching notifications
      */
-    List<Notification> findByUserIdOrType(Long id, NotificationEventType type);
+    List<Notification> findByUserIdAndType(Long id, NotificationEventType type);
 
     /**
      * Finds notifications by event type.

@@ -38,8 +38,7 @@ public class AuthController {
     {
 
    try {
-        String token = authenticationService.register(request);
-        addJwtCookie(response, token);
+        authenticationService.register(request);
         return ResponseEntity.ok(Map.of("message", "Registered successfully"));
 
     } catch (RuntimeException e) {

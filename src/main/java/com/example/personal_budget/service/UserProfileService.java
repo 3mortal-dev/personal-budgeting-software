@@ -31,6 +31,9 @@ public class UserProfileService {
                 .goalsCount(goalsCount)
                 .transactionsCount(transactionsCount)
                 .budgetsCount(budgetsCount)
+                .budgetAlertEnabled(user.isBudgetAlertenabled())
+                .goalProgressAlertEnabled(user.isGoalProgressAlertEnabled())
+                .currency(user.getCurrency())
                 .build();
     }
 

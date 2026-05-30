@@ -15,7 +15,9 @@ import org.springframework.http.HttpStatus;
 
 import com.example.personal_budget.dto.request.CreateBudgetRequest;
 import com.example.personal_budget.dto.response.BudgetResponse;
+import com.example.personal_budget.entity.User;
 import com.example.personal_budget.service.BudgetService;
+import com.example.personal_budget.service.CurrencyService;
 import com.example.personal_budget.service.UserService;
 import com.example.personal_budget.entity.Budget;
 
@@ -30,15 +32,23 @@ public class BudgetController {
 
     private final BudgetService budgetService;
     private final UserService userService;
+    private final CurrencyService currencyService;
 
-    private BudgetResponse toResponse(Budget budget) {
-        return new BudgetResponse(budget);
+    private BudgetResponse toResponse(Budget budget, String userCurrency) {
+        BudgetResponse br = new BudgetResponse(budget, userCurrency);
+        br.setSpendingLimit(currencyService.convert(budget.getSpendingLimit(), "USD", userCurrency));
+        br.setSpentAmount(currencyService.convert(budget.getSpentAmount(), "USD", userCurrency));
+        return br;
     }
 
-    private List<BudgetResponse> toResponseList(List<Budget> budgets) {
+    private List<BudgetResponse> toResponseList(List<Budget> budgets, String userCurrency) {
         return budgets.stream()
-                .map(this::toResponse)
+                .map(b -> toResponse(b, userCurrency))
                 .toList();
+    }
+
+    private User getUser(UserDetails userDetails) {
+        return userService.getUser(userDetails);
     }
 
     /**
@@ -49,8 +59,8 @@ public class BudgetController {
      */
     @GetMapping
     public ResponseEntity<List<BudgetResponse>> getAllBudgets(@AuthenticationPrincipal UserDetails userDetails) {
-        List<BudgetResponse> budgets = toResponseList(budgetService.getAllBudgets(userService.getUserId(userDetails)));
-        return ResponseEntity.ok(budgets);
+        User user = getUser(userDetails);
+        return ResponseEntity.ok(toResponseList(budgetService.getAllBudgets(user.getId()), user.getCurrency()));
     }
 
     /**
@@ -61,8 +71,8 @@ public class BudgetController {
      */
     @GetMapping("/active")
     public ResponseEntity<List<BudgetResponse>> getActiveBudgets(@AuthenticationPrincipal UserDetails userDetails) {
-        List<BudgetResponse> budgets = toResponseList(budgetService.getActiveBudgets(userService.getUserId(userDetails)));
-        return ResponseEntity.ok(budgets);
+        User user = getUser(userDetails);
+        return ResponseEntity.ok(toResponseList(budgetService.getActiveBudgets(user.getId()), user.getCurrency()));
     }
 
     /**
@@ -73,8 +83,8 @@ public class BudgetController {
      */
     @GetMapping("/near-limit")
     public ResponseEntity<List<BudgetResponse>> getNearLimitBudgets(@AuthenticationPrincipal UserDetails userDetails) {
-        List<BudgetResponse> budgets = toResponseList(budgetService.getNearLimitBudgets(userService.getUserId(userDetails)));
-        return ResponseEntity.ok(budgets);
+        User user = getUser(userDetails);
+        return ResponseEntity.ok(toResponseList(budgetService.getNearLimitBudgets(user.getId()), user.getCurrency()));
     }
 
     /**
@@ -85,8 +95,8 @@ public class BudgetController {
      */
     @GetMapping("/Exeeded-limit")
     public ResponseEntity<List<BudgetResponse>> getExeededLimitBudgets(@AuthenticationPrincipal UserDetails userDetails) {
-        List<BudgetResponse> budgets = toResponseList(budgetService.getExeededLimitBudgets(userService.getUserId(userDetails)));
-        return ResponseEntity.ok(budgets);
+        User user = getUser(userDetails);
+        return ResponseEntity.ok(toResponseList(budgetService.getExeededLimitBudgets(user.getId()), user.getCurrency()));
     }
 
     /**
@@ -97,8 +107,8 @@ public class BudgetController {
      */
     @GetMapping("/expired")
     public ResponseEntity<List<BudgetResponse>> getExpiredBudgets(@AuthenticationPrincipal UserDetails userDetails) {
-        List<BudgetResponse> budgets = toResponseList(budgetService.getExpiredBudgets(userService.getUserId(userDetails)));
-        return ResponseEntity.ok(budgets);
+        User user = getUser(userDetails);
+        return ResponseEntity.ok(toResponseList(budgetService.getExpiredBudgets(user.getId()), user.getCurrency()));
     }
 
     /**
@@ -110,8 +120,9 @@ public class BudgetController {
      */
     @PostMapping
     public ResponseEntity<BudgetResponse> addBudget(@AuthenticationPrincipal UserDetails userDetails, @Valid @RequestBody CreateBudgetRequest request) {
-        BudgetResponse budget = toResponse(budgetService.addBudget(userService.getUserId(userDetails), request));
-        return ResponseEntity.status(HttpStatus.CREATED).body(budget);
+        User user = getUser(userDetails);
+        Budget budget = budgetService.addBudget(user.getId(), request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(budget, user.getCurrency()));
     }
 
     /**
@@ -124,8 +135,9 @@ public class BudgetController {
      */
     @PutMapping("/{budgetID}")
     public ResponseEntity<BudgetResponse> editBudget(@AuthenticationPrincipal UserDetails userDetails, @PathVariable Long budgetID, @Valid @RequestBody CreateBudgetRequest request) {
-        BudgetResponse budget = toResponse(budgetService.editBudget(userService.getUserId(userDetails), budgetID, request));
-        return ResponseEntity.ok(budget);
+        User user = getUser(userDetails);
+        Budget budget = budgetService.editBudget(user.getId(), budgetID, request);
+        return ResponseEntity.ok(toResponse(budget, user.getCurrency()));
     }
 
     /**

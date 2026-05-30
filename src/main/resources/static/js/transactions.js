@@ -5,9 +5,8 @@ const API = {
   PROFILE: "/profile",
   TRANSACTIONS: "/transactions",
   CATEGORIES: "/categories",
-  NOTIFICATIONS: "/notifications",
-  MARK_ALL_READ: "/notifications/mark-all-read",
-  MARK_READ: (id) => `/notifications/${id}/read`,
+  NOTIFICATIONS: "/notifications/all",
+  MARK_READ: (id) => `/notifications/${id}/markRead`,
   LOGOUT: "/auth/logout",
 };
 
@@ -50,11 +49,13 @@ const state = {
   transactions: [],
   categories: [],
   notifications: [],
+  currency: "USD",
   currentFilter: {
     type: "all",
     categoryId: "all",
     dateFrom: "",
     dateTo: "",
+    searchQuery: "",
   },
 };
 
@@ -132,6 +133,12 @@ function setupEventListeners() {
     .addEventListener("change", (e) => {
       updateFormFieldsVisibility(e.target.value, "edit");
     });
+
+  // Navbar search
+  document.addEventListener("app-search", (e) => {
+    state.currentFilter.searchQuery = e.detail.query;
+    renderTransactions();
+  });
 }
 
 // Show/hide category and source based on transaction type
@@ -184,6 +191,7 @@ async function loadUserProfile() {
   const data = await apiFetch(API.PROFILE);
   if (data) {
     state.user = data;
+    state.currency = data.currency || "USD";
   }
 }
 
@@ -240,7 +248,7 @@ function renderTransactions() {
       <td>${transaction.description || "-"}</td>
       <td class="col-source" >${transaction.source || "-"}</td>
       <td class="amount ${transaction.type.toLowerCase()}">
-        ${transaction.type === "INCOME" ? "+" : "-"}$${transaction.amount.toFixed(2)}
+        ${transaction.type === "INCOME" ? "+" : "-"}${formatCurrency(transaction.amount, transaction.currency)}
       </td>
       <td class="actions">
         <button class="btn-icon-small" onclick="editTransaction(${transaction.id})" title="Edit">
@@ -257,7 +265,7 @@ function renderTransactions() {
 
 function filterTransactionsData() {
   return state.transactions.filter((transaction) => {
-    const { type, categoryId, dateFrom, dateTo } = state.currentFilter;
+    const { type, categoryId, dateFrom, dateTo, searchQuery } = state.currentFilter;
 
     // Type filter
     if (type !== "all" && transaction.type.toLowerCase() !== type) {
@@ -277,7 +285,25 @@ function filterTransactionsData() {
     if (dateFrom && transactionDate < new Date(dateFrom)) {
       return false;
     }
-    return !(dateTo && transactionDate > new Date(dateTo));
+    if (dateTo && transactionDate > new Date(dateTo)) {
+      return false;
+    }
+
+    // Text search
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const matchesDescription = (transaction.description || "").toLowerCase().includes(q);
+      const matchesSource = (transaction.source || "").toLowerCase().includes(q);
+      const matchesType = transaction.type.toLowerCase().includes(q);
+      const category = state.categories.find((c) => c.id === transaction.categoryId);
+      const matchesCategory = (category?.name || "").toLowerCase().includes(q);
+      const matchesAmount = String(transaction.amount).includes(q);
+      if (!matchesDescription && !matchesSource && !matchesType && !matchesCategory && !matchesAmount) {
+        return false;
+      }
+    }
+
+    return true;
   });
 }
 
@@ -293,24 +319,42 @@ function filterTransactions() {
 
 async function addTransaction(event) {
   event.preventDefault();
-  btnStartLoading("addTransactionBtn");
 
   const type = document.getElementById("transactionType").value;
+  const amount = parseFloat(document.getElementById("transactionAmount").value);
+  const date = document.getElementById("transactionDate").value;
+  const categoryId =
+    type === "INCOME"
+      ? null
+      : parseInt(document.getElementById("transactionCategory").value);
+  const source =
+    type === "INCOME"
+      ? document.getElementById("transactionSource").value
+      : null;
+  const description = document.getElementById("transactionDescription").value;
 
-  const formData = {
-    type: type,
-    amount: parseFloat(document.getElementById("transactionAmount").value),
-    date: document.getElementById("transactionDate").value,
-    categoryId:
-      type === "INCOME"
-        ? null
-        : parseInt(document.getElementById("transactionCategory").value),
-    source:
-      type === "INCOME"
-        ? document.getElementById("transactionSource").value
-        : null,
-    description: document.getElementById("transactionDescription").value,
-  };
+  document.querySelectorAll("#addTransactionForm .field-error").forEach((el) => (el.textContent = ""));
+  let hasError = false;
+  if (!amount || isNaN(amount) || amount <= 0) {
+    const err = document.getElementById("amountErr");
+    if (err) err.textContent = "Enter an amount greater than $0.";
+    hasError = true;
+  }
+  if (!date) {
+    const err = document.getElementById("dateErr");
+    if (err) err.textContent = "Date is required.";
+    hasError = true;
+  }
+  if (type === "EXPENSE" && (!categoryId || isNaN(categoryId))) {
+    const err = document.getElementById("categoryErr");
+    if (err) err.textContent = "Select a category.";
+    hasError = true;
+  }
+  if (hasError) return;
+
+  btnStartLoading("addTransactionBtn");
+
+  const formData = { type, amount, date, categoryId, source, description };
 
   const result = await apiFetch(API.TRANSACTIONS, {
     method: "POST",
@@ -492,11 +536,14 @@ function toggleNotifications() {
 }
 
 async function markAllRead() {
-  await apiFetch(API.MARK_ALL_READ, { method: "PUT" });
-  state.notifications.forEach((n) => (n.read = true));
+  const unread = state.notifications.filter((n) => !n.read);
+  await Promise.all(
+    unread.map((n) =>
+      apiFetch(API.MARK_READ(n.id), { method: "PUT" }),
+    ),
+  );
+  unread.forEach((n) => (n.read = true));
   updateNotificationBadge();
-  // Reload notifications to update UI
-  await loadNotifications();
 }
 
 // Render UI
@@ -660,7 +707,7 @@ function showError(message) {
  */
 function toastTransactionAdded(type, amount, label) {
   const sign = type === "INCOME" ? "+" : "−";
-  const money = formatCurrency(amount);
+  const money = formatCurrency(amount, state.currency);
   const detail = label ? ` · ${label}` : "";
   const verb = type === "INCOME" ? "Income recorded" : "Expense logged";
   showToast(`${verb}: ${sign}${money}${detail}`, "success");
@@ -671,7 +718,7 @@ function toastTransactionAdded(type, amount, label) {
  */
 function toastTransactionUpdated(type, amount) {
   const sign = type === "INCOME" ? "+" : "−";
-  const money = formatCurrency(amount);
+  const money = formatCurrency(amount, state.currency);
   showToast(`Transaction updated — ${sign}${money}`, "success");
 }
 
@@ -700,10 +747,10 @@ function toastLoadFailed() {
 }
 
 /** Format currency without the Intl overhead for toast strings */
-function formatCurrency(amount) {
+function formatCurrency(amount, currencyCode) {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
-    currency: "USD",
+    currency: currencyCode || state.currency || "USD",
     minimumFractionDigits: 2,
   }).format(amount ?? 0);
 }

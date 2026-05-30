@@ -237,6 +237,10 @@
         .ledger-row-amount.INCOME  { color: #16a34a; }
         .ledger-row-amount.EXPENSE { color: #dc2626; }
     </style>
+    <link rel="stylesheet" th:href="@{/css/theme.css}" href="../static/css/theme.css" />
+    <script>
+      (function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}})();
+    </script>
     </head>
     <body>
 

@@ -19,4 +19,5 @@ public class UserProfileResponse {
     private int budgetsCount;
     private boolean budgetAlertEnabled;
     private boolean goalProgressAlertEnabled;
+    private String currency;
 }

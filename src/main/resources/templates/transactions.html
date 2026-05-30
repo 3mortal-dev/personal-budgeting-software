@@ -7,12 +7,17 @@
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+        <link rel="stylesheet" th:href="@{/css/theme.css}"
+            href="../static/css/theme.css" />
         <link rel="stylesheet" th:href="@{/css/navbar.css}"
             href="../static/css/navbar.css" />
         <link rel="stylesheet" th:href="@{/css/loading.css}"
             href="../static/css/loading.css" />
         <link rel="stylesheet" th:href="@{/css/transactions.css}"
             href="../static/css/transactions.css" />
+        <script>
+            (function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}})();
+        </script>
     </head>
     <body>
 
@@ -164,6 +169,7 @@
                                 class="field-input" step="0.01" min="0.01"
                                 placeholder="0.00" required />
                         </div>
+                        <span class="field-error" id="amountErr"></span>
                     </div>
                     <div class="field-group">
                         <label class="field-label" for="transactionDate">Date
@@ -181,6 +187,7 @@
                             <input type="date" id="transactionDate"
                                 class="field-input" required />
                         </div>
+                        <span class="field-error" id="dateErr"></span>
                     </div>
                     <div class="field-group">
                         <label class="field-label"
@@ -196,6 +203,7 @@
                             <select id="transactionCategory" class="field-input"
                                 required></select>
                         </div>
+                        <span class="field-error" id="categoryErr"></span>
                     </div>
                     <div class="field-group">
                         <label class="field-label"

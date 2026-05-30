@@ -44,4 +44,8 @@ public class Transaction {
 
     private String source;
     private String description;
+
+    @Column(length = 3)
+    @Builder.Default
+    private String currency = "USD";
 }

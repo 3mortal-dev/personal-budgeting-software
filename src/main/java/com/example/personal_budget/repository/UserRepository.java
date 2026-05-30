@@ -47,4 +47,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("UPDATE User u SET u.budgetAlertenabled = :budgetAlertEnabled, u.goalProgressAlertEnabled = :goalProgressAlertEnabled WHERE u.id = :id")
     void updateNotificationSettingsById(@Param("id") Long id, @Param("budgetAlertEnabled") boolean budgetAlertEnabled, @Param("goalProgressAlertEnabled") boolean goalProgressAlertEnabled);
 
+    /**
+     * Updates the preferred display currency for a user.
+     *
+     * @param id the user id
+     * @param currency the ISO 4217 currency code
+     */
+    @Modifying
+    @Query("UPDATE User u SET u.currency = :currency WHERE u.id = :id")
+    void updateCurrencyById(@Param("id") Long id, @Param("currency") String currency);
+
 }
