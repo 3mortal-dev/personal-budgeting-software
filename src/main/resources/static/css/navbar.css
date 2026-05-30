@@ -630,41 +630,66 @@
 }
 
 
+@media (max-width: 900px) {
+    .main {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
 @media (max-width: 768px) {
+
+    .main {
+        margin-left: 0;
+        width: 100%;
+    }
 
     /* Sidebar slides off-screen by default */
     .sidebar {
         transform: translateX(-100%);
         animation: none;
-        /* no entrance animation on mobile */
         box-shadow: var(--shadow-lg);
     }
 
-    /* Slide in when open */
     .sidebar.sidebar--open {
         transform: translateX(0);
     }
 
-    /* Show hamburger */
     .topbar__hamburger {
         display: flex;
     }
 
-    /* Hide search bar on very small screens */
-    @media (max-width: 480px) {
-        .topbar__search {
-            display: none;
-        }
-
-        .topbar__greeting {
-            font-size: 15px;
-        }
+    .topbar {
+        padding: 0 16px;
+        height: 60px;
     }
 
-    /* Notification dropdown full-width on mobile */
+    .topbar__greeting {
+        font-size: 15px;
+    }
+
+    .topbar__search input {
+        width: 100px;
+    }
+
+    .topbar__actions {
+        gap: 8px;
+    }
+
     .notif-dropdown {
-        width: calc(100vw - 32px);
-        right: -8px;
+        width: calc(100vw - 24px);
+        right: -4px;
+        top: calc(100% + 8px);
+    }
+}
+
+@media (max-width: 480px) {
+    .topbar__search {
+        display: none;
+    }
+
+    .topbar__greeting {
+        font-size: 13px;
     }
 }
 

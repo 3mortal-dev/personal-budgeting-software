@@ -434,12 +434,58 @@ html.dark .field-input-wrap input::selection {
 }
 
 /* ── RESPONSIVE ── */
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+  body {
+    padding: 16px;
+  }
+
   .auth-card {
-    padding: 32px 24px;
+    padding: 36px 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: 12px;
+  }
+
+  .auth-card {
+    padding: 28px 20px;
+    border-radius: 12px;
+  }
+
+  .auth-header h1 {
+    font-size: 20px;
+  }
+
+  .auth-header p {
+    font-size: 13px;
+  }
+
+  .auth-header {
+    margin-bottom: 24px;
+  }
+
+  .field {
+    margin-bottom: 16px;
+  }
+
+  .field-input-wrap input {
+    height: 44px;
+    font-size: 14px;
+    padding: 0 14px 0 38px;
+  }
+
+  .btn-auth {
+    height: 46px;
+    font-size: 14px;
   }
 
   .name-row {
     grid-template-columns: 1fr;
+  }
+
+  .auth-footer {
+    font-size: 13px;
   }
 }

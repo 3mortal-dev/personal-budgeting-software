@@ -327,14 +327,6 @@
     padding-right: 16px;
   }
 
-  .sidebar {
-    width: 100%;
-    height: auto;
-    position: relative;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-
   .layout {
     flex-direction: column;
   }
@@ -751,5 +743,148 @@
   .bw-toast {
     min-width: unset;
     max-width: 100%;
+  }
+}
+
+/* ── Responsive: tablet ── */
+@media (max-width: 768px) {
+  .reports-topbar {
+    padding: 18px 20px 0;
+  }
+
+  .reports-page-content {
+    padding: 18px 20px 32px;
+    gap: 18px;
+  }
+
+  .reports-title {
+    font-size: 22px;
+  }
+
+  .reports-subtitle {
+    font-size: 13px;
+  }
+
+  .panel {
+    padding: 18px 18px;
+  }
+
+  .panel-title {
+    font-size: 15px;
+    margin-bottom: 16px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .field {
+    width: 100%;
+  }
+
+  .field-input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .stat-card {
+    padding: 14px;
+  }
+
+  .stat-card__value {
+    font-size: 18px;
+  }
+
+  .chart-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-card {
+    padding: 14px;
+  }
+
+  .chart-card__title {
+    font-size: 13px;
+  }
+
+  .chart-wrap {
+    height: min(280px, 50vw);
+  }
+}
+
+@media (max-width: 480px) {
+  .reports-topbar {
+    padding: 14px 14px 0;
+  }
+
+  .reports-page-content {
+    padding: 14px 14px 24px;
+    gap: 14px;
+  }
+
+  .reports-title {
+    font-size: 20px;
+  }
+
+  .reports-subtitle {
+    font-size: 12px;
+  }
+
+  .panel {
+    padding: 14px 14px;
+  }
+
+  .panel-title {
+    font-size: 14px;
+    margin-bottom: 12px;
+  }
+
+  .panel-hint {
+    font-size: 12px;
+  }
+
+  .summary-cards {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .stat-card {
+    padding: 12px;
+  }
+
+  .stat-card__label {
+    font-size: 10px;
+  }
+
+  .stat-card__value {
+    font-size: 16px;
+  }
+
+  .chart-card {
+    padding: 12px;
+  }
+
+  .chart-wrap {
+    height: min(240px, 50vw);
+  }
+
+  .field-label {
+    font-size: 11px;
+  }
+
+  .field-input {
+    font-size: 13px;
+    padding: 8px 10px;
   }
 }
