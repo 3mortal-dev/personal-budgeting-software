@@ -53,11 +53,9 @@
         <nav class="sidebar__nav">
           ${links}
         </nav>
-        <form class="sidebar__logout-form" action="/login" method="get">
-          <button type="submit" class="sidebar__logout">
-            <i class="fa-solid fa-arrow-right-from-bracket"></i><span>Logout</span>
-          </button>
-        </form>
+        <button class="sidebar__logout" onclick="handleLogout()">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i><span>Logout</span>
+        </button>
       </aside>`;
   }
 
@@ -439,6 +437,19 @@
     setupSearch();
     setupThemeToggle();
   }
+
+  async function handleLogout() {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (_) {
+      // proceed even if the API call fails
+    }
+    window.location.href = "/login";
+  }
+  window.handleLogout = handleLogout;
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", inject);
