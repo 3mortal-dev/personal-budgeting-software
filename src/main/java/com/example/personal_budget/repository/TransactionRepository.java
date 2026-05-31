@@ -3,6 +3,8 @@ package com.example.personal_budget.repository;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,6 +21,15 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
      * @return transactions for the user
      */
     List<Transaction> findByUserId(Long userId);
+
+    /**
+     * Finds transactions owned by a user with pagination.
+     *
+     * @param userId the owner user id
+     * @param pageable pagination parameters
+     * @return a page of transactions for the user
+     */
+    Page<Transaction> findByUserId(Long userId, Pageable pageable);
 
     /**
      * Finds transactions for a user filtered by transaction type.
