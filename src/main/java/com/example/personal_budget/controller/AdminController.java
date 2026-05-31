@@ -4,6 +4,7 @@ import com.example.personal_budget.dto.request.admin.AdminUpdateUserRoleRequest;
 import com.example.personal_budget.dto.response.TransactionResponse;
 import com.example.personal_budget.dto.response.admin.AdminStatsResponse;
 import com.example.personal_budget.dto.response.admin.AdminUserResponse;
+import com.example.personal_budget.dto.response.admin.AuditLogResponse;
 import com.example.personal_budget.entity.User;
 import com.example.personal_budget.enums.Role;
 import com.example.personal_budget.repository.BudgetRepository;
@@ -11,12 +12,15 @@ import com.example.personal_budget.repository.CategoryRepository;
 import com.example.personal_budget.repository.GoalRepository;
 import com.example.personal_budget.repository.TransactionRepository;
 import com.example.personal_budget.repository.UserRepository;
-import com.example.personal_budget.entity.User;
+import com.example.personal_budget.service.AuditLogService;
 import com.example.personal_budget.service.CurrencyService;
 import com.example.personal_budget.service.TransactionService;
 import com.example.personal_budget.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -46,6 +50,7 @@ public class AdminController {
     private final GoalRepository goalRepository;
     private final CategoryRepository categoryRepository;
     private final CurrencyService currencyService;
+    private final AuditLogService auditLogService;
 
     /**
      * Returns aggregate counts used by the admin dashboard.
@@ -65,15 +70,16 @@ public class AdminController {
     }
 
     /**
-     * Lists all users for administrative management.
+     * Lists all users for administrative management with pagination.
      *
-     * @return all users as admin response DTOs
+     * @param pageable pagination parameters (default page 0, size 50)
+     * @return a paginated page of users as admin response DTOs
      */
     @GetMapping("/users")
-    public ResponseEntity<List<AdminUserResponse>> getAllUsers() {
-        List<AdminUserResponse> users = StreamSupport.stream(userService.getAllUsers().spliterator(), false)
-                .map(AdminUserResponse::new)
-                .toList();
+    public ResponseEntity<Page<AdminUserResponse>> getAllUsers(
+            @PageableDefault(size = 50) Pageable pageable) {
+        Page<AdminUserResponse> users = userService.getUsers(pageable)
+                .map(AdminUserResponse::new);
         return ResponseEntity.ok(users);
     }
 
@@ -105,8 +111,13 @@ public class AdminController {
         if (currentUserId == id) {
             throw new RuntimeException("Admins cannot change their own role.");
         }
+        User admin = userService.getUser(userDetails);
         User user = userService.getUserById(id);
+        Role oldRole = user.getRole();
         user.setRole(request.getRole());
+        userService.revokeAllTokens(id);
+        auditLogService.log(admin, "ROLE_CHANGE", user,
+                "Role changed from " + oldRole + " to " + request.getRole());
         return ResponseEntity.ok(new AdminUserResponse(userService.saveUser(user)));
     }
 
@@ -125,6 +136,10 @@ public class AdminController {
         if (currentUserId == id) {
             throw new RuntimeException("Admins cannot delete their own account.");
         }
+        User admin = userService.getUser(userDetails);
+        User user = userService.getUserById(id);
+        auditLogService.log(admin, "DELETE_USER", user,
+                "Deleted user: " + user.getName() + " (" + user.getEmail() + ")");
         userService.deleteUserById(id);
         return ResponseEntity.noContent().build();
     }
@@ -133,19 +148,34 @@ public class AdminController {
      * Lists transactions owned by a specific user for admin review.
      *
      * @param id the target user id
-     * @return the user's transactions
+     * @param pageable pagination parameters (default page 0, size 20)
+     * @return a paginated page of the user's transactions
      */
     @GetMapping("/users/{id}/transactions")
-    public ResponseEntity<List<TransactionResponse>> getUserTransactions(@PathVariable Long id) {
+    public ResponseEntity<Page<TransactionResponse>> getUserTransactions(
+            @PathVariable Long id,
+            @PageableDefault(size = 20) Pageable pageable) {
         User targetUser = userService.getUserById(id);
-        List<TransactionResponse> transactions = transactionService.getAllTransactions(id)
-                .stream()
+        Page<TransactionResponse> transactions = transactionRepository.findByUserId(id, pageable)
                 .map(t -> {
                     TransactionResponse tr = new TransactionResponse(t, targetUser.getCurrency());
-                    tr.setAmount(currencyService.convert(t.getAmount(), t.getCurrency(), targetUser.getCurrency()));
+                    tr.setAmount(currencyService.convert(
+                            t.getAmount(), t.getCurrency(), targetUser.getCurrency()));
                     return tr;
-                })
-                .toList();
+                });
         return ResponseEntity.ok(transactions);
+    }
+
+    /**
+     * Returns a paginated list of admin audit log entries.
+     *
+     * @param pageable pagination parameters (default page 0, size 20)
+     * @return a paginated page of audit log entries
+     */
+    @GetMapping("/audit-logs")
+    public ResponseEntity<Page<AuditLogResponse>> getAuditLogs(
+            @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(
+                auditLogService.getAuditLogs(pageable).map(AuditLogResponse::new));
     }
 }

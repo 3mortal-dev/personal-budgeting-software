@@ -1,9 +1,14 @@
 package com.example.personal_budget.service;
 
 import com.example.personal_budget.dto.request.UpdateNotificationSettings;
+import com.example.personal_budget.entity.Token;
 import com.example.personal_budget.entity.User;
+import com.example.personal_budget.repository.TokenRepository;
 import com.example.personal_budget.repository.UserRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
 
     private Long getUserIdByEmail(String email) {
         return userRepository.findIdByEmail(email).orElseThrow(
@@ -76,6 +82,16 @@ public class UserService {
     }
 
     /**
+     * Retrieves a paginated page of users.
+     *
+     * @param pageable pagination parameters
+     * @return a page of user entities
+     */
+    public Page<User> getUsers(Pageable pageable) {
+        return userRepository.findAll(pageable);
+    }
+
+    /**
      * Persists a user entity.
      *
      * @param user the user entity to save
@@ -92,6 +108,23 @@ public class UserService {
      */
     public void deleteUserById(Long id) {
         userRepository.deleteById(id);
+    }
+
+    /**
+     * Revokes all valid (non-expired, non-revoked) JWT tokens for a user.
+     * Used when an admin changes a user's role so old tokens are invalidated.
+     *
+     * @param userId the user whose tokens should be revoked
+     */
+    @Transactional
+    public void revokeAllTokens(Long userId) {
+        List<Token> validTokens = tokenRepository.findAllValidTokenByUser(userId);
+        if (validTokens.isEmpty()) return;
+        validTokens.forEach(token -> {
+            token.setExpired(true);
+            token.setRevoked(true);
+        });
+        tokenRepository.saveAll(validTokens);
     }
 
     /**

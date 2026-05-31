@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.personal_budget.dto.request.CreateCategoryRequest;
 import com.example.personal_budget.dto.response.CategoryResponse;
 import com.example.personal_budget.entity.Category;
+import com.example.personal_budget.service.AuditLogService;
 import com.example.personal_budget.service.CategoryService;
 import com.example.personal_budget.service.UserService;
 
@@ -32,6 +33,7 @@ public class CategoryController {
 
     private final CategoryService categoryService;
     private final UserService userService;
+    private final AuditLogService auditLogService;
 
     private CategoryResponse toResponse(Category category) {
         return new CategoryResponse(category);
@@ -99,9 +101,13 @@ public class CategoryController {
      */
     @PostMapping("/built-in")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CategoryResponse> addBuiltInCategory(@Valid @RequestBody CreateCategoryRequest request) {
-        CategoryResponse category = toResponse(categoryService.addBuiltInCategory(request));
-        return ResponseEntity.status(HttpStatus.CREATED).body(category);
+    public ResponseEntity<CategoryResponse> addBuiltInCategory(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @Valid @RequestBody CreateCategoryRequest request) {
+        Category created = categoryService.addBuiltInCategory(request);
+        auditLogService.log(userService.getUser(userDetails), "CREATE_CATEGORY", null,
+                "Created built-in category: " + created.getName());
+        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(created));
     }
 
     /**

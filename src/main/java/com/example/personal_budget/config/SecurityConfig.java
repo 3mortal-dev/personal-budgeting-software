@@ -58,7 +58,8 @@ public class SecurityConfig {
                 .requestMatchers(WHITE_LIST_URL).permitAll()
                 .requestMatchers("/", "/home", "/index", "/static/**", "/css/**", "/js/**", "/images/**",
                     "/dashboard", "/transactions", "/budget", "/goals",
-                    "/reports", "/notifications", "/userProfile", "/admin").permitAll()
+                    "/reports", "/notifications", "/userProfile").permitAll()
+                .requestMatchers("/admin").hasRole("ADMIN")
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
