@@ -338,6 +338,8 @@
     outline: none;
     transition: border-color 0.2s;
     font-size: 14px;
+    background-color: var(--bg);
+    color: var(--text);
 }
 
 .admin-field input:focus {

@@ -1567,7 +1567,7 @@ button {
     gap: 10px;
     min-width: 260px;
     max-width: 380px;
-    background: var(--text);
+    background: #1a2332;
     color: #fff;
     padding: 13px 18px;
     border-radius: var(--radius-sm);
@@ -1643,7 +1643,7 @@ button {
     position: fixed;
     bottom: 28px;
     right: 28px;
-    background: var(--text);
+    background: #1a2332;
     color: #fff;
     padding: 12px 20px;
     border-radius: 12px;
