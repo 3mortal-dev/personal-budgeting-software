@@ -339,6 +339,48 @@
 .dark .alert-pill--off {
   background: var(--surface);
 }
+.dark .admin-tabs {
+  border-color: var(--border);
+}
+.dark .admin-tab--active {
+  background: var(--surface);
+}
+.dark .role-select {
+  background: var(--surface);
+}
+.dark .admin-header-actions .admin-add-category {
+  background: var(--surface);
+  border-color: var(--border);
+}
+.dark .admin-header-actions .admin-add-category:hover {
+  border-color: var(--green) !important;
+}
+.dark .audit-action--role_change {
+  background: #1e3a5f;
+  color: #93c5fd;
+}
+.dark .audit-action--delete_user {
+  background: #2d1515;
+  color: #fca5a5;
+}
+.dark .audit-action--create_category {
+  background: #042f2e;
+  color: #6ee7b7;
+}
+.dark .admin-tx:hover {
+  background: rgba(255,255,255,0.02);
+}
+.dark .admin-tx--income .admin-tx__icon {
+  background: #042f2e;
+  color: var(--green);
+}
+.dark .admin-tx--expense .admin-tx__icon {
+  background: #2d1515;
+  color: var(--red);
+}
+.dark .admin-table tbody tr:hover {
+  background: rgba(255,255,255,0.02);
+}
 
 /* ═══════════════════ SKELETON / LOADING ══════════════════ */
 .dark .skeleton-light {

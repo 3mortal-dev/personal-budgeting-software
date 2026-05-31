@@ -8,6 +8,7 @@ const API = {
     ROLE: id => `/api/admin/users/${id}/role`,
     TRANSACTIONS: id => `/api/admin/users/${id}/transactions`,
     ADD_CATEGORY: '/api/categories/built-in',
+    AUDIT_LOGS: '/api/admin/audit-logs',
     LOGOUT: '/api/auth/logout',
 };
 
@@ -16,6 +17,8 @@ const state = {
     stats: null,
     selectedUserId: null,
     query: '',
+    activeTab: 'users',
+    auditLogs: [],
 };
 
 async function apiFetch(endpoint, options = {}) {
@@ -91,12 +94,12 @@ async function loadAdminData() {
     if (refreshBtn) refreshBtn.disabled = true;
 
     try {
-        const [stats, users] = await Promise.all([
+        const [stats, usersPage] = await Promise.all([
             apiFetch(API.STATS),
             apiFetch(API.USERS),
         ]);
         state.stats = stats;
-        state.users = users || [];
+        state.users = usersPage?.content || [];
         renderStats();
         renderUsers();
     } catch (error) {
@@ -106,21 +109,34 @@ async function loadAdminData() {
     }
 }
 
+const STAT_ICONS = {
+    users: '<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+    admins: '<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+    transactions: '<svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>',
+    budgets: '<svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+    goals: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+    categories: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>',
+};
+
 function renderStats() {
     const stats = state.stats || {};
     const cards = [
-        ['Users', stats.users],
-        ['Admins', stats.admins],
-        ['Transactions', stats.transactions],
-        ['Budgets', stats.budgets],
-        ['Goals', stats.goals],
-        ['Categories', stats.categories],
+        { key: 'users', label: 'Users', value: stats.users },
+        { key: 'admins', label: 'Admins', value: stats.admins },
+        { key: 'transactions', label: 'Transactions', value: stats.transactions },
+        { key: 'budgets', label: 'Budgets', value: stats.budgets },
+        { key: 'goals', label: 'Goals', value: stats.goals },
+        { key: 'categories', label: 'Categories', value: stats.categories },
     ];
 
-    document.getElementById('adminStats').innerHTML = cards.map(([label, value]) => `
+    document.getElementById('adminStats').innerHTML = cards.map(c => `
         <div class="admin-stat">
-            <div class="admin-stat__label">${escapeHtml(label)}</div>
-            <div class="admin-stat__value">${Number(value || 0)}</div>
+            <div class="admin-stat__accent admin-stat__accent--${c.key}"></div>
+            <div class="admin-stat__icon admin-stat__icon--${c.key}">${STAT_ICONS[c.key]}</div>
+            <div class="admin-stat__body">
+                <div class="admin-stat__label">${escapeHtml(c.label)}</div>
+                <div class="admin-stat__value">${Number(c.value || 0)}</div>
+            </div>
         </div>
     `).join('');
 }
@@ -147,8 +163,13 @@ function renderUsers() {
     body.innerHTML = users.map(user => `
         <tr>
             <td>
-                <span class="admin-user-name">${escapeHtml(user.name)}</span>
-                <span class="admin-user-id">ID ${user.id}</span>
+                <div class="admin-user-cell">
+                    <div class="admin-user-avatar admin-user-avatar--${user.role.toLowerCase()}">${getInitials(user.name)}</div>
+                    <div class="admin-user-info">
+                        <span class="admin-user-name">${escapeHtml(user.name)}</span>
+                        <span class="admin-user-id">ID ${user.id}</span>
+                    </div>
+                </div>
             </td>
             <td>${escapeHtml(user.email)}</td>
             <td>
@@ -245,8 +266,8 @@ async function viewTransactions(userId) {
     document.getElementById('transactionsList').innerHTML = `<div class="admin-detail-empty">Loading transactions...</div>`;
 
     try {
-        const transactions = await apiFetch(API.TRANSACTIONS(userId));
-        renderTransactions(transactions || []);
+        const txPage = await apiFetch(API.TRANSACTIONS(userId));
+        renderTransactions(txPage?.content || []);
     } catch {
         document.getElementById('transactionsList').innerHTML = `<div class="admin-detail-empty">Could not load transactions.</div>`;
     }
@@ -262,7 +283,10 @@ function clearTransactions() {
 function renderTransactions(transactions) {
     const list = document.getElementById('transactionsList');
     if (!transactions.length) {
-        list.innerHTML = `<div class="admin-detail-empty">No transactions for this user.</div>`;
+        list.innerHTML = `<div class="admin-detail-empty">
+            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+            No transactions for this user.
+        </div>`;
         return;
     }
 
@@ -270,17 +294,104 @@ function renderTransactions(transactions) {
         const type = String(tx.type || '').toLowerCase();
         const category = tx.categoryName || tx.source || 'Uncategorized';
         const txCurrency = tx.currency || 'USD';
+        const icon = type === 'income'
+            ? '<svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>'
+            : '<svg viewBox="0 0 24 24"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>';
         return `
             <div class="admin-tx admin-tx--${type}">
-                <div class="admin-tx__top">
-                    <span>${escapeHtml(category)}</span>
-                    <span class="admin-tx__amount">${formatMoney(tx.amount, txCurrency)}</span>
+                <div class="admin-tx__row">
+                    <div class="admin-tx__icon">${icon}</div>
+                    <div style="flex:1;min-width:0">
+                        <div class="admin-tx__top">
+                            <span>${escapeHtml(category)}</span>
+                            <span class="admin-tx__amount">${formatMoney(tx.amount, txCurrency)}</span>
+                        </div>
+                        <div class="admin-tx__meta">${escapeHtml(tx.type)} - ${escapeHtml(formatDate(tx.date))}</div>
+                        ${tx.description ? `<div class="admin-tx__meta">${escapeHtml(tx.description)}</div>` : ''}
+                    </div>
                 </div>
-                <div class="admin-tx__meta">${escapeHtml(tx.type)} - ${escapeHtml(formatDate(tx.date))}</div>
-                ${tx.description ? `<div class="admin-tx__meta">${escapeHtml(tx.description)}</div>` : ''}
             </div>
         `;
     }).join('');
+}
+
+async function loadAuditLogs() {
+    try {
+        const page = await apiFetch(API.AUDIT_LOGS);
+        state.auditLogs = page?.content || [];
+        renderAuditLogs();
+    } catch {
+        document.getElementById('auditLogBody').innerHTML = '';
+        document.getElementById('auditEmpty').style.display = '';
+    }
+}
+
+function timeAgo(dateStr) {
+    if (!dateStr) return '';
+    const now = Date.now();
+    const then = new Date(dateStr).getTime();
+    const diff = Math.max(0, now - then);
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'Just now';
+    if (mins < 60) return mins + 'm ago';
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return hours + 'h ago';
+    const days = Math.floor(hours / 24);
+    if (days < 30) return days + 'd ago';
+    return formatDate(dateStr);
+}
+
+function renderAuditLogs() {
+    const body = document.getElementById('auditLogBody');
+    const empty = document.getElementById('auditEmpty');
+    const logs = state.auditLogs;
+
+    if (!logs.length) {
+        body.innerHTML = '';
+        if (empty) empty.style.display = '';
+        return;
+    }
+
+    if (empty) empty.style.display = 'none';
+
+    body.innerHTML = logs.map(log => {
+        const actionLabel = log.action
+            .replace(/_/g, ' ')
+            .replace(/\b\w/g, c => c.toUpperCase());
+        const target = log.targetUserName
+            ? `<div class="audit-target">${escapeHtml(log.targetUserName)}<span class="audit-target-email">${escapeHtml(log.targetUserEmail)}</span></div>`
+            : '<span class="audit-target" style="color:var(--text3)">—</span>';
+        return `
+            <tr>
+                <td>
+                    <span style="font-weight:600;font-size:13px;color:var(--text)">${timeAgo(log.createdAt)}</span>
+                    <span class="audit-time">${formatDate(log.createdAt)}</span>
+                </td>
+                <td>
+                    <div class="audit-log-admin">
+                        <div class="audit-log-admin__avatar">${getInitials(log.adminName)}</div>
+                        <span class="audit-log-admin__name">${escapeHtml(log.adminName)}</span>
+                    </div>
+                </td>
+                <td><span class="audit-action audit-action--${log.action.toLowerCase()}">${escapeHtml(actionLabel)}</span></td>
+                <td>${target}</td>
+                <td><span class="audit-details" title="${escapeHtml(log.details || '')}">${escapeHtml(log.details || '')}</span></td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function switchTab(tab) {
+    state.activeTab = tab;
+    document.querySelectorAll('.admin-tab').forEach(btn => {
+        btn.classList.toggle('admin-tab--active', btn.dataset.tab === tab);
+    });
+    document.querySelectorAll('.admin-tab-content').forEach(el => {
+        el.classList.toggle('admin-tab-content--active', el.id === 'tab' + tab.charAt(0).toUpperCase() + tab.slice(1));
+    });
+    if (tab === 'audit' && !state.auditLogs.length) {
+        loadAuditLogs();
+    }
 }
 
 async function handleLogout() {
@@ -310,6 +421,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('refreshBtn')?.addEventListener('click', loadAdminData);
+
+    document.querySelectorAll('.admin-tab').forEach(btn => {
+        btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
 
     document.getElementById('addCategoryBtn')?.addEventListener('click', addBuiltInCategory);
 
