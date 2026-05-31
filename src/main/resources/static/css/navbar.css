@@ -171,7 +171,13 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    width: 100%;
     padding: 11px 14px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
     border-radius: var(--radius-sm);
     font-size: 14px;
     font-weight: 600;
@@ -631,14 +637,6 @@
 
 
 @media (max-width: 900px) {
-    .main {
-        margin-left: 0;
-        width: 100%;
-    }
-}
-
-@media (max-width: 768px) {
-
     .main {
         margin-left: 0;
         width: 100%;

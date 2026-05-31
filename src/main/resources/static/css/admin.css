@@ -146,6 +146,7 @@
     padding: 0 12px;
     color: var(--text);
     outline: 0;
+    background-color: var(--bg);
 }
 
 .admin-search:focus {
@@ -549,6 +550,7 @@
     .admin-header-actions .admin-refresh,
     .admin-header-actions .admin-add-category {
         width: 100%;
+        padding: 10px 15px;
     }
 
     .admin-stats {
